@@ -48,6 +48,11 @@ public sealed class MainViewModel : ObservableObject
         };
 
         CleanCommand = new RelayCommand(Clean, () => !IsBusy && Areas.Any(a => a.IsSelected));
+        AddExclusionCommand = new RelayCommand(() => AddExclusion(SelectedProcess), () => !string.IsNullOrEmpty(SelectedProcess));
+        RemoveExclusionCommand = new RelayCommand(() => { }, () => true);
+
+        RefreshExcluded();
+        RefreshAvailableProcesses();
     }
 
     /// <summary>Gets or sets the physical memory headline.</summary>
@@ -62,6 +67,130 @@ public sealed class MainViewModel : ObservableObject
     {
         get => _segmentText;
         set => Set(ref _segmentText, value);
+    }
+
+
+    private bool _processUsageExpanded;
+    private string _processSearchText = string.Empty;
+    private string _selectedProcess = string.Empty;
+
+    /// <summary>Gets the process rows, largest first.</summary>
+    public ObservableCollection<ProcessUsage> ProcessUsageItems { get; } = new();
+
+    /// <summary>Gets the names that can be excluded.</summary>
+    public ObservableCollection<string> AvailableProcesses { get; } = new();
+
+    /// <summary>Gets the excluded names.</summary>
+    public ObservableCollection<string> ExcludedProcesses { get; } = new();
+
+    /// <summary>Gets or sets the total the shown rows hold.</summary>
+    public string ProcessUsageTotal { get; private set; } = string.Empty;
+
+    /// <summary>Gets or sets a value indicating whether the process section is open.</summary>
+    public bool ProcessUsageExpanded
+    {
+        get => _processUsageExpanded;
+        set
+        {
+            if (Set(ref _processUsageExpanded, value) && value)
+                RefreshProcessUsage();
+        }
+    }
+
+    /// <summary>Gets or sets the filter applied to the process picker.</summary>
+    public string ProcessSearchText
+    {
+        get => _processSearchText;
+        set
+        {
+            if (Set(ref _processSearchText, value))
+                RefreshAvailableProcesses();
+        }
+    }
+
+    /// <summary>Gets or sets the selected name in the picker.</summary>
+    public string SelectedProcess
+    {
+        get => _selectedProcess;
+        set
+        {
+            if (Set(ref _selectedProcess, value))
+                ((RelayCommand)AddExclusionCommand).RaiseCanExecuteChanged();
+        }
+    }
+
+    /// <summary>Gets the command that adds the selected name to the exclusion list.</summary>
+    public ICommand AddExclusionCommand { get; }
+
+    /// <summary>Gets the command that removes a name from the exclusion list.</summary>
+    public ICommand RemoveExclusionCommand { get; }
+
+    /// <summary>
+    /// Rebuilds the process table.
+    /// </summary>
+    public void RefreshProcessUsage()
+    {
+        ProcessUsageItems.Clear();
+
+        foreach (var row in ProcessUsageReader.Read(10))
+            ProcessUsageItems.Add(row);
+
+        var total = ProcessUsageItems.Sum(r => r.PrivateWorkingSet);
+
+        ProcessUsageTotal = string.Format(
+            System.Globalization.CultureInfo.InvariantCulture,
+            "合计（专用工作集，不含共享页） {0:0.#} GB",
+            total / (1024d * 1024 * 1024));
+
+        Raise(nameof(ProcessUsageTotal));
+    }
+
+    private void RefreshAvailableProcesses()
+    {
+        var names = System.Diagnostics.Process.GetProcesses()
+            .Select(p => p.ProcessName)
+            .Distinct(StringComparer.OrdinalIgnoreCase)
+            .Where(n => !Settings.ExcludedProcesses.Contains(n))
+            .Where(n => string.IsNullOrEmpty(_processSearchText)
+                        || n.Contains(_processSearchText, StringComparison.OrdinalIgnoreCase))
+            .OrderBy(n => n, StringComparer.OrdinalIgnoreCase);
+
+        AvailableProcesses.Clear();
+
+        foreach (var name in names)
+            AvailableProcesses.Add(name);
+
+        if (!AvailableProcesses.Contains(_selectedProcess))
+            SelectedProcess = AvailableProcesses.FirstOrDefault() ?? string.Empty;
+    }
+
+    private void RefreshExcluded()
+    {
+        ExcludedProcesses.Clear();
+
+        foreach (var name in Settings.ExcludedProcesses.OrderBy(n => n, StringComparer.OrdinalIgnoreCase))
+            ExcludedProcesses.Add(name);
+    }
+
+    private void AddExclusion(string? name)
+    {
+        if (string.IsNullOrWhiteSpace(name) || !Settings.ExcludedProcesses.Add(name))
+            return;
+
+        Settings.Save();
+        RefreshExcluded();
+        RefreshAvailableProcesses();
+        ((RelayCommand)RemoveExclusionCommand).RaiseCanExecuteChanged();
+    }
+
+    private void RemoveExclusion(string? name)
+    {
+        if (string.IsNullOrWhiteSpace(name) || !Settings.ExcludedProcesses.Remove(name))
+            return;
+
+        Settings.Save();
+        RefreshExcluded();
+        RefreshAvailableProcesses();
     }
 
     /// <summary>Gets the areas shown on the home tab.</summary>
