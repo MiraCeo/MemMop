@@ -116,11 +116,22 @@
                 <ColumnDefinition Width="*" />
             </Grid.ColumnDefinitions>
 
-            <controls:RingChart Width="132"
-                                Height="132"
-                                Palette="{DynamicResource SegmentPalette}"
-                                RingThickness="16"
-                                Values="{Binding PhysicalSegments}" />
+            <Grid Width="132" Height="132">
+                <controls:RingChart Width="132"
+                                    Height="132"
+                                    Palette="{DynamicResource SegmentPalette}"
+                                    RingThickness="16"
+                                    Values="{Binding PhysicalSegments}" />
+                <Button x:Name="RingCleanButton"
+            Style="{StaticResource RingButton}"
+                        Width="84"
+                        Height="84"
+                        HorizontalAlignment="Center"
+                        VerticalAlignment="Center"
+                        FontSize="13"
+                        Command="{Binding CleanCommand}"
+                        Content="清理" />
+            </Grid>
 
             <StackPanel Grid.Column="1" Margin="14, 4, 0, 0" VerticalAlignment="Top">
                 <TextBlock FontSize="26" Text="{Binding UsedPercentText}" />
