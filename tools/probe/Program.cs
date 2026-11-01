@@ -1,18 +1,16 @@
-﻿using MemMop.ViewModel;
+﻿using MemMop.Core;
+using MemMop.ViewModel;
 
 var vm = new MainViewModel();
-vm.ProcessUsageExpanded = true;
+var zh = VM_First(vm);
+Strings.Current.SetLanguage(true);
+var en = VM_First(vm);
+Strings.Current.SetLanguage(false);
+var back = VM_First(vm);
 
-Console.WriteLine($"rows          {vm.ProcessUsageItems.Count}");
-foreach (var r in vm.ProcessUsageItems.Take(3))
-    Console.WriteLine($"  {r.Name,-18} x{r.Instances,-3} {r.Size}");
-Console.WriteLine($"total line    {vm.ProcessUsageTotal}");
+Console.WriteLine($"zh        {zh}");
+Console.WriteLine($"en        {en}");
+Console.WriteLine($"back      {back}");
+Console.WriteLine($"tab zh    {Strings.Current.Home} / clean {Strings.Current.Clean}");
 
-Console.WriteLine($"available     {vm.AvailableProcesses.Count}");
-vm.ProcessSearchText = "chr";
-Console.WriteLine($"filter 'chr'  {string.Join(",", vm.AvailableProcesses.Take(5))}");
-
-Console.WriteLine($"excluded now  {vm.ExcludedProcesses.Count}");
-vm.SelectedProcess = vm.AvailableProcesses.FirstOrDefault() ?? "";
-vm.AddExclusionCommand.Execute(null);
-Console.WriteLine($"after add     {vm.ExcludedProcesses.Count} -> {string.Join(",", vm.ExcludedProcesses)}");
+static string VM_First(MainViewModel vm) => vm.Areas.Count == 0 ? "-" : $"{vm.Areas[0].Title} | {vm.Areas[0].Risk}";

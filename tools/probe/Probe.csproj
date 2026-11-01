@@ -28,8 +28,10 @@
     <Compile Include="..\..\src\MemMop\Core\Settings.cs" Link="Settings.cs" />
     <Compile Include="..\..\src\MemMop\Core\ProcessUsage.cs" Link="ProcessUsage.cs" />
   <Compile Include="..\..\src\MemMop\Core\ProcessUsageReader.cs" Link="ProcessUsageReader.cs" />
-    </ItemGroup>
+      <Compile Include="..\..\src\MemMop\Core\Strings.cs" Link="Strings.cs" />
+  </ItemGroup>
 </Project>
+
 
 
 

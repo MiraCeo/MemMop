@@ -83,7 +83,12 @@ public partial class MainWindow : Window
     private void OnLanguageChanged(object sender, SelectionChangedEventArgs e)
     {
         if (LanguageBox.SelectedItem is ComboBoxItem item && item.Tag is string tag)
+        {
             Settings.Language = tag;
+            Settings.Save();
+
+            Strings.Current.SetLanguage(tag == "en");
+        }
     }
 
     private void OnCloseToTrayChanged(object sender, RoutedEventArgs e)

@@ -19,6 +19,8 @@ public partial class App : Application
     {
         Settings.Load();
 
+        Strings.Current.SetLanguage(Settings.Language == "en");
+
         _tray = new TrayService();
         _tray.Initialize();
         _tray.ShowRequested += ShowWindow;

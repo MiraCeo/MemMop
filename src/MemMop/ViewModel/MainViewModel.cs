@@ -12,6 +12,7 @@ public sealed class MainViewModel : ObservableObject
 {
     private readonly CleaningEngine _engine;
     private readonly AutoCleanPolicy _policy = new();
+    private readonly IMemoryReclaimer[] AllReclaimers;
     private bool _isBusy;
     private string _summary = string.Empty;
     private string _physicalText = string.Empty;
@@ -22,7 +23,7 @@ public sealed class MainViewModel : ObservableObject
     /// </summary>
     public MainViewModel()
     {
-        var reclaimers = new IMemoryReclaimer[]
+        var reclaimers = AllReclaimers = new IMemoryReclaimer[]
         {
             new StandbyListReclaimer(),
             new StandbyListReclaimer(true),
@@ -35,17 +36,11 @@ public sealed class MainViewModel : ObservableObject
 
         _engine = new CleaningEngine(reclaimers);
 
-        // the texts mirror SPEC §2.1: a name that says what happens, and a cost that is not hidden
-        Areas = new ObservableCollection<AreaItem>
-        {
-            new(new StandbyListReclaimer(), "清理待机缓存", "清空文件缓存，再次读取需重新读盘"),
-            new(new StandbyListReclaimer(true), "仅清理低优先级待机缓存", "只清理最冷的待机页，与上一项互斥"),
-            new(new ModifiedPageListReclaimer(), "写回已修改内存", "等待未写盘的数据落盘，这一步最慢"),
-            new(new CombinedPageListReclaimer(), "合并重复内存页", "合并内容相同的物理页，不删除数据"),
-            new(new SystemFileCacheReclaimer(), "收缩系统缓存", "降低文件缓存上限，之后读写可能变慢"),
-            new(new RegistryCacheReclaimer(), "注册表缓存整理", "整理注册表的内存缓存，收益不确定"),
-            new(new WorkingSetReclaimer(), "收缩程序驻留内存", "移出各程序驻留的内存，重用时可能卡顿"),
-        };
+        Areas = new ObservableCollection<AreaItem>();
+
+        RebuildAreas();
+
+        Strings.Current.PropertyChanged += (_, _) => RebuildAreas();
 
         CleanCommand = new RelayCommand(Clean, () => !IsBusy && Areas.Any(a => a.IsSelected));
         AddExclusionCommand = new RelayCommand(() => AddExclusion(SelectedProcess), () => !string.IsNullOrEmpty(SelectedProcess));
@@ -124,6 +119,30 @@ public sealed class MainViewModel : ObservableObject
 
     /// <summary>Gets the command that removes a name from the exclusion list.</summary>
     public ICommand RemoveExclusionCommand { get; }
+
+    /// <summary>
+    /// Rebuilds the area rows from the catalog, keeping the ticks the user set.
+    /// </summary>
+    private void RebuildAreas()
+    {
+        var chosen = Areas.Where(a => a.IsSelected).Select(a => a.Reclaimer.Name).ToHashSet(StringComparer.Ordinal);
+
+        Areas.Clear();
+
+        var texts = Strings.Current.Areas;
+
+        for (var i = 0; i < texts.Count; i++)
+        {
+            var item = new AreaItem(AllReclaimers[i], texts[i].Title, texts[i].Risk);
+
+            if (chosen.Count > 0)
+                item.IsSelected = chosen.Contains(item.Reclaimer.Name);
+
+            Areas.Add(item);
+        }
+
+        (CleanCommand as RelayCommand)?.RaiseCanExecuteChanged();
+    }
 
     /// <summary>
     /// Rebuilds the process table.
@@ -206,7 +225,7 @@ public sealed class MainViewModel : ObservableObject
         private set
         {
             if (Set(ref _isBusy, value))
-                ((RelayCommand)CleanCommand).RaiseCanExecuteChanged();
+                (CleanCommand as RelayCommand)?.RaiseCanExecuteChanged();
         }
     }
 
