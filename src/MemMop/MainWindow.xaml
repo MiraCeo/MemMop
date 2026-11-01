@@ -336,6 +336,7 @@
                     <CheckBox Margin="0, 10, 0, 0" Content="静默启动（启动时不显示窗口）" IsChecked="{Binding StartMinimized}" />
                     <CheckBox Margin="0, 10, 0, 0" Content="开机自启（登录时以最高权限启动，不弹 UAC）" IsChecked="{Binding RunOnStartup}" />
                     <CheckBox Margin="0, 10, 0, 0" Content="启用清理热键（Ctrl+Alt+M）" IsChecked="{Binding HotkeyEnabled}" />
+                    <CheckBox Margin="0, 10, 0, 0" Content="清理完成后显示通知" IsChecked="{Binding ShowNotifications}" />
 
                     <Rectangle Height="1"
                                Margin="0, 26, 0, 0"

@@ -81,7 +81,11 @@ public partial class App : Application
 
         if (viewModel != null)
         {
-            viewModel.CleanCompleted += summary => _tray?.Notify(summary);
+            viewModel.CleanCompleted += summary =>
+            {
+                if (Settings.ShowNotifications)
+                    _tray?.Notify(summary);
+            };
 
             // the policy decides whether anything is due; this only asks it regularly
             _autoCleanTimer = new System.Windows.Threading.DispatcherTimer { Interval = TimeSpan.FromSeconds(30) };
@@ -89,7 +93,7 @@ public partial class App : Application
             {
                 var message = await viewModel.TryAutoCleanAsync(DateTime.Now);
 
-                if (!string.IsNullOrEmpty(message))
+                if (!string.IsNullOrEmpty(message) && Settings.ShowNotifications)
                     _tray?.Notify(message);
             };
 

@@ -39,6 +39,9 @@ public static class Settings
     /// <summary>Gets or sets a value indicating whether the program starts at logon.</summary>
     public static bool RunOnStartup { get; set; }
 
+    /// <summary>Gets or sets a value indicating whether cleaning raises a tray notification.</summary>
+    public static bool ShowNotifications { get; set; } = true;
+
     /// <summary>Gets or sets a value indicating whether the committed line is shown.</summary>
     public static bool ShowCommitted { get; set; } = true;
 
@@ -88,6 +91,7 @@ public static class Settings
             HotkeyEnabled = ReadInt(key, nameof(HotkeyEnabled), HotkeyEnabled ? 1 : 0) != 0;
             HotkeyModifiers = ReadInt(key, nameof(HotkeyModifiers), HotkeyModifiers);
             HotkeyKey = ReadInt(key, nameof(HotkeyKey), HotkeyKey);
+            ShowNotifications = ReadInt(key, nameof(ShowNotifications), ShowNotifications ? 1 : 0) != 0;
             ShowCommitted = ReadInt(key, nameof(ShowCommitted), ShowCommitted ? 1 : 0) != 0;
             DetailedMemory = ReadInt(key, nameof(DetailedMemory), DetailedMemory ? 1 : 0) != 0;
 
@@ -127,6 +131,7 @@ public static class Settings
             key.SetValue(nameof(HotkeyEnabled), HotkeyEnabled ? 1 : 0, RegistryValueKind.DWord);
             key.SetValue(nameof(HotkeyModifiers), HotkeyModifiers, RegistryValueKind.DWord);
             key.SetValue(nameof(HotkeyKey), HotkeyKey, RegistryValueKind.DWord);
+            key.SetValue(nameof(ShowNotifications), ShowNotifications ? 1 : 0, RegistryValueKind.DWord);
             key.SetValue(nameof(ShowCommitted), ShowCommitted ? 1 : 0, RegistryValueKind.DWord);
             key.SetValue(nameof(DetailedMemory), DetailedMemory ? 1 : 0, RegistryValueKind.DWord);
             key.SetValue(nameof(ExcludedProcesses), string.Join("\n", ExcludedProcesses), RegistryValueKind.String);

@@ -453,6 +453,18 @@ public sealed class MainViewModel : ObservableObject
         }
     }
 
+    /// <summary>Gets or sets a value indicating whether cleaning raises a tray notification.</summary>
+    public bool ShowNotifications
+    {
+        get => Settings.ShowNotifications;
+        set
+        {
+            Settings.ShowNotifications = value;
+            Settings.Save();
+            Raise();
+        }
+    }
+
     /// <summary>Gets or sets a value indicating whether the committed line is shown.</summary>
     public bool ShowCommitted
     {
