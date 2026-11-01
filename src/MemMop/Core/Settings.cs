@@ -30,11 +30,11 @@ public static class Settings
     /// <summary>Gets or sets a value indicating whether the clean hotkey is registered.</summary>
     public static bool HotkeyEnabled { get; set; }
 
-    /// <summary>Gets or sets the hotkey modifiers (MOD_CONTROL etc).</summary>
-    public static int HotkeyModifiers { get; set; } = 0x0002;
+    /// <summary>Gets or sets the hotkey modifiers: MOD_CONTROL | MOD_ALT.</summary>
+    public static int HotkeyModifiers { get; set; } = 0x0003;
 
-    /// <summary>Gets or sets the hotkey virtual-key code (defaults to C).</summary>
-    public static int HotkeyKey { get; set; } = 0x43;
+    /// <summary>Gets or sets the hotkey virtual-key code (defaults to M).</summary>
+    public static int HotkeyKey { get; set; } = 0x4D;
 
     /// <summary>Gets or sets a value indicating whether the program starts at logon.</summary>
     public static bool RunOnStartup { get; set; }
