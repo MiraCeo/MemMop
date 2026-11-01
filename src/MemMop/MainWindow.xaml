@@ -311,6 +311,11 @@
                     <CheckBox Margin="0, 10, 0, 0" Content="显示已提交行" IsChecked="{Binding ShowCommitted}" />
                     <CheckBox Margin="0, 10, 0, 0" Content="显示详细内存信息" IsChecked="{Binding DetailedMemory}" />
 
+                    <Rectangle Height="1"
+                               Margin="0, 26, 0, 0"
+                               Fill="{DynamicResource Border}"
+                               Opacity="0.55" />
+
                     <TextBlock Margin="0, 22, 0, 10" FontSize="11" Foreground="{DynamicResource TextMuted}" Text="行为" />
 
                     <CheckBox x:Name="CloseToTrayBox"
@@ -320,7 +325,12 @@
                     <CheckBox Margin="0, 10, 0, 0" Content="开机自启（登录时以最高权限启动，不弹 UAC）" IsChecked="{Binding RunOnStartup}" />
                     <CheckBox Margin="0, 10, 0, 0" Content="启用清理热键（Ctrl+Alt+M）" IsChecked="{Binding HotkeyEnabled}" />
 
-                    <TextBlock Margin="0, 22, 0, 2"
+                    <Rectangle Height="1"
+                               Margin="0, 26, 0, 0"
+                               Fill="{DynamicResource Border}"
+                               Opacity="0.55" />
+
+                    <TextBlock Margin="0, 24, 0, 12"
                                FontSize="11"
                                Foreground="{DynamicResource TextMuted}"
                                Text="排除的进程" />
