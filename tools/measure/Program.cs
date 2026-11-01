@@ -19,8 +19,8 @@ internal static class Program
         const double boxHeight = 32;
         const double pathWidth = 10;
         const double pathHeight = 6;
-        const double rightMargin = 12;
-        const double topMargin = 1;
+        const double rightMargin = 9;
+        const double topMargin = 6;
 
         var path = new Path
         {
