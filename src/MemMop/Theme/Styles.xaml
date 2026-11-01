@@ -163,11 +163,11 @@
                 <ControlTemplate TargetType="TabItem">
                     <Grid VerticalAlignment="Stretch">
                         <Border x:Name="Chip"
-                                Background="{DynamicResource SurfaceAlt}"
+                                Background="Transparent"
                                 BorderBrush="Transparent"
                                 BorderThickness="1, 1, 1, 0"
-                                CornerRadius="7, 7, 0, 0"
-                                Padding="16, 0, 16, 0">
+                                CornerRadius="8, 8, 0, 0"
+                                Padding="20, 0, 20, 0">
                             <ContentPresenter ContentSource="Header"
                                               HorizontalAlignment="Center"
                                               VerticalAlignment="Center" />
@@ -180,7 +180,7 @@
                         <Trigger Property="IsSelected" Value="True">
                             <Setter Property="Foreground" Value="{DynamicResource TextPrimary}" />
                             <Setter TargetName="Chip" Property="Background" Value="{DynamicResource Surface}" />
-                            <Setter TargetName="Chip" Property="BorderBrush" Value="{DynamicResource Border}" />
+                            <Setter TargetName="Chip" Property="BorderBrush" Value="{DynamicResource InputBorder}" />
                         </Trigger>
                     </ControlTemplate.Triggers>
                 </ControlTemplate>
