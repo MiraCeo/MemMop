@@ -16,6 +16,15 @@ internal static class NativeMethods
     /// <summary>Purge only the lowest-priority standby pages.</summary>
     internal const int MemoryPurgeLowPriorityStandbyList = 5;
 
+    /// <summary>SystemRegistryReconciliationInformation - registry hive reconciliation.</summary>
+    internal const int SystemRegistryReconciliationInformation = 155;
+
+    /// <summary>MemoryFlushModifiedList - writes dirty pages back to disk.</summary>
+    internal const int MemoryFlushModifiedList = 3;
+
+    /// <summary>SeDebugPrivilege - needed to trim other processes' working sets.</summary>
+    internal const string SeDebugPrivilege = "SeDebugPrivilege";
+
     /// <summary>SeProfileSingleProcessPrivilege - needed to purge the standby list.</summary>
     internal const string SeProfileSingleProcess = "SeProfileSingleProcessPrivilege";
 
@@ -84,6 +93,10 @@ internal static class NativeMethods
 
     [DllImport("ntdll.dll")]
     internal static extern int NtSetSystemInformation(int informationClass, IntPtr buffer, uint length);
+
+    [DllImport("psapi.dll", SetLastError = true)]
+    [return: MarshalAs(UnmanagedType.Bool)]
+    internal static extern bool EmptyWorkingSet(IntPtr process);
 
     [DllImport("advapi32.dll", SetLastError = true)]
     [return: MarshalAs(UnmanagedType.Bool)]

@@ -2,19 +2,14 @@
 using MemMop.Core.Reclaimers;
 
 const double gb = 1024d * 1024 * 1024;
-var s = MemorySnapshot.Capture();
-
-Console.WriteLine($"before     available {s.Available / gb:0.0} GB · standby {s.Standby / gb:0.0} GB");
-
-var engine = new CleaningEngine(new IMemoryReclaimer[] { new StandbyListReclaimer() });
-
-foreach (var (name, result) in engine.Run(new[] { "StandbyList" }))
+var engine = new CleaningEngine(new IMemoryReclaimer[]
 {
-    Console.WriteLine($"reclaim    {name}");
-    Console.WriteLine($"  succeeded {result.Succeeded}");
-    Console.WriteLine($"  freed     {result.FreedBytes / gb:0.00} GB");
-    Console.WriteLine($"  message   {result.Message ?? "-"}");
-}
+    new StandbyListReclaimer(),
+    new StandbyListReclaimer(true),
+    new ModifiedPageListReclaimer(),
+    new RegistryCacheReclaimer(),
+    new WorkingSetReclaimer(),
+});
 
-var after = MemorySnapshot.Capture();
-Console.WriteLine($"after      available {after.Available / gb:0.0} GB · standby {after.Standby / gb:0.0} GB");
+foreach (var (name, r) in engine.Run(new[] { "StandbyList", "StandbyListLowPriority", "ModifiedPageList", "RegistryCache", "WorkingSet" }))
+    Console.WriteLine($"{name,-22} ok={r.Succeeded,-5} freed={r.FreedBytes / gb,6:0.00} GB  {r.Message ?? "-"}");

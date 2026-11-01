@@ -15,5 +15,9 @@
     <Compile Include="..\..\src\MemMop\Core\IMemoryReclaimer.cs" Link="IMemoryReclaimer.cs" />
     <Compile Include="..\..\src\MemMop\Core\ReclaimResult.cs" Link="ReclaimResult.cs" />
     <Compile Include="..\..\src\MemMop\Core\Reclaimers\StandbyListReclaimer.cs" Link="StandbyListReclaimer.cs" />
+    <Compile Include="..\..\src\MemMop\Core\Reclaimers\ModifiedPageListReclaimer.cs" Link="ModifiedPageListReclaimer.cs" />
+    <Compile Include="..\..\src\MemMop\Core\Reclaimers\RegistryCacheReclaimer.cs" Link="RegistryCacheReclaimer.cs" />
+    <Compile Include="..\..\src\MemMop\Core\Reclaimers\WorkingSetReclaimer.cs" Link="WorkingSetReclaimer.cs" />
   </ItemGroup>
 </Project>
+
