@@ -198,30 +198,53 @@
         </Setter>
     </Style>
 
-    <!-- Slim scroll bar; the OS one is a light strip in a dark window -->
+    <!-- Scroll bar: no trough, no arrows, thumb only. Invisible until the pointer is on the strip. -->
     <Style x:Key="ScrollThumb" TargetType="Thumb">
+        <Setter Property="OverridesDefaultStyle" Value="True" />
+        <Setter Property="IsTabStop" Value="False" />
         <Setter Property="Template">
             <Setter.Value>
                 <ControlTemplate TargetType="Thumb">
-                    <Border Background="{DynamicResource Border}" CornerRadius="3" />
+                    <Border x:Name="Bar"
+                            Width="6"
+                            Margin="0, 4, 2, 4"
+                            HorizontalAlignment="Right"
+                            Background="{DynamicResource TextMuted}"
+                            CornerRadius="3"
+                            Opacity="0.5" />
+                    <ControlTemplate.Triggers>
+                        <Trigger Property="IsMouseOver" Value="True">
+                            <Setter TargetName="Bar" Property="Opacity" Value="0.9" />
+                        </Trigger>
+                        <Trigger Property="IsDragging" Value="True">
+                            <Setter TargetName="Bar" Property="Opacity" Value="1" />
+                        </Trigger>
+                    </ControlTemplate.Triggers>
                 </ControlTemplate>
             </Setter.Value>
         </Setter>
     </Style>
 
     <Style TargetType="ScrollBar">
-        <Setter Property="Width" Value="8" />
+        <Setter Property="Width" Value="10" />
+        <Setter Property="MinWidth" Value="10" />
         <Setter Property="Background" Value="Transparent" />
         <Setter Property="Template">
             <Setter.Value>
                 <ControlTemplate TargetType="ScrollBar">
-                    <Grid Background="Transparent">
+                    <Grid x:Name="Strip" Background="Transparent">
                         <Track x:Name="PART_Track" IsDirectionReversed="True">
                             <Track.Thumb>
                                 <Thumb Style="{StaticResource ScrollThumb}" />
                             </Track.Thumb>
                         </Track>
                     </Grid>
+                    <ControlTemplate.Triggers>
+                        <!-- opacity, not visibility: the strip must still catch the pointer while hidden -->
+                        <Trigger Property="IsMouseOver" Value="False">
+                            <Setter TargetName="Strip" Property="Opacity" Value="0" />
+                        </Trigger>
+                    </ControlTemplate.Triggers>
                 </ControlTemplate>
             </Setter.Value>
         </Setter>
