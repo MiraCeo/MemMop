@@ -28,7 +28,16 @@ try {
 
     New-Item -ItemType Directory -Force -Path $dist | Out-Null
     $target = Join-Path $dist "MemMop.exe"
-    Copy-Item $built $target -Force
+
+    try {
+        Copy-Item $built $target -Force -ErrorAction Stop
+    }
+    catch {
+        Write-Host ""
+        Write-Host "  cannot replace $target" -ForegroundColor Red
+        Write-Host "  MemMop is probably still running - close it and build again." -ForegroundColor Red
+        throw
+    }
 
     $item = Get-Item $target
     $extra = Get-ChildItem (Split-Path $built -Parent) -File | Where-Object { $_.Extension -ne ".exe" } | Select-Object -ExpandProperty Name
