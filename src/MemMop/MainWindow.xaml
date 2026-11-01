@@ -352,6 +352,11 @@
                                Foreground="{DynamicResource InputBorder}"
                                Text="这些进程不参与「收缩程序驻留内存」" />
 
+                    <TextBlock Margin="0, 0, 0, 6"
+                               FontSize="10"
+                               Foreground="{DynamicResource TextMuted}"
+                               Text="查找进程" />
+
                     <Grid>
                         <TextBox Margin="0, 0, 42, 0"
                                  Padding="34, 6, 10, 6"
@@ -378,7 +383,12 @@
                         </Grid>
                     </Grid>
 
-                    <Grid Margin="0, 10, 0, 0">
+                    <TextBlock Margin="0, 16, 0, 6"
+                               FontSize="10"
+                               Foreground="{DynamicResource TextMuted}"
+                               Text="添加排除" />
+
+                    <Grid Margin="0, 0, 0, 0">
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="*" />
                             <ColumnDefinition Width="Auto" />
@@ -390,10 +400,16 @@
                                 Margin="8, 0, 0, 0"
                                 Command="{Binding AddExclusionCommand}"
                                 Style="{StaticResource FlatButton}"
-                                Content="+" />
+                                Padding="12, 0, 6, 0"
+                                Content="添加 »" />
                     </Grid>
 
-                    <Grid Margin="0, 8, 0, 0">
+                    <TextBlock Margin="0, 16, 0, 6"
+                               FontSize="10"
+                               Foreground="{DynamicResource TextMuted}"
+                               Text="已排除（不参与收缩）" />
+
+                    <Grid Margin="0, 0, 0, 0">
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="*" />
                             <ColumnDefinition Width="Auto" />
@@ -416,7 +432,8 @@
                                 VerticalAlignment="Top"
                                 Command="{Binding RemoveExclusionCommand}"
                                 Style="{StaticResource FlatButton}"
-                                Content="−" />
+                                Padding="12, 0, 6, 0"
+                                Content="移除" />
                     </Grid>
 
                     <Button Margin="0, 24, 0, 0"
