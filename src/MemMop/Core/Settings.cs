@@ -21,6 +21,12 @@ public static class Settings
     /// <summary>Gets or sets a value indicating whether the app starts hidden in the tray.</summary>
     public static bool StartMinimized { get; set; } = true;
 
+    /// <summary>Gets or sets a value indicating whether the window shows the compact view.</summary>
+    public static bool CompactMode { get; set; }
+
+    /// <summary>Gets or sets a value indicating whether the window stays above others.</summary>
+    public static bool AlwaysOnTop { get; set; }
+
     /// <summary>Gets or sets a value indicating whether the clean hotkey is registered.</summary>
     public static bool HotkeyEnabled { get; set; }
 
@@ -77,6 +83,8 @@ public static class Settings
             StartMinimized = ReadInt(key, nameof(StartMinimized), StartMinimized ? 1 : 0) != 0;
             AutoCleanSafeOnly = ReadInt(key, nameof(AutoCleanSafeOnly), AutoCleanSafeOnly ? 1 : 0) != 0;
             RunOnStartup = ReadInt(key, nameof(RunOnStartup), RunOnStartup ? 1 : 0) != 0;
+            CompactMode = ReadInt(key, nameof(CompactMode), CompactMode ? 1 : 0) != 0;
+            AlwaysOnTop = ReadInt(key, nameof(AlwaysOnTop), AlwaysOnTop ? 1 : 0) != 0;
             HotkeyEnabled = ReadInt(key, nameof(HotkeyEnabled), HotkeyEnabled ? 1 : 0) != 0;
             HotkeyModifiers = ReadInt(key, nameof(HotkeyModifiers), HotkeyModifiers);
             HotkeyKey = ReadInt(key, nameof(HotkeyKey), HotkeyKey);
@@ -114,6 +122,8 @@ public static class Settings
             key.SetValue(nameof(StartMinimized), StartMinimized ? 1 : 0, RegistryValueKind.DWord);
             key.SetValue(nameof(AutoCleanSafeOnly), AutoCleanSafeOnly ? 1 : 0, RegistryValueKind.DWord);
             key.SetValue(nameof(RunOnStartup), RunOnStartup ? 1 : 0, RegistryValueKind.DWord);
+            key.SetValue(nameof(CompactMode), CompactMode ? 1 : 0, RegistryValueKind.DWord);
+            key.SetValue(nameof(AlwaysOnTop), AlwaysOnTop ? 1 : 0, RegistryValueKind.DWord);
             key.SetValue(nameof(HotkeyEnabled), HotkeyEnabled ? 1 : 0, RegistryValueKind.DWord);
             key.SetValue(nameof(HotkeyModifiers), HotkeyModifiers, RegistryValueKind.DWord);
             key.SetValue(nameof(HotkeyKey), HotkeyKey, RegistryValueKind.DWord);

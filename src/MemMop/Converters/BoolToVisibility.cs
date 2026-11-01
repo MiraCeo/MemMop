@@ -17,3 +17,17 @@ public sealed class BoolToVisibility : IValueConverter
     public object ConvertBack(object? value, Type targetType, object? parameter, CultureInfo culture)
         => value is Visibility.Visible;
 }
+
+/// <summary>
+/// Maps a bool to a visibility, inverted - used to hide the tabbed view while the compact one is shown.
+/// </summary>
+public sealed class InverseBoolToVisibility : IValueConverter
+{
+    /// <inheritdoc/>
+    public object Convert(object? value, Type targetType, object? parameter, CultureInfo culture)
+        => value is true ? Visibility.Collapsed : Visibility.Visible;
+
+    /// <inheritdoc/>
+    public object ConvertBack(object? value, Type targetType, object? parameter, CultureInfo culture)
+        => value is not Visibility.Visible;
+}

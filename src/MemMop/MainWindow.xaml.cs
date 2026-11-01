@@ -39,6 +39,14 @@ public partial class MainWindow : Window
             ApplyHotkey();
         };
 
+        _viewModel.PropertyChanged += (_, args) =>
+        {
+            if (args.PropertyName == nameof(MainViewModel.CompactMode))
+                ApplyWindowSize();
+        };
+
+        Loaded += (_, _) => ApplyWindowSize();
+
         Loaded += OnLoaded;
         Closed += (_, _) => _timer.Stop();
     }
@@ -95,6 +103,15 @@ public partial class MainWindow : Window
             ? snapshot.CommitUsed + "," + (snapshot.CommitLimit - snapshot.CommitUsed)
             : string.Empty;
 
+        var usedPercent = snapshot.Total > 0 ? (snapshot.Total - snapshot.Available) * 100.0 / snapshot.Total : 0;
+
+        _viewModel.UsedPercentText = usedPercent.ToString("0", System.Globalization.CultureInfo.InvariantCulture) + "%";
+        _viewModel.UsedText = Size(snapshot.Total - snapshot.Available) + " / " + Size(snapshot.Total);
+        _viewModel.ActiveText = "活动 " + Size(snapshot.Active);
+        _viewModel.ModifiedText = "已修改 " + Size(snapshot.Modified);
+        _viewModel.StandbyText = "待机 " + Size(snapshot.Standby);
+        _viewModel.FreeText = "空闲 " + Size(snapshot.Free);
+
         _viewModel.CommitText = snapshot.CommitLimit > 0
             ? text.Commit(snapshot.CommitUsed, snapshot.CommitLimit)
             : string.Empty;
@@ -108,6 +125,22 @@ public partial class MainWindow : Window
     {
         if (FindName("Tabs") is System.Windows.Controls.TabControl tabs)
             tabs.SelectedIndex = index;
+    }
+
+    private void ApplyWindowSize()
+    {
+        // the compact view is a fixed-size card, the tabbed one a fixed-size window: neither should be resizable
+        // by accident, so both are set explicitly
+        if (_viewModel.CompactMode)
+        {
+            Width = 320;
+            Height = 190;
+        }
+        else
+        {
+            Width = 540;
+            Height = 640;
+        }
     }
 
     private void ApplyHotkey()

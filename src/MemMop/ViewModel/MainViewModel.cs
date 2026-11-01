@@ -84,6 +84,8 @@ public sealed class MainViewModel : ObservableObject
     private string _processSearchText = string.Empty;
     private string _selectedProcess = string.Empty;
     private string _selectedExclusion = string.Empty;
+    private string _usedPercentText = string.Empty;
+    private string _usedText = string.Empty;
 
     /// <summary>Gets the process rows, largest first.</summary>
     public ObservableCollection<ProcessUsage> ProcessUsageItems { get; } = new();
@@ -272,6 +274,56 @@ public sealed class MainViewModel : ObservableObject
             Settings.Save();
             Raise();
         }
+    }
+
+    /// <summary>Gets or sets a value indicating whether the compact view is shown.</summary>
+    public bool CompactMode
+    {
+        get => Settings.CompactMode;
+        set
+        {
+            Settings.CompactMode = value;
+            Settings.Save();
+            Raise();
+        }
+    }
+
+    /// <summary>Gets or sets a value indicating whether the window stays above others.</summary>
+    public bool AlwaysOnTop
+    {
+        get => Settings.AlwaysOnTop;
+        set
+        {
+            Settings.AlwaysOnTop = value;
+            Settings.Save();
+            Raise();
+        }
+    }
+
+    /// <summary>Gets or sets the active segment line.</summary>
+    public string ActiveText { get; set; } = string.Empty;
+
+    /// <summary>Gets or sets the modified segment line.</summary>
+    public string ModifiedText { get; set; } = string.Empty;
+
+    /// <summary>Gets or sets the standby segment line.</summary>
+    public string StandbyText { get; set; } = string.Empty;
+
+    /// <summary>Gets or sets the free segment line.</summary>
+    public string FreeText { get; set; } = string.Empty;
+
+    /// <summary>Gets the used percentage shown in the compact view.</summary>
+    public string UsedPercentText
+    {
+        get => _usedPercentText;
+        set => Set(ref _usedPercentText, value);
+    }
+
+    /// <summary>Gets the used / total line shown in the compact view.</summary>
+    public string UsedText
+    {
+        get => _usedText;
+        set => Set(ref _usedText, value);
     }
 
     /// <summary>
