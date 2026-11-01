@@ -127,6 +127,17 @@ public partial class MainWindow : Window
             tabs.SelectedIndex = index;
     }
 
+    private void OnTitleBarMouseDown(object sender, System.Windows.Input.MouseButtonEventArgs e)
+    {
+        // a frameless window has to move itself
+        if (e.ChangedButton == System.Windows.Input.MouseButton.Left)
+            DragMove();
+    }
+
+    private void OnMinimizeClick(object sender, RoutedEventArgs e) => WindowState = WindowState.Minimized;
+
+    private void OnCloseClick(object sender, RoutedEventArgs e) => Close();
+
     private void ApplyWindowSize()
     {
         // the compact view is a fixed-size card, the tabbed one a fixed-size window: neither should be resizable
