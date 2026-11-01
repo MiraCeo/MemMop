@@ -11,6 +11,7 @@ namespace MemMop.ViewModel;
 public sealed class MainViewModel : ObservableObject
 {
     private readonly CleaningEngine _engine;
+    private readonly AutoCleanPolicy _policy = new();
     private bool _isBusy;
     private string _summary = string.Empty;
     private string _physicalText = string.Empty;
@@ -85,6 +86,43 @@ public sealed class MainViewModel : ObservableObject
     {
         get => _summary;
         private set => Set(ref _summary, value);
+    }
+
+    /// <summary>
+    /// Runs the automatic policy: interval or low-memory, then the narrowed area set.
+    /// </summary>
+    /// <param name="now">The current time.</param>
+    /// <returns>What happened, for the caller to report.</returns>
+    public async Task<string?> TryAutoCleanAsync(DateTime now)
+    {
+        var snapshot = MemorySnapshot.Capture();
+        var byInterval = _policy.IsIntervalDue(now, Settings.AutoCleanMinutes);
+        var byMemory = AutoCleanPolicy.IsMemoryDue(snapshot, Settings.LowMemoryPercent);
+
+        if (!byInterval && !byMemory)
+            return null;
+
+        var areas = AutoCleanPolicy.SelectForRun(
+            Areas.Where(a => a.IsSelected).Select(a => a.Reclaimer.Name),
+            automatic: true,
+            safeOnly: Settings.AutoCleanSafeOnly);
+
+        if (areas.Count == 0)
+            return null;
+
+        _policy.MarkIntervalRun(now);
+
+        var results = await Task.Run(() => _engine.Run(areas));
+
+        foreach (var (name, result) in results)
+            Areas.FirstOrDefault(a => a.Reclaimer.Name == name)?.Apply(result);
+
+        var failed = results.Count(r => !r.Result.Succeeded);
+        var released = results.Where(r => r.Result.Succeeded).Sum(r => Math.Max(0, r.Result.FreedBytes));
+
+        return failed > 0
+            ? $"自动清理：{results.Count - failed} 项完成，{failed} 项失败"
+            : string.Format(System.Globalization.CultureInfo.InvariantCulture, "自动清理：释放 {0:0.#} GB", released / (1024d * 1024 * 1024));
     }
 
     private async void Clean()
