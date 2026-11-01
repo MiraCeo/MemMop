@@ -161,17 +161,15 @@
         <Setter Property="Template">
             <Setter.Value>
                 <ControlTemplate TargetType="TabItem">
-                    <Grid>
-                        <Border x:Name="Chrome" Background="Transparent" Padding="14, 0, 14, 0">
+                    <Grid Margin="3, 0, 0, 0">
+                        <Border x:Name="Chip"
+                                Background="Transparent"
+                                CornerRadius="7, 7, 0, 0"
+                                Padding="16, 0, 16, 0">
                             <ContentPresenter ContentSource="Header"
                                               HorizontalAlignment="Center"
                                               VerticalAlignment="Center" />
                         </Border>
-                        <Rectangle x:Name="Underline"
-                                   Height="2"
-                                   VerticalAlignment="Bottom"
-                                   Fill="{DynamicResource Accent}"
-                                   Opacity="0" />
                     </Grid>
                     <ControlTemplate.Triggers>
                         <Trigger Property="IsMouseOver" Value="True">
@@ -179,7 +177,7 @@
                         </Trigger>
                         <Trigger Property="IsSelected" Value="True">
                             <Setter Property="Foreground" Value="{DynamicResource TextPrimary}" />
-                            <Setter TargetName="Underline" Property="Opacity" Value="1" />
+                            <Setter TargetName="Chip" Property="Background" Value="{DynamicResource SurfaceAlt}" />
                         </Trigger>
                     </ControlTemplate.Triggers>
                 </ControlTemplate>
@@ -199,13 +197,10 @@
                             <RowDefinition Height="*" />
                         </Grid.RowDefinitions>
 
-                        <!-- the band: full width, one hairline below it, nothing else -->
-                        <Border Grid.Row="0"
-                                Background="{DynamicResource Nav}"
-                                BorderBrush="{DynamicResource Border}"
-                                BorderThickness="0, 0, 0, 1">
-                            <TabPanel Margin="8, 0, 0, 0" IsItemsHost="True" />
-                        </Border>
+                        <!-- no band, no hairline: the chips sit directly on the content surface -->
+                        <Grid Grid.Row="0" Background="{DynamicResource Surface}">
+                            <TabPanel Margin="3, 0, 0, 0" VerticalAlignment="Bottom" IsItemsHost="True" />
+                        </Grid>
 
                         <ContentPresenter Grid.Row="1" ContentSource="SelectedContent" />
                     </Grid>
