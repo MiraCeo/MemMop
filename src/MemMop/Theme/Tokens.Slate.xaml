@@ -19,4 +19,5 @@
     <sys:Double x:Key="TitleBarAccentOpacity">0</sys:Double>
     <sys:Double x:Key="TitleBarHighlightOpacity">0</sys:Double>
     <SolidColorBrush x:Key="InputBorder" Color="#4A525E" />
+    <SolidColorBrush x:Key="Nav" Color="#282C33" />
 </ResourceDictionary>

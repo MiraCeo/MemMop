@@ -162,8 +162,10 @@
             <Setter.Value>
                 <ControlTemplate TargetType="TabItem">
                     <Grid>
-                        <Border x:Name="Chrome" Background="Transparent" Padding="14, 8, 14, 6">
-                            <ContentPresenter ContentSource="Header" HorizontalAlignment="Center" />
+                        <Border x:Name="Chrome" Background="Transparent" Padding="14, 0, 14, 0">
+                            <ContentPresenter ContentSource="Header"
+                                              HorizontalAlignment="Center"
+                                              VerticalAlignment="Center" />
                         </Border>
                         <Rectangle x:Name="Underline"
                                    Height="2"
@@ -193,10 +195,18 @@
                 <ControlTemplate TargetType="TabControl">
                     <Grid>
                         <Grid.RowDefinitions>
-                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="38" />
                             <RowDefinition Height="*" />
                         </Grid.RowDefinitions>
-                        <TabPanel Grid.Row="0" Margin="0, 0, 0, 10" IsItemsHost="True" Panel.ZIndex="1" />
+
+                        <!-- the band: full width, one hairline below it, nothing else -->
+                        <Border Grid.Row="0"
+                                Background="{DynamicResource Nav}"
+                                BorderBrush="{DynamicResource Border}"
+                                BorderThickness="0, 0, 0, 1">
+                            <TabPanel Margin="22, 0, 0, 0" IsItemsHost="True" />
+                        </Border>
+
                         <ContentPresenter Grid.Row="1" ContentSource="SelectedContent" />
                     </Grid>
                 </ControlTemplate>

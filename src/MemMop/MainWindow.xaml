@@ -37,11 +37,10 @@
             <!-- Title bar -->
             <Grid x:Name="TitleBar" Grid.Row="0" Background="{DynamicResource TitleBarSurface}" MouseLeftButtonDown="OnTitleBarMouseDown">
                 <!-- decorative layers; both are opacity tokens so a variant is a number, not a rewrite -->
-                <Rectangle Height="2"
+                <Rectangle Height="1"
                            VerticalAlignment="Bottom"
-                           Fill="{DynamicResource Accent}"
-                           IsHitTestVisible="False"
-                           Opacity="{DynamicResource TitleBarAccentOpacity}" />
+                           Fill="{DynamicResource Border}"
+                           IsHitTestVisible="False" />
                 <Rectangle Height="1"
                            VerticalAlignment="Top"
                            Fill="#FFFFFF"
@@ -133,7 +132,7 @@
         </Grid>
 
     <TabControl x:Name="Tabs"
-                Margin="10"
+                Margin="0"
                 Visibility="{Binding CompactMode, Converter={StaticResource InverseBoolToVisibility}}">
         <TabItem Header="{Binding Source={x:Static core:Strings.Current}, Path=Home}">
             <Grid>
