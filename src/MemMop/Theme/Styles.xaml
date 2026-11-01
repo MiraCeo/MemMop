@@ -202,7 +202,7 @@
 
                         <!-- darker than the page: the open tab shares the page colour and merges into it -->
                         <Grid Grid.Row="0" Background="{DynamicResource TabStrip}">
-                            <TabPanel Margin="3, 0, 0, 0" VerticalAlignment="Stretch" IsItemsHost="True" />
+                            <TabPanel Margin="3, 6, 0, 0" VerticalAlignment="Stretch" IsItemsHost="True" />
                         </Grid>
 
                         <ContentPresenter Grid.Row="1" ContentSource="SelectedContent" />
