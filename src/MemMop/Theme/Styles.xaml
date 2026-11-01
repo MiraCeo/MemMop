@@ -161,9 +161,11 @@
         <Setter Property="Template">
             <Setter.Value>
                 <ControlTemplate TargetType="TabItem">
-                    <Grid Margin="3, 0, 0, 0">
+                    <Grid VerticalAlignment="Stretch">
                         <Border x:Name="Chip"
-                                Background="Transparent"
+                                Background="{DynamicResource SurfaceAlt}"
+                                BorderBrush="Transparent"
+                                BorderThickness="1, 1, 1, 0"
                                 CornerRadius="7, 7, 0, 0"
                                 Padding="16, 0, 16, 0">
                             <ContentPresenter ContentSource="Header"
@@ -178,8 +180,7 @@
                         <Trigger Property="IsSelected" Value="True">
                             <Setter Property="Foreground" Value="{DynamicResource TextPrimary}" />
                             <Setter TargetName="Chip" Property="Background" Value="{DynamicResource Surface}" />
-                            <Setter TargetName="Chip" Property="BorderBrush" Value="{DynamicResource Accent}" />
-                            <Setter TargetName="Chip" Property="BorderThickness" Value="0, 2, 0, 0" />
+                            <Setter TargetName="Chip" Property="BorderBrush" Value="{DynamicResource Border}" />
                         </Trigger>
                     </ControlTemplate.Triggers>
                 </ControlTemplate>
@@ -195,13 +196,13 @@
                 <ControlTemplate TargetType="TabControl">
                     <Grid>
                         <Grid.RowDefinitions>
-                            <RowDefinition Height="38" />
+                            <RowDefinition Height="Auto" />
                             <RowDefinition Height="*" />
                         </Grid.RowDefinitions>
 
                         <!-- darker than the page: the open tab shares the page colour and merges into it -->
                         <Grid Grid.Row="0" Background="{DynamicResource TabStrip}">
-                            <TabPanel Margin="3, 8, 0, 0" VerticalAlignment="Stretch" IsItemsHost="True" />
+                            <TabPanel Margin="3, 0, 0, 0" VerticalAlignment="Stretch" IsItemsHost="True" />
                         </Grid>
 
                         <ContentPresenter Grid.Row="1" ContentSource="SelectedContent" />
