@@ -118,7 +118,24 @@
                             Command="{Binding AddExclusionCommand}"
                             Content="+" />
                 </Grid>
-                <ListBox Margin="0, 6, 0, 0" MaxHeight="120" ItemsSource="{Binding ExcludedProcesses}" />
+                <Grid Margin="0, 6, 0, 0">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="Auto" />
+                    </Grid.ColumnDefinitions>
+                    <ListBox MaxHeight="120"
+                             ItemsSource="{Binding ExcludedProcesses}"
+                             SelectedItem="{Binding SelectedExclusion}" />
+                    <Button Grid.Column="1"
+                            Margin="6, 0, 0, 0"
+                            Padding="10, 4, 10, 4"
+                            Command="{Binding RemoveExclusionCommand}"
+                            Content="-" />
+                </Grid>
+
+                <CheckBox Margin="0, 8, 0, 0"
+                          Content="静默启动"
+                          IsChecked="{Binding StartMinimized}" />
 
                 <CheckBox x:Name="CloseToTrayBox"
                           Margin="0, 16, 0, 0"

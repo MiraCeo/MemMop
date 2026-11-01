@@ -12,6 +12,7 @@ namespace MemMop;
 public partial class App : Application
 {
     private TrayService? _tray;
+    private System.Windows.Threading.DispatcherTimer? _autoCleanTimer;
     private MainWindow? _window;
 
     /// <inheritdoc/>
@@ -35,6 +36,25 @@ public partial class App : Application
         _window.MemoryRead += OnMemoryRead;
 
         // the very first run has nothing in the tray the user could recognise yet, so show the window
+        var viewModel = _window.DataContext as MainViewModel;
+
+        if (viewModel != null)
+        {
+            viewModel.CleanCompleted += summary => _tray?.Notify(summary);
+
+            // the policy decides whether anything is due; this only asks it regularly
+            _autoCleanTimer = new System.Windows.Threading.DispatcherTimer { Interval = TimeSpan.FromSeconds(30) };
+            _autoCleanTimer.Tick += async (_, _) =>
+            {
+                var message = await viewModel.TryAutoCleanAsync(DateTime.Now);
+
+                if (!string.IsNullOrEmpty(message))
+                    _tray?.Notify(message);
+            };
+
+            _autoCleanTimer.Start();
+        }
+
         if (!Settings.StartMinimized || !Settings.ShownTrayHint)
             _window.Show();
         else
@@ -47,6 +67,7 @@ public partial class App : Application
     protected override void OnExit(ExitEventArgs e)
     {
         Settings.Save();
+        _autoCleanTimer?.Stop();
         _tray?.Dispose();
 
         base.OnExit(e);

@@ -1,13 +1,20 @@
 ﻿using MemMop.Core;
+using MemMop.ViewModel;
 
-var s = MemorySnapshot.Capture();
-var t = Strings.Current;
+var vm = new MainViewModel();
 
-Console.WriteLine(t.Physical(s.Total - s.Available, s.Total));
-Console.WriteLine(t.Segments(s.Active, s.Modified, s.Standby, s.Free));
-Console.WriteLine(t.Commit(s.CommitUsed, s.CommitLimit));
+Console.WriteLine($"start-minimized default   {vm.StartMinimized}");
+vm.StartMinimized = false;
+Console.WriteLine($"after set false           {vm.StartMinimized} (settings={Settings.StartMinimized})");
+vm.StartMinimized = true;
 
-t.SetLanguage(true);
-Console.WriteLine(t.Physical(s.Total - s.Available, s.Total));
-Console.WriteLine(t.Segments(s.Active, s.Modified, s.Standby, s.Free));
-t.SetLanguage(false);
+Console.WriteLine($"auto-clean due (interval 0) {vm.TryAutoCleanAsync(DateTime.Now).Result ?? "null (not due)"}");
+
+vm.SelectedProcess = vm.AvailableProcesses.FirstOrDefault() ?? "";
+vm.AddExclusionCommand.Execute(null);
+var added = vm.ExcludedProcesses.FirstOrDefault() ?? "";
+Console.WriteLine($"excluded added            {added}");
+vm.SelectedExclusion = added;
+Console.WriteLine($"can remove                {vm.RemoveExclusionCommand.CanExecute(null)}");
+vm.RemoveExclusionCommand.Execute(null);
+Console.WriteLine($"after remove              {vm.ExcludedProcesses.Count}");

@@ -45,7 +45,7 @@ public sealed class MainViewModel : ObservableObject
 
         CleanCommand = new RelayCommand(Clean, () => !IsBusy && Areas.Any(a => a.IsSelected));
         AddExclusionCommand = new RelayCommand(() => AddExclusion(SelectedProcess), () => !string.IsNullOrEmpty(SelectedProcess));
-        RemoveExclusionCommand = new RelayCommand(() => { }, () => true);
+        RemoveExclusionCommand = new RelayCommand(() => RemoveExclusion(SelectedExclusion), () => !string.IsNullOrEmpty(SelectedExclusion));
 
         RefreshExcluded();
         RefreshAvailableProcesses();
@@ -80,6 +80,7 @@ public sealed class MainViewModel : ObservableObject
     private bool _processUsageExpanded;
     private string _processSearchText = string.Empty;
     private string _selectedProcess = string.Empty;
+    private string _selectedExclusion = string.Empty;
 
     /// <summary>Gets the process rows, largest first.</summary>
     public ObservableCollection<ProcessUsage> ProcessUsageItems { get; } = new();
@@ -224,6 +225,32 @@ public sealed class MainViewModel : ObservableObject
         RefreshAvailableProcesses();
     }
 
+    /// <summary>Raised after a manual run with the one-line summary.</summary>
+    public event Action<string>? CleanCompleted;
+
+    /// <summary>Gets or sets the excluded name selected for removal.</summary>
+    public string SelectedExclusion
+    {
+        get => _selectedExclusion;
+        set
+        {
+            if (Set(ref _selectedExclusion, value))
+                (RemoveExclusionCommand as RelayCommand)?.RaiseCanExecuteChanged();
+        }
+    }
+
+    /// <summary>Gets or sets a value indicating whether the window starts hidden in the tray.</summary>
+    public bool StartMinimized
+    {
+        get => Settings.StartMinimized;
+        set
+        {
+            Settings.StartMinimized = value;
+            Settings.Save();
+            Raise();
+        }
+    }
+
     /// <summary>Gets the areas shown on the home tab.</summary>
     public ObservableCollection<AreaItem> Areas { get; }
 
@@ -308,6 +335,8 @@ public sealed class MainViewModel : ObservableObject
 
             var released = results.Where(r => r.Result.Succeeded).Sum(r => Math.Max(0, r.Result.FreedBytes));
             var failed = results.Count(r => !r.Result.Succeeded);
+
+            CleanCompleted?.Invoke(Summary);
 
             Summary = failed > 0
                 ? $"{selected.Count - failed} 项完成，{failed} 项失败"
