@@ -64,7 +64,11 @@ public partial class MainWindow : Window
 
         _viewModel.PhysicalText = text.Physical(snapshot.Total - snapshot.Available, snapshot.Total);
 
-        MemoryRead?.Invoke(_viewModel.PhysicalText);
+        var tooltip = _viewModel.ShowCommitted && snapshot.CommitLimit > 0
+            ? _viewModel.PhysicalText + Environment.NewLine + text.Commit(snapshot.CommitUsed, snapshot.CommitLimit)
+            : _viewModel.PhysicalText;
+
+        MemoryRead?.Invoke(tooltip);
 
         _viewModel.SegmentText = snapshot.HasSegments
             ? text.Segments(snapshot.Active, snapshot.Modified, snapshot.Standby, snapshot.Free)

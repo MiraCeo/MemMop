@@ -29,6 +29,13 @@ public interface ITrayService : IDisposable
     void UpdateTooltip(string text);
 
     /// <summary>
+    /// Replaces the two status rows at the top of the menu.
+    /// </summary>
+    /// <param name="main">The memory line.</param>
+    /// <param name="last">The last-clean line.</param>
+    void SetStatus(string main, string last);
+
+    /// <summary>
     /// Shows a balloon once.
     /// </summary>
     /// <param name="message">The message.</param>

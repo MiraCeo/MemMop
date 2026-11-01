@@ -251,6 +251,23 @@ public sealed class MainViewModel : ObservableObject
     /// <summary>Raised after a manual run with the one-line summary.</summary>
     public event Action<string>? CleanCompleted;
 
+    /// <summary>Gets when the last successful clean finished.</summary>
+    public DateTime? LastCleanAt { get; private set; }
+
+    /// <summary>Gets a short description of when the last clean ran.</summary>
+    public string LastCleanText
+    {
+        get
+        {
+            if (LastCleanAt == null)
+                return "本次尚未清理";
+
+            var minutes = (int)(DateTime.Now - LastCleanAt.Value).TotalMinutes;
+
+            return minutes < 1 ? "刚刚清理" : $"上次清理 {minutes} 分钟前";
+        }
+    }
+
     /// <summary>Gets or sets the excluded name selected for removal.</summary>
     public string SelectedExclusion
     {
@@ -395,6 +412,9 @@ public sealed class MainViewModel : ObservableObject
         foreach (var (name, result) in results)
             Areas.FirstOrDefault(a => a.Reclaimer.Name == name)?.Apply(result);
 
+        LastCleanAt = DateTime.Now;
+        Raise(nameof(LastCleanText));
+
         var failed = results.Count(r => !r.Result.Succeeded);
         var released = results.Where(r => r.Result.Succeeded).Sum(r => Math.Max(0, r.Result.FreedBytes));
 
@@ -426,6 +446,9 @@ public sealed class MainViewModel : ObservableObject
 
             var released = results.Where(r => r.Result.Succeeded).Sum(r => Math.Max(0, r.Result.FreedBytes));
             var failed = results.Count(r => !r.Result.Succeeded);
+
+            LastCleanAt = DateTime.Now;
+            Raise(nameof(LastCleanText));
 
             CleanCompleted?.Invoke(Summary);
 

@@ -13,11 +13,50 @@ public partial class App : Application
 {
     private TrayService? _tray;
     private System.Windows.Threading.DispatcherTimer? _autoCleanTimer;
+    private System.Threading.Mutex? _instanceMutex;
+    private System.Threading.EventWaitHandle? _showInstance;
     private MainWindow? _window;
 
     /// <inheritdoc/>
     protected override void OnStartup(StartupEventArgs e)
     {
+        // one instance only: a second launch asks the first to show itself, then leaves
+        _instanceMutex = new System.Threading.Mutex(true, "MemMop.SingleInstance", out var isFirst);
+
+        if (!isFirst)
+        {
+            try
+            {
+                System.Threading.EventWaitHandle.OpenExisting("MemMop.ShowInstance").Set();
+            }
+            catch (Exception)
+            {
+                // the first instance is not listening yet; nothing else to do
+            }
+
+            Shutdown();
+
+            return;
+        }
+
+        try
+        {
+            _showInstance = new System.Threading.EventWaitHandle(false, System.Threading.EventResetMode.AutoReset, "MemMop.ShowInstance");
+
+            var listener = new System.Threading.Thread(() =>
+            {
+                while (_showInstance.WaitOne())
+                    Dispatcher.BeginInvoke(new Action(ShowWindow));
+            })
+            { IsBackground = true };
+
+            listener.Start();
+        }
+        catch (Exception)
+        {
+            // without the event the second instance simply exits; the window is still reachable from the tray
+        }
+
         AppDomain.CurrentDomain.UnhandledException += (_, args) => LogCrash(args.ExceptionObject as Exception);
 
         Settings.Load();
@@ -92,6 +131,11 @@ public partial class App : Application
     private void OnMemoryRead(string tooltip)
     {
         _tray?.UpdateTooltip(tooltip);
+
+        var first = tooltip.Split('\n')[0];
+        var last = (_window?.DataContext as MainViewModel)?.LastCleanText ?? string.Empty;
+
+        _tray?.SetStatus(first, last);
     }
 
     private void OnWindowClosing(object? sender, System.ComponentModel.CancelEventArgs e)

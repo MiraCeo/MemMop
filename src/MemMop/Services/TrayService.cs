@@ -11,6 +11,8 @@ public sealed class TrayService : ITrayService
 {
     private NotifyIcon? _icon;
     private ToolStripMenuItem? _cleanItem;
+    private ToolStripMenuItem? _statusMain;
+    private ToolStripMenuItem? _statusLast;
 
     /// <inheritdoc/>
     public event Action? ShowRequested;
@@ -42,6 +44,14 @@ public sealed class TrayService : ITrayService
 
         var menu = new ContextMenuStrip();
 
+        // two disabled rows: the figures live here so they are readable without opening the window
+        _statusMain = new ToolStripMenuItem(string.Empty) { Enabled = false };
+        _statusLast = new ToolStripMenuItem(string.Empty) { Enabled = false };
+
+        menu.Items.Add(_statusMain);
+        menu.Items.Add(_statusLast);
+        menu.Items.Add(new ToolStripSeparator());
+
         var home = new ToolStripMenuItem("主页", null, (_, _) => ViewRequested?.Invoke(0));
         var settings = new ToolStripMenuItem("设置…", null, (_, _) => ViewRequested?.Invoke(1));
 
@@ -56,6 +66,16 @@ public sealed class TrayService : ITrayService
         menu.Items.Add(exit);
 
         _icon.ContextMenuStrip = menu;
+    }
+
+    /// <inheritdoc/>
+    public void SetStatus(string main, string last)
+    {
+        if (_statusMain != null)
+            _statusMain.Text = main;
+
+        if (_statusLast != null)
+            _statusLast.Text = last;
     }
 
     /// <inheritdoc/>
