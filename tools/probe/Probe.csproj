@@ -18,6 +18,9 @@
     <Compile Include="..\..\src\MemMop\Core\Reclaimers\ModifiedPageListReclaimer.cs" Link="ModifiedPageListReclaimer.cs" />
     <Compile Include="..\..\src\MemMop\Core\Reclaimers\RegistryCacheReclaimer.cs" Link="RegistryCacheReclaimer.cs" />
     <Compile Include="..\..\src\MemMop\Core\Reclaimers\WorkingSetReclaimer.cs" Link="WorkingSetReclaimer.cs" />
+    <Compile Include="..\..\src\MemMop\Core\Reclaimers\CombinedPageListReclaimer.cs" Link="CombinedPageListReclaimer.cs" />
+    <Compile Include="..\..\src\MemMop\Core\Reclaimers\SystemFileCacheReclaimer.cs" Link="SystemFileCacheReclaimer.cs" />
   </ItemGroup>
 </Project>
+
 

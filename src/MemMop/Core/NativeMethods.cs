@@ -16,6 +16,15 @@ internal static class NativeMethods
     /// <summary>Purge only the lowest-priority standby pages.</summary>
     internal const int MemoryPurgeLowPriorityStandbyList = 5;
 
+    /// <summary>SystemCombinePhysicalMemoryInformation - combines identical physical pages.</summary>
+    internal const int CombinePhysicalMemoryInformation = 130;
+
+    /// <summary>SystemFileCacheInformation - the system file cache working set.</summary>
+    internal const int SystemFileCacheInformation = 21;
+
+    /// <summary>SeIncreaseQuotaPrivilege - needed to shrink the system file cache.</summary>
+    internal const string SeIncreaseQuotaPrivilege = "SeIncreaseQuotaPrivilege";
+
     /// <summary>SystemRegistryReconciliationInformation - registry hive reconciliation.</summary>
     internal const int SystemRegistryReconciliationInformation = 155;
 
@@ -80,6 +89,14 @@ internal static class NativeMethods
         public uint Attributes;
     }
 
+    [StructLayout(LayoutKind.Sequential)]
+    internal struct MemoryCombineInformation
+    {
+        public IntPtr Handle;
+        public IntPtr PagesCombined;
+        public long Flags;
+    }
+
     [DllImport("kernel32.dll", SetLastError = true)]
     [return: MarshalAs(UnmanagedType.Bool)]
     internal static extern bool GlobalMemoryStatusEx(ref MemoryStatusEx buffer);
@@ -90,6 +107,10 @@ internal static class NativeMethods
 
     [DllImport("ntdll.dll")]
     internal static extern int NtQuerySystemInformation(int informationClass, IntPtr buffer, uint length, out uint returned);
+
+    [DllImport("kernel32.dll", SetLastError = true)]
+    [return: MarshalAs(UnmanagedType.Bool)]
+    internal static extern bool SetSystemFileCacheSize(IntPtr minimum, IntPtr maximum, uint flags);
 
     [DllImport("ntdll.dll")]
     internal static extern int NtSetSystemInformation(int informationClass, IntPtr buffer, uint length);
