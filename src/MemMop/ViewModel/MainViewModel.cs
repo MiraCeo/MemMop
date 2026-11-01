@@ -404,6 +404,18 @@ public sealed class MainViewModel : ObservableObject
         }
     }
 
+    /// <summary>Gets or sets a value indicating whether closing hides the window instead of quitting.</summary>
+    public bool CloseToTray
+    {
+        get => Settings.CloseToTray;
+        set
+        {
+            Settings.CloseToTray = value;
+            Settings.Save();
+            Raise();
+        }
+    }
+
     /// <summary>Gets or sets a value indicating whether the window starts hidden in the tray.</summary>
     public bool StartMinimized
     {

@@ -22,8 +22,9 @@ internal static class Program
         {
             ApplyTheme(theme);
 
-            Render(Path.Combine(output, theme.ToLowerInvariant() + "-normal.png"), 540, 640, false);
-            Render(Path.Combine(output, theme.ToLowerInvariant() + "-compact.png"), 320, 190, true);
+            Render(Path.Combine(output, theme.ToLowerInvariant() + "-normal.png"), 540, 640, false, 0);
+            Render(Path.Combine(output, theme.ToLowerInvariant() + "-settings.png"), 540, 640, false, 1);
+            Render(Path.Combine(output, theme.ToLowerInvariant() + "-compact.png"), 320, 190, true, 0);
         }
 
         Console.WriteLine(output);
@@ -46,7 +47,7 @@ internal static class Program
         });
     }
 
-    private static void Render(string path, double width, double height, bool compact)
+    private static void Render(string path, double width, double height, bool compact, int tab)
     {
         var window = new MainWindow
         {
