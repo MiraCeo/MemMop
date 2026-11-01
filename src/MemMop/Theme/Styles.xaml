@@ -177,7 +177,9 @@
                         </Trigger>
                         <Trigger Property="IsSelected" Value="True">
                             <Setter Property="Foreground" Value="{DynamicResource TextPrimary}" />
-                            <Setter TargetName="Chip" Property="Background" Value="{DynamicResource SurfaceAlt}" />
+                            <Setter TargetName="Chip" Property="Background" Value="{DynamicResource Surface}" />
+                            <Setter TargetName="Chip" Property="BorderBrush" Value="{DynamicResource Accent}" />
+                            <Setter TargetName="Chip" Property="BorderThickness" Value="0, 2, 0, 0" />
                         </Trigger>
                     </ControlTemplate.Triggers>
                 </ControlTemplate>
@@ -197,9 +199,9 @@
                             <RowDefinition Height="*" />
                         </Grid.RowDefinitions>
 
-                        <!-- no band, no hairline: the chips sit directly on the content surface -->
-                        <Grid Grid.Row="0" Background="{DynamicResource Surface}">
-                            <TabPanel Margin="3, 0, 0, 0" VerticalAlignment="Bottom" IsItemsHost="True" />
+                        <!-- darker than the page: the open tab shares the page colour and merges into it -->
+                        <Grid Grid.Row="0" Background="{DynamicResource TabStrip}">
+                            <TabPanel Margin="3, 8, 0, 0" VerticalAlignment="Stretch" IsItemsHost="True" />
                         </Grid>
 
                         <ContentPresenter Grid.Row="1" ContentSource="SelectedContent" />
