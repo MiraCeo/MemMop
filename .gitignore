@@ -1,0 +1,16 @@
+# build
+bin/
+obj/
+*.user
+*.suo
+.vs/
+
+# artifacts
+/dist/
+/release/
+*.exe
+!*.png
+
+# tools
+.idea/
+*.log
