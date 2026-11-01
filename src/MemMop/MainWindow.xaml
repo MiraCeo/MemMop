@@ -63,7 +63,7 @@
                                   ToolTip="窗口置顶">
                         <Path Data="M 2.8 1.8 L 9.2 1.8 L 9.2 4 L 6.9 5.9 L 6.9 10.6 L 5.1 10.6 L 5.1 5.9 L 2.8 4 Z"
                               Fill="Transparent"
-                              Stroke="{DynamicResource TextMuted}"
+                              Stroke="{DynamicResource TextPrimary}"
                               StrokeThickness="1"
                               Width="12"
                               Height="12"
@@ -77,30 +77,30 @@
                                   BorderThickness="0"
                                   IsChecked="{Binding CompactMode}"
                                   ToolTip="紧凑视图">
-                        <Path Data="M 2 5 L 6 1 L 10 5"
-                              Stroke="{DynamicResource TextMuted}"
-                              StrokeThickness="1.4"
+                        <Path Data="M 2 8 L 6 3.5 L 10 8"
                               Width="12"
-                              Height="8"
-                              Stretch="Uniform" />
+                              Height="12"
+                              Stretch="None"
+                              Stroke="{DynamicResource TextPrimary}"
+                              StrokeThickness="1.4" />
                     </ToggleButton>
 
-                    <Button Width="34"
-                            Height="28"
-                            Background="Transparent"
-                            BorderThickness="0"
-                            Click="OnMinimizeClick"
-                            ToolTip="最小化">
-                        <Path Data="M 2 6 L 10 6" Stroke="{DynamicResource TextMuted}" StrokeThickness="1.2" Width="12" Height="2" Stretch="Uniform" />
+                    <Button Style="{StaticResource TitleButton}" Click="OnMinimizeClick" ToolTip="最小化">
+                        <Path Data="M 2 6 L 10 6"
+                              Width="12"
+                              Height="12"
+                              Stretch="None"
+                              Stroke="{DynamicResource TextPrimary}"
+                              StrokeThickness="1.2" />
                     </Button>
 
-                    <Button Width="34"
-                            Height="28"
-                            Background="Transparent"
-                            BorderThickness="0"
-                            Click="OnCloseClick"
-                            ToolTip="关闭">
-                        <Path Data="M 2 2 L 10 10 M 10 2 L 2 10" Stroke="{DynamicResource TextMuted}" StrokeThickness="1.2" Width="12" Height="12" Stretch="Uniform" />
+                    <Button Style="{StaticResource TitleButton}" Click="OnCloseClick" ToolTip="关闭">
+                        <Path Data="M 2.5 2.5 L 9.5 9.5 M 9.5 2.5 L 2.5 9.5"
+                              Width="12"
+                              Height="12"
+                              Stretch="None"
+                              Stroke="{DynamicResource TextPrimary}"
+                              StrokeThickness="1.2" />
                     </Button>
                 </StackPanel>
             </Grid>
