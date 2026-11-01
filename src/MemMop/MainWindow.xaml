@@ -414,13 +414,14 @@
                             Content="重置为默认" />
                 </StackPanel>
             </ScrollViewer>
-                <Rectangle Height="30"
+                <Rectangle Height="64"
                            VerticalAlignment="Bottom"
                            IsHitTestVisible="False"
                            Fill="{DynamicResource Surface}">
                     <Rectangle.OpacityMask>
                         <LinearGradientBrush StartPoint="0, 0" EndPoint="0, 1">
                             <GradientStop Offset="0" Color="#00FFFFFF" />
+                            <GradientStop Offset="0.55" Color="#8CFFFFFF" />
                             <GradientStop Offset="1" Color="#FFFFFFFF" />
                         </LinearGradientBrush>
                     </Rectangle.OpacityMask>
