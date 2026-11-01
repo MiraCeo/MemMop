@@ -271,6 +271,7 @@
         </TabItem>
 
         <TabItem Header="{Binding Source={x:Static core:Strings.Current}, Path=Settings}">
+            <Grid>
             <ScrollViewer HorizontalScrollBarVisibility="Disabled" VerticalScrollBarVisibility="Auto">
                 <StackPanel Margin="22, 18, 22, 24">
 
@@ -413,6 +414,18 @@
                             Content="重置为默认" />
                 </StackPanel>
             </ScrollViewer>
+                <Rectangle Height="30"
+                           VerticalAlignment="Bottom"
+                           IsHitTestVisible="False"
+                           Fill="{DynamicResource Surface}">
+                    <Rectangle.OpacityMask>
+                        <LinearGradientBrush StartPoint="0, 0" EndPoint="0, 1">
+                            <GradientStop Offset="0" Color="#00FFFFFF" />
+                            <GradientStop Offset="1" Color="#FFFFFFFF" />
+                        </LinearGradientBrush>
+                    </Rectangle.OpacityMask>
+                </Rectangle>
+            </Grid>
         </TabItem>
 
         <TabItem Header="{Binding Source={x:Static core:Strings.Current}, Path=About}">
