@@ -17,6 +17,8 @@ public partial class App : Application
     /// <inheritdoc/>
     protected override void OnStartup(StartupEventArgs e)
     {
+        AppDomain.CurrentDomain.UnhandledException += (_, args) => LogCrash(args.ExceptionObject as Exception);
+
         Settings.Load();
 
         Strings.Current.SetLanguage(Settings.Language == "en");
@@ -32,7 +34,8 @@ public partial class App : Application
         _window.Closing += OnWindowClosing;
         _window.MemoryRead += OnMemoryRead;
 
-        if (!Settings.StartMinimized)
+        // the very first run has nothing in the tray the user could recognise yet, so show the window
+        if (!Settings.StartMinimized || !Settings.ShownTrayHint)
             _window.Show();
         else
             ShowTrayHintOnce();
@@ -50,6 +53,20 @@ public partial class App : Application
     }
 
     private MainWindow? MainWindow => _window;
+
+    private static void LogCrash(Exception? exception)
+    {
+        try
+        {
+            var path = System.IO.Path.Combine(System.IO.Path.GetTempPath(), "memmop-crash.txt");
+
+            System.IO.File.WriteAllText(path, DateTime.Now + Environment.NewLine + exception);
+        }
+        catch
+        {
+            // a crash log must never itself crash
+        }
+    }
 
     private void OnMemoryRead(string tooltip)
     {
