@@ -4,7 +4,7 @@
     <Application.Resources>
         <ResourceDictionary>
             <ResourceDictionary.MergedDictionaries>
-                <ResourceDictionary Source="Theme/Tokens.Slate.xaml" />
+                <ResourceDictionary Source="Theme/Tokens.Ceobe.xaml" />
                 <ResourceDictionary Source="Theme/Styles.xaml" />
             </ResourceDictionary.MergedDictionaries>
         </ResourceDictionary>
