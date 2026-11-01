@@ -60,14 +60,15 @@ public partial class MainWindow : Window
     private void Refresh()
     {
         var snapshot = MemorySnapshot.Capture();
+        var text = Strings.Current;
 
-        _viewModel.PhysicalText = $"物理内存 {Size(snapshot.Total - snapshot.Available)} / {Size(snapshot.Total)}";
+        _viewModel.PhysicalText = text.Physical(snapshot.Total - snapshot.Available, snapshot.Total);
 
-        MemoryRead?.Invoke($"物理内存 {Size(snapshot.Total - snapshot.Available)} / {Size(snapshot.Total)}");
+        MemoryRead?.Invoke(_viewModel.PhysicalText);
 
         _viewModel.SegmentText = snapshot.HasSegments
-            ? $"活动 {Size(snapshot.Active)} · 已修改 {Size(snapshot.Modified)} · 待机 {Size(snapshot.Standby)} · 空闲 {Size(snapshot.Free)}"
-            : "四段构成：当前系统版本无法读取";
+            ? text.Segments(snapshot.Active, snapshot.Modified, snapshot.Standby, snapshot.Free)
+            : text.SegmentsUnavailable;
     }
 
     /// <summary>

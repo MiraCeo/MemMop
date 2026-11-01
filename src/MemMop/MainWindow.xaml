@@ -129,7 +129,7 @@
         <TabItem Header="{Binding Source={StaticResource Strings}, Path=About}">
             <StackPanel Margin="12">
                 <TextBlock FontSize="18" Text="忆干二净 MemMop" />
-                <TextBlock Margin="0, 2, 0, 0" Foreground="#999999" Text="2.0.0 · Windows" />
+                <TextBlock Margin="0, 2, 0, 0" Foreground="#999999" Text="{Binding VersionText}" />
                 <TextBlock Margin="0, 14, 0, 0"
                            TextWrapping="Wrap"
                            Text="一个 Windows 内存管理工具，绿色免安装，设置保存在当前用户下。清理不会让电脑变快——待机内存本来就计入可用。" />

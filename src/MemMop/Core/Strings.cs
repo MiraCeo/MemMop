@@ -93,4 +93,40 @@ public sealed class Strings : INotifyPropertyChanged
 
         PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(Areas)));
     }
+
+    /// <summary>Formats the physical memory headline.</summary>
+    /// <param name="used">Used bytes.</param>
+    /// <param name="total">Total bytes.</param>
+    /// <returns>The line.</returns>
+    public string Physical(long used, long total) => _english
+        ? $"physical  {Gb(used)} / {Gb(total)}"
+        : $"物理内存  {Gb(used)} / {Gb(total)}";
+
+    /// <summary>Formats the four-segment line.</summary>
+    /// <param name="active">Active bytes.</param>
+    /// <param name="modified">Modified bytes.</param>
+    /// <param name="standby">Standby bytes.</param>
+    /// <param name="free">Free bytes.</param>
+    /// <returns>The line.</returns>
+    public string Segments(long active, long modified, long standby, long free) => _english
+        ? $"active {Gb(active)} · modified {Gb(modified)} · standby {Gb(standby)} · free {Gb(free)}"
+        : $"活动 {Gb(active)} · 已修改 {Gb(modified)} · 待机 {Gb(standby)} · 空闲 {Gb(free)}";
+
+    /// <summary>Formats the committed memory line.</summary>
+    /// <param name="used">Committed bytes.</param>
+    /// <param name="limit">Commit limit in bytes.</param>
+    /// <returns>The line.</returns>
+    public string Commit(long used, long limit) => _english
+        ? $"committed  {Gb(used)} / {Gb(limit)}"
+        : $"已提交  {Gb(used)} / {Gb(limit)}";
+
+    /// <summary>Gets the line shown when the kernel page lists cannot be read.</summary>
+    public string SegmentsUnavailable => _english
+        ? "four-part breakdown: not readable on this system"
+        : "四段构成：当前系统版本无法读取";
+
+    private static string Gb(long bytes) => string.Format(
+        System.Globalization.CultureInfo.InvariantCulture,
+        "{0:0.#} GB",
+        bytes / (1024d * 1024 * 1024));
 }
