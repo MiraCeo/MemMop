@@ -151,6 +151,10 @@
                 </Grid>
 
                 <CheckBox Margin="0, 8, 0, 0"
+                          Content="开机自启"
+                          IsChecked="{Binding RunOnStartup}" />
+
+                <CheckBox Margin="0, 8, 0, 0"
                           Content="静默启动"
                           IsChecked="{Binding StartMinimized}" />
 

@@ -251,6 +251,29 @@ public sealed class MainViewModel : ObservableObject
     /// <summary>Raised after a manual run with the one-line summary.</summary>
     public event Action<string>? CleanCompleted;
 
+    /// <summary>
+    /// Gets or sets a value indicating whether the program starts at logon. Failures roll the switch back and
+    /// raise <see cref="CleanCompleted"/> with the reason, because a check that lies is worse than no check.
+    /// </summary>
+    public bool RunOnStartup
+    {
+        get => Settings.RunOnStartup;
+        set
+        {
+            if (!AutoStart.Set(value))
+            {
+                CleanCompleted?.Invoke(value ? "开机自启设置失败" : "关闭开机自启失败");
+                Raise();
+
+                return;
+            }
+
+            Settings.RunOnStartup = value;
+            Settings.Save();
+            Raise();
+        }
+    }
+
     /// <summary>Gets when the last successful clean finished.</summary>
     public DateTime? LastCleanAt { get; private set; }
 

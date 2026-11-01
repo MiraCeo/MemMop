@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <OutputType>Exe</OutputType>
     <TargetFramework>net472</TargetFramework>
@@ -30,8 +30,11 @@
     <Compile Include="..\..\src\MemMop\Core\ProcessUsage.cs" Link="ProcessUsage.cs" />
   <Compile Include="..\..\src\MemMop\Core\ProcessUsageReader.cs" Link="ProcessUsageReader.cs" />
       <Compile Include="..\..\src\MemMop\Core\Strings.cs" Link="Strings.cs" />
+    <Compile Include="..\..\src\MemMop\Core\Log.cs" Link="Log.cs" />
+  <Compile Include="..\..\src\MemMop\Core\AutoStart.cs" Link="AutoStart.cs" />
   </ItemGroup>
 </Project>
+
 
 
 

@@ -1,5 +1,5 @@
-﻿using MemMop.ViewModel;
+﻿using MemMop.Core;
 
-var vm = new MainViewModel();
-Console.WriteLine($"last clean text   {vm.LastCleanText}");
-Console.WriteLine($"has timestamp     {vm.LastCleanAt.HasValue}");
+Console.WriteLine($"autostart enabled  {AutoStart.IsEnabled()}");
+Log.Info("probe wrote this line");
+Console.WriteLine("log call survived");

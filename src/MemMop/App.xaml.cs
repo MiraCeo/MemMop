@@ -70,6 +70,8 @@ public partial class App : Application
         _tray.CleanRequested += () => (MainWindow?.DataContext as MainViewModel)?.CleanCommand.Execute(null);
         _tray.ExitRequested += Quit;
 
+        Log.Info("started, version " + (typeof(App).Assembly.GetName().Version?.ToString() ?? "?"));
+
         _window = new MainWindow();
         _window.Closing += OnWindowClosing;
         _window.MemoryRead += OnMemoryRead;
@@ -115,6 +117,13 @@ public partial class App : Application
     private MainWindow? MainWindow => _window;
 
     private static void LogCrash(Exception? exception)
+    {
+        Log.Error("unhandled exception", exception);
+
+        WriteCrashFile(exception);
+    }
+
+    private static void WriteCrashFile(Exception? exception)
     {
         try
         {

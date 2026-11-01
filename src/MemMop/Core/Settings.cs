@@ -21,6 +21,9 @@ public static class Settings
     /// <summary>Gets or sets a value indicating whether the app starts hidden in the tray.</summary>
     public static bool StartMinimized { get; set; } = true;
 
+    /// <summary>Gets or sets a value indicating whether the program starts at logon.</summary>
+    public static bool RunOnStartup { get; set; }
+
     /// <summary>Gets or sets a value indicating whether the committed line is shown.</summary>
     public static bool ShowCommitted { get; set; } = true;
 
@@ -64,6 +67,7 @@ public static class Settings
             CloseToTray = ReadInt(key, nameof(CloseToTray), CloseToTray ? 1 : 0) != 0;
             StartMinimized = ReadInt(key, nameof(StartMinimized), StartMinimized ? 1 : 0) != 0;
             AutoCleanSafeOnly = ReadInt(key, nameof(AutoCleanSafeOnly), AutoCleanSafeOnly ? 1 : 0) != 0;
+            RunOnStartup = ReadInt(key, nameof(RunOnStartup), RunOnStartup ? 1 : 0) != 0;
             ShowCommitted = ReadInt(key, nameof(ShowCommitted), ShowCommitted ? 1 : 0) != 0;
             DetailedMemory = ReadInt(key, nameof(DetailedMemory), DetailedMemory ? 1 : 0) != 0;
 
@@ -97,6 +101,7 @@ public static class Settings
             key.SetValue(nameof(CloseToTray), CloseToTray ? 1 : 0, RegistryValueKind.DWord);
             key.SetValue(nameof(StartMinimized), StartMinimized ? 1 : 0, RegistryValueKind.DWord);
             key.SetValue(nameof(AutoCleanSafeOnly), AutoCleanSafeOnly ? 1 : 0, RegistryValueKind.DWord);
+            key.SetValue(nameof(RunOnStartup), RunOnStartup ? 1 : 0, RegistryValueKind.DWord);
             key.SetValue(nameof(ShowCommitted), ShowCommitted ? 1 : 0, RegistryValueKind.DWord);
             key.SetValue(nameof(DetailedMemory), DetailedMemory ? 1 : 0, RegistryValueKind.DWord);
             key.SetValue(nameof(ExcludedProcesses), string.Join("\n", ExcludedProcesses), RegistryValueKind.String);
