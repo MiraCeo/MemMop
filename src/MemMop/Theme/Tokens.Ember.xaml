@@ -13,7 +13,7 @@
     <SolidColorBrush x:Key="SegModified" Color="#9C8272" />
     <SolidColorBrush x:Key="SegStandby" Color="#5F8598" />
     <SolidColorBrush x:Key="SegFree" Color="#7FA95B" />
-    <SolidColorBrush x:Key="TitleBarSurface" Color="#1A1411" />
+    <SolidColorBrush x:Key="TitleBarSurface" Color="#241C18" />
     <sys:Double x:Key="TitleBarAccentOpacity">0</sys:Double>
     <sys:Double x:Key="TitleBarHighlightOpacity">0</sys:Double>
 </ResourceDictionary>

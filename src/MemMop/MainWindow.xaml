@@ -50,7 +50,7 @@
                 <TextBlock Margin="12, 0, 0, 0"
                            VerticalAlignment="Center"
                            FontSize="12"
-                           Foreground="{DynamicResource TextMuted}"
+                           Foreground="{DynamicResource TextPrimary}"
                            Text="忆干二净 MemMop" />
 
                 <StackPanel HorizontalAlignment="Right" Orientation="Horizontal">
@@ -360,6 +360,7 @@
                                 Height="32"
                                 Margin="8, 0, 0, 0"
                                 Command="{Binding AddExclusionCommand}"
+                                Style="{StaticResource FlatButton}"
                                 Content="+" />
                     </Grid>
 
@@ -377,6 +378,7 @@
                                 Margin="8, 0, 0, 0"
                                 VerticalAlignment="Top"
                                 Command="{Binding RemoveExclusionCommand}"
+                                Style="{StaticResource FlatButton}"
                                 Content="−" />
                     </Grid>
 

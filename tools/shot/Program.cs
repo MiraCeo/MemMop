@@ -10,10 +10,7 @@ internal static class Program
 
     private static readonly (string Name, double Accent, double Highlight, string Surface)[] Variants =
     {
-        ("L1", 0.6, 0, "#1C150F"),
-        ("L2", 0.6, 0, "#221A13"),
         ("L3", 0.6, 0, "#281F16"),
-        ("L4", 0.6, 0, "#2E241A"),
     };
 
     [STAThread]
@@ -39,6 +36,8 @@ internal static class Program
                 System.Windows.Application.Current.Resources["TitleBarHighlightOpacity"] = variant.Highlight;
 
                 Render(Path.Combine(output, theme.ToLowerInvariant() + "-" + variant.Name + ".png"), 540, 640, false, 0);
+                var settings = Path.Combine(output, theme.ToLowerInvariant() + "-settings.png");
+                Render(settings, 540, 640, false, 1);
             }
 
 

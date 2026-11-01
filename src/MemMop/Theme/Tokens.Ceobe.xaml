@@ -15,7 +15,7 @@
     <SolidColorBrush x:Key="SegFree" Color="#8FA86A" />
     <sys:String x:Key="SegmentPalette">#E8622F,#A8846A,#E0A83C,#8FA86A</sys:String>
     <sys:String x:Key="CommitPalette">#E8622F,#8FA86A</sys:String>
-    <SolidColorBrush x:Key="TitleBarSurface" Color="#1C150F" />
+    <SolidColorBrush x:Key="TitleBarSurface" Color="#281F16" />
     <sys:Double x:Key="TitleBarAccentOpacity">0</sys:Double>
     <sys:Double x:Key="TitleBarHighlightOpacity">0</sys:Double>
 </ResourceDictionary>
