@@ -4,7 +4,14 @@
         Title="MemMop" Height="560" Width="520">
     <TabControl Margin="10">
         <TabItem Header="主页">
-            <TextBlock Margin="12" Text="内存区域与进程占用（待实现）" />
+            <StackPanel Margin="12">
+                <TextBlock x:Name="PhysicalText" FontSize="14" />
+                <TextBlock x:Name="SegmentText" Margin="0, 6, 0, 0" />
+                <TextBlock x:Name="CommitText" Margin="0, 6, 0, 0" />
+                <TextBlock Margin="0, 18, 0, 0"
+                           Foreground="#999999"
+                           Text="内存区域与进程占用（待实现）" />
+            </StackPanel>
         </TabItem>
         <TabItem Header="设置">
             <StackPanel Margin="12">
