@@ -108,6 +108,36 @@ internal static class NativeMethods
     [DllImport("ntdll.dll")]
     internal static extern int NtQuerySystemInformation(int informationClass, IntPtr buffer, uint length, out uint returned);
 
+
+    [StructLayout(LayoutKind.Sequential)]
+    internal struct ProcessMemoryCounters
+    {
+        public uint Size;
+        public uint PageFaultCount;
+        public IntPtr PeakWorkingSet;
+        public IntPtr WorkingSet;
+        public IntPtr QuotaPeakPagedPoolUsage;
+        public IntPtr QuotaPagedPoolUsage;
+        public IntPtr QuotaPeakNonPagedPoolUsage;
+        public IntPtr QuotaNonPagedPoolUsage;
+        public IntPtr PagefileUsage;
+        public IntPtr PeakPagefileUsage;
+        public IntPtr PrivateUsage;
+        public IntPtr PrivateWorkingSet;
+        public ulong SharedCommitUsage;
+    }
+
+    [DllImport("kernel32.dll", SetLastError = true)]
+    internal static extern IntPtr OpenProcess(uint access, [MarshalAs(UnmanagedType.Bool)] bool inherit, int processId);
+
+    [DllImport("kernel32.dll", SetLastError = true)]
+    [return: MarshalAs(UnmanagedType.Bool)]
+    internal static extern bool CloseHandle(IntPtr handle);
+
+    [DllImport("psapi.dll", SetLastError = true)]
+    [return: MarshalAs(UnmanagedType.Bool)]
+    internal static extern bool GetProcessMemoryInfo(IntPtr process, out ProcessMemoryCounters counters, uint size);
+
     [DllImport("kernel32.dll", SetLastError = true)]
     [return: MarshalAs(UnmanagedType.Bool)]
     internal static extern bool SetSystemFileCacheSize(IntPtr minimum, IntPtr maximum, uint flags);
@@ -134,7 +164,4 @@ internal static class NativeMethods
     [DllImport("kernel32.dll")]
     internal static extern IntPtr GetCurrentProcess();
 
-    [DllImport("kernel32.dll", SetLastError = true)]
-    [return: MarshalAs(UnmanagedType.Bool)]
-    internal static extern bool CloseHandle(IntPtr handle);
 }

@@ -26,8 +26,11 @@
     <Compile Include="..\..\src\MemMop\ViewModel\RelayCommand.cs" Link="RelayCommand.cs" />
     <Compile Include="..\..\src\MemMop\Core\AutoCleanPolicy.cs" Link="AutoCleanPolicy.cs" />
     <Compile Include="..\..\src\MemMop\Core\Settings.cs" Link="Settings.cs" />
+    <Compile Include="..\..\src\MemMop\Core\ProcessUsage.cs" Link="ProcessUsage.cs" />
+  <Compile Include="..\..\src\MemMop\Core\ProcessUsageReader.cs" Link="ProcessUsageReader.cs" />
   </ItemGroup>
 </Project>
+
 
 
 

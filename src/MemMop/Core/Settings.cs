@@ -22,6 +22,12 @@ public static class Settings
     public static bool StartMinimized { get; set; } = true;
 
     /// <summary>
+    /// Gets the process names excluded from working-set trimming. Stored verbatim: Windows reports names
+    /// without an extension, keeping their case, and names may contain spaces.
+    /// </summary>
+    public static HashSet<string> ExcludedProcesses { get; } = new(StringComparer.OrdinalIgnoreCase);
+
+    /// <summary>
     /// Gets or sets a value indicating whether automatic cleaning stays on the conservative subset.
     /// </summary>
     public static bool AutoCleanSafeOnly { get; set; } = true;
@@ -52,6 +58,9 @@ public static class Settings
             CloseToTray = ReadInt(key, nameof(CloseToTray), CloseToTray ? 1 : 0) != 0;
             StartMinimized = ReadInt(key, nameof(StartMinimized), StartMinimized ? 1 : 0) != 0;
             AutoCleanSafeOnly = ReadInt(key, nameof(AutoCleanSafeOnly), AutoCleanSafeOnly ? 1 : 0) != 0;
+
+            foreach (var name in (key.GetValue(nameof(ExcludedProcesses)) as string ?? string.Empty).Split('\n', StringSplitOptions.RemoveEmptyEntries))
+                ExcludedProcesses.Add(name);
             ShownTrayHint = ReadInt(key, nameof(ShownTrayHint), ShownTrayHint ? 1 : 0) != 0;
             AutoCleanMinutes = ReadInt(key, nameof(AutoCleanMinutes), AutoCleanMinutes);
             LowMemoryPercent = ReadInt(key, nameof(LowMemoryPercent), LowMemoryPercent);
@@ -80,6 +89,7 @@ public static class Settings
             key.SetValue(nameof(CloseToTray), CloseToTray ? 1 : 0, RegistryValueKind.DWord);
             key.SetValue(nameof(StartMinimized), StartMinimized ? 1 : 0, RegistryValueKind.DWord);
             key.SetValue(nameof(AutoCleanSafeOnly), AutoCleanSafeOnly ? 1 : 0, RegistryValueKind.DWord);
+            key.SetValue(nameof(ExcludedProcesses), string.Join("\n", ExcludedProcesses), RegistryValueKind.String);
             key.SetValue(nameof(ShownTrayHint), ShownTrayHint ? 1 : 0, RegistryValueKind.DWord);
             key.SetValue(nameof(AutoCleanMinutes), AutoCleanMinutes, RegistryValueKind.DWord);
             key.SetValue(nameof(LowMemoryPercent), LowMemoryPercent, RegistryValueKind.DWord);
