@@ -13,6 +13,12 @@ public partial class MainWindow : Window
 {
     private readonly DispatcherTimer _timer = new() { Interval = TimeSpan.FromSeconds(1) };
     private readonly MainViewModel _viewModel = new();
+
+    /// <summary>Sets the compact state before the window is shown (used by the screenshot harness).</summary>
+    public bool CompactMode
+    {
+        set => _viewModel.CompactMode = value;
+    }
     private readonly MemMop.Services.HotkeyService _hotkey = new();
 
     /// <summary>Raised after each refresh with the text for the tray tooltip.</summary>
