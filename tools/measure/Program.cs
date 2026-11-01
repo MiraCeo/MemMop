@@ -9,18 +9,47 @@ using Path = System.Windows.Shapes.Path;
 
 internal static class Program
 {
+    /// <summary>
+    /// Reads the chevron's geometry straight out of the shipped template, so the measurement cannot drift from it.
+    /// </summary>
+    private static (double Width, double Height, double Right, double Top) ReadChevron()
+    {
+        var path = System.IO.Path.Combine(
+            System.IO.Path.GetDirectoryName(typeof(Program).Assembly.Location) ?? ".",
+            "Styles.xaml");
+
+        if (!System.IO.File.Exists(path))
+            path = @"D:\MemClean\MemMop\src\MemMop\Theme\Styles.xaml";
+
+        var text = System.IO.File.ReadAllText(path);
+        var block = text.Substring(text.IndexOf("x:Name=\"Chevron\"", StringComparison.Ordinal));
+
+        double Pick(string attribute)
+        {
+            var match = System.Text.RegularExpressions.Regex.Match(block, attribute + "=\"([0-9.]+)\"");
+
+            return match.Success ? double.Parse(match.Groups[1].Value, System.Globalization.CultureInfo.InvariantCulture) : 0;
+        }
+
+        var margin = System.Text.RegularExpressions.Regex.Match(block, "Margin=\"([0-9., ]+)\"");
+
+        var parts = margin.Success
+            ? margin.Groups[1].Value.Split(',').Select(p => double.Parse(p.Trim(), System.Globalization.CultureInfo.InvariantCulture)).ToArray()
+            : new double[] { 0, 0, 0, 0 };
+
+        return (Pick("Width"), Pick("Height"), parts[2], parts[1]);
+    }
+
     [STAThread]
     private static void Main()
     {
         var app = new System.Windows.Application();
 
+        var (pathWidth, pathHeight, rightMargin, topMargin) = ReadChevron();
+
         // what the ComboBox template contains: a 10x6 path, right aligned with a 12px margin, vertically centred
         const double boxWidth = 200;
         const double boxHeight = 32;
-        const double pathWidth = 10;
-        const double pathHeight = 6;
-        const double rightMargin = 9;
-        const double topMargin = 6;
 
         var path = new Path
         {
