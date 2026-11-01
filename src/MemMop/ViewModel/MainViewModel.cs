@@ -18,6 +18,8 @@ public sealed class MainViewModel : ObservableObject
     private string _physicalText = string.Empty;
     private string _segmentText = string.Empty;
     private string _commitText = string.Empty;
+    private string _physicalSegments = string.Empty;
+    private string _commitSegments = string.Empty;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="MainViewModel"/> class.
@@ -319,6 +321,26 @@ public sealed class MainViewModel : ObservableObject
 
     /// <summary>Gets the command that restores the defaults.</summary>
     public System.Windows.Input.ICommand ResetSettingsCommand { get; private set; } = null!;
+
+    /// <summary>Gets or sets the four-segment bar values.</summary>
+    public string PhysicalSegments
+    {
+        get => _physicalSegments;
+        set => Set(ref _physicalSegments, value);
+    }
+
+    /// <summary>Gets or sets the four-segment bar colours.</summary>
+    public string PhysicalPalette => "#E2523B,#9E9E9E,#A5D66A,#43B047";
+
+    /// <summary>Gets or sets the committed bar values.</summary>
+    public string CommitSegments
+    {
+        get => _commitSegments;
+        set => Set(ref _commitSegments, value);
+    }
+
+    /// <summary>Gets or sets the committed bar colours.</summary>
+    public string CommitPalette => "#E2523B,#43B047";
 
     /// <summary>Gets the areas shown on the home tab.</summary>
     public ObservableCollection<AreaItem> Areas { get; }

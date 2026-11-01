@@ -70,6 +70,14 @@ public partial class MainWindow : Window
             ? text.Segments(snapshot.Active, snapshot.Modified, snapshot.Standby, snapshot.Free)
             : text.SegmentsUnavailable;
 
+        _viewModel.PhysicalSegments = snapshot.HasSegments
+            ? string.Join(",", snapshot.Active, snapshot.Modified, snapshot.Standby, snapshot.Free)
+            : string.Empty;
+
+        _viewModel.CommitSegments = snapshot.CommitLimit > 0
+            ? snapshot.CommitUsed + "," + (snapshot.CommitLimit - snapshot.CommitUsed)
+            : string.Empty;
+
         _viewModel.CommitText = snapshot.CommitLimit > 0
             ? text.Commit(snapshot.CommitUsed, snapshot.CommitLimit)
             : string.Empty;
