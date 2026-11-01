@@ -21,6 +21,12 @@ public static class Settings
     /// <summary>Gets or sets a value indicating whether the app starts hidden in the tray.</summary>
     public static bool StartMinimized { get; set; } = true;
 
+    /// <summary>Gets or sets a value indicating whether the committed line is shown.</summary>
+    public static bool ShowCommitted { get; set; } = true;
+
+    /// <summary>Gets or sets a value indicating whether the four-part breakdown is shown.</summary>
+    public static bool DetailedMemory { get; set; } = true;
+
     /// <summary>
     /// Gets the process names excluded from working-set trimming. Stored verbatim: Windows reports names
     /// without an extension, keeping their case, and names may contain spaces.
@@ -58,6 +64,8 @@ public static class Settings
             CloseToTray = ReadInt(key, nameof(CloseToTray), CloseToTray ? 1 : 0) != 0;
             StartMinimized = ReadInt(key, nameof(StartMinimized), StartMinimized ? 1 : 0) != 0;
             AutoCleanSafeOnly = ReadInt(key, nameof(AutoCleanSafeOnly), AutoCleanSafeOnly ? 1 : 0) != 0;
+            ShowCommitted = ReadInt(key, nameof(ShowCommitted), ShowCommitted ? 1 : 0) != 0;
+            DetailedMemory = ReadInt(key, nameof(DetailedMemory), DetailedMemory ? 1 : 0) != 0;
 
             foreach (var name in (key.GetValue(nameof(ExcludedProcesses)) as string ?? string.Empty).Split(new[] { '\n' }, StringSplitOptions.RemoveEmptyEntries))
                 ExcludedProcesses.Add(name);
@@ -89,6 +97,8 @@ public static class Settings
             key.SetValue(nameof(CloseToTray), CloseToTray ? 1 : 0, RegistryValueKind.DWord);
             key.SetValue(nameof(StartMinimized), StartMinimized ? 1 : 0, RegistryValueKind.DWord);
             key.SetValue(nameof(AutoCleanSafeOnly), AutoCleanSafeOnly ? 1 : 0, RegistryValueKind.DWord);
+            key.SetValue(nameof(ShowCommitted), ShowCommitted ? 1 : 0, RegistryValueKind.DWord);
+            key.SetValue(nameof(DetailedMemory), DetailedMemory ? 1 : 0, RegistryValueKind.DWord);
             key.SetValue(nameof(ExcludedProcesses), string.Join("\n", ExcludedProcesses), RegistryValueKind.String);
             key.SetValue(nameof(ShownTrayHint), ShownTrayHint ? 1 : 0, RegistryValueKind.DWord);
             key.SetValue(nameof(AutoCleanMinutes), AutoCleanMinutes, RegistryValueKind.DWord);

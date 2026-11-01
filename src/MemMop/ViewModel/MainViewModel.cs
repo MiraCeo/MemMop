@@ -45,6 +45,7 @@ public sealed class MainViewModel : ObservableObject
 
         CleanCommand = new RelayCommand(Clean, () => !IsBusy && Areas.Any(a => a.IsSelected));
         AddExclusionCommand = new RelayCommand(() => AddExclusion(SelectedProcess), () => !string.IsNullOrEmpty(SelectedProcess));
+        ResetSettingsCommand = new RelayCommand(ResetSettings);
         RemoveExclusionCommand = new RelayCommand(() => RemoveExclusion(SelectedExclusion), () => !string.IsNullOrEmpty(SelectedExclusion));
 
         RefreshExcluded();
@@ -132,6 +133,26 @@ public sealed class MainViewModel : ObservableObject
 
     /// <summary>Gets the command that removes a name from the exclusion list.</summary>
     public ICommand RemoveExclusionCommand { get; }
+
+    private void ResetSettings()
+    {
+        Settings.ShowCommitted = true;
+        Settings.DetailedMemory = true;
+        Settings.FontSizeIndex = 1;
+        Settings.CloseToTray = true;
+        Settings.StartMinimized = true;
+        Settings.AutoCleanSafeOnly = true;
+        Settings.AutoCleanMinutes = 0;
+        Settings.LowMemoryPercent = 0;
+        Settings.ExcludedProcesses.Clear();
+        Settings.Save();
+
+        foreach (var name in new[] { nameof(ShowCommitted), nameof(DetailedMemory), nameof(FontSizeIndex), nameof(FontSize), nameof(StartMinimized) })
+            Raise(name);
+
+        RefreshExcluded();
+        RefreshAvailableProcesses();
+    }
 
     /// <summary>
     /// Rebuilds the area rows from the catalog, keeping the ticks the user set.
@@ -250,6 +271,54 @@ public sealed class MainViewModel : ObservableObject
             Raise();
         }
     }
+
+    /// <summary>Gets or sets a value indicating whether the committed line is shown.</summary>
+    public bool ShowCommitted
+    {
+        get => Settings.ShowCommitted;
+        set
+        {
+            Settings.ShowCommitted = value;
+            Settings.Save();
+            Raise();
+        }
+    }
+
+    /// <summary>Gets or sets a value indicating whether the four-part breakdown is shown.</summary>
+    public bool DetailedMemory
+    {
+        get => Settings.DetailedMemory;
+        set
+        {
+            Settings.DetailedMemory = value;
+            Settings.Save();
+            Raise();
+        }
+    }
+
+    /// <summary>Gets or sets the font size index: 0 small, 1 normal, 2 large.</summary>
+    public int FontSizeIndex
+    {
+        get => Settings.FontSizeIndex;
+        set
+        {
+            Settings.FontSizeIndex = value;
+            Settings.Save();
+            Raise();
+            Raise(nameof(FontSize));
+        }
+    }
+
+    /// <summary>Gets the window font size for the current index.</summary>
+    public double FontSize => Settings.FontSizeIndex switch
+    {
+        0 => 12,
+        2 => 18,
+        _ => 14,
+    };
+
+    /// <summary>Gets the command that restores the defaults.</summary>
+    public System.Windows.Input.ICommand ResetSettingsCommand { get; private set; } = null!;
 
     /// <summary>Gets the areas shown on the home tab.</summary>
     public ObservableCollection<AreaItem> Areas { get; }

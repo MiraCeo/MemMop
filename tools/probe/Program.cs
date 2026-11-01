@@ -1,20 +1,10 @@
-﻿using MemMop.Core;
-using MemMop.ViewModel;
+﻿using MemMop.ViewModel;
 
 var vm = new MainViewModel();
-
-Console.WriteLine($"start-minimized default   {vm.StartMinimized}");
-vm.StartMinimized = false;
-Console.WriteLine($"after set false           {vm.StartMinimized} (settings={Settings.StartMinimized})");
-vm.StartMinimized = true;
-
-Console.WriteLine($"auto-clean due (interval 0) {vm.TryAutoCleanAsync(DateTime.Now).Result ?? "null (not due)"}");
-
-vm.SelectedProcess = vm.AvailableProcesses.FirstOrDefault() ?? "";
-vm.AddExclusionCommand.Execute(null);
-var added = vm.ExcludedProcesses.FirstOrDefault() ?? "";
-Console.WriteLine($"excluded added            {added}");
-vm.SelectedExclusion = added;
-Console.WriteLine($"can remove                {vm.RemoveExclusionCommand.CanExecute(null)}");
-vm.RemoveExclusionCommand.Execute(null);
-Console.WriteLine($"after remove              {vm.ExcludedProcesses.Count}");
+Console.WriteLine($"defaults   committed={vm.ShowCommitted} detailed={vm.DetailedMemory} font={vm.FontSize}");
+vm.FontSizeIndex = 2;
+Console.WriteLine($"font idx 2 -> {vm.FontSize}");
+vm.ShowCommitted = false;
+Console.WriteLine($"committed off -> {vm.ShowCommitted} (settings={MemMop.Core.Settings.ShowCommitted})");
+vm.ResetSettingsCommand.Execute(null);
+Console.WriteLine($"after reset committed={vm.ShowCommitted} detailed={vm.DetailedMemory} font={vm.FontSize}");
