@@ -24,7 +24,10 @@
                 </Grid.RowDefinitions>
 
                 <TextBlock Grid.Row="0" FontSize="14" Text="{Binding PhysicalText}" />
-                <TextBlock Grid.Row="1" Margin="0, 4, 0, 0" Foreground="#999999" Text="{Binding SegmentText}" />
+                <StackPanel Grid.Row="1" Margin="0, 4, 0, 0">
+                    <TextBlock Foreground="#999999" Text="{Binding SegmentText}" />
+                    <TextBlock Margin="0, 2, 0, 0" Foreground="#999999" Text="{Binding CommitText}" />
+                </StackPanel>
 
                 <ScrollViewer Grid.Row="2" Margin="0, 14, 0, 0" VerticalScrollBarVisibility="Auto">
                     <ItemsControl ItemsSource="{Binding Areas}">
@@ -92,17 +95,17 @@
 
         <TabItem Header="{Binding Source={StaticResource Strings}, Path=Settings}">
             <StackPanel Margin="12">
-                <TextBlock Margin="0, 0, 0, 4" Text="语言" />
+                <TextBlock Margin="0, 0, 0, 4" Text="{Binding Source={StaticResource Strings}, Path=Language}" />
                 <ComboBox x:Name="LanguageBox" Width="220" HorizontalAlignment="Left" SelectionChanged="OnLanguageChanged">
                     <ComboBoxItem Content="简体中文" Tag="zh-Hans" />
                     <ComboBoxItem Content="English" Tag="en" />
                 </ComboBox>
 
 
-                <TextBlock Margin="0, 18, 0, 4" Text="排除的进程（不参与收缩程序驻留内存）" />
+                <TextBlock Margin="0, 18, 0, 4" Text="{Binding Source={StaticResource Strings}, Path=Exclusions}" />
                 <TextBox Padding="4"
                          Text="{Binding ProcessSearchText, UpdateSourceTrigger=PropertyChanged}"
-                         ToolTip="按名称搜索进程" />
+                         ToolTip="{Binding Source={StaticResource Strings}, Path=SearchProcess}" />
                 <Grid Margin="0, 4, 0, 0">
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="*" />
@@ -120,7 +123,7 @@
 
                 <CheckBox x:Name="CloseToTrayBox"
                           Margin="0, 16, 0, 0"
-                          Content="关闭时最小化到托盘"
+                          Content="{Binding Source={StaticResource Strings}, Path=CloseToTray}"
                           Checked="OnCloseToTrayChanged"
                           Unchecked="OnCloseToTrayChanged" />
             </StackPanel>

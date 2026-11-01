@@ -17,6 +17,7 @@ public sealed class MainViewModel : ObservableObject
     private string _summary = string.Empty;
     private string _physicalText = string.Empty;
     private string _segmentText = string.Empty;
+    private string _commitText = string.Empty;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="MainViewModel"/> class.
@@ -59,6 +60,13 @@ public sealed class MainViewModel : ObservableObject
     {
         get => _physicalText;
         set => Set(ref _physicalText, value);
+    }
+
+    /// <summary>Gets or sets the committed memory line.</summary>
+    public string CommitText
+    {
+        get => _commitText;
+        set => Set(ref _commitText, value);
     }
 
     /// <summary>Gets or sets the four-segment breakdown line.</summary>
