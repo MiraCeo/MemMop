@@ -1,5 +1,10 @@
 ﻿using MemMop.Core;
+using MemMop.ViewModel;
 
-Console.WriteLine($"autostart enabled  {AutoStart.IsEnabled()}");
-Log.Info("probe wrote this line");
-Console.WriteLine("log call survived");
+var vm = new MainViewModel();
+Console.WriteLine($"hotkey enabled   {vm.HotkeyEnabled}");
+Console.WriteLine($"modifiers        0x{vm.HotkeyModifiers:X}  (MOD_CONTROL)");
+Console.WriteLine($"key              0x{vm.HotkeyKey:X}  (C)");
+vm.HotkeyEnabled = true;
+Console.WriteLine($"after enable     {vm.HotkeyEnabled} (settings={Settings.HotkeyEnabled})");
+vm.HotkeyEnabled = false;

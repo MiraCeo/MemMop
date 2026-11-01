@@ -13,6 +13,7 @@ public partial class MainWindow : Window
 {
     private readonly DispatcherTimer _timer = new() { Interval = TimeSpan.FromSeconds(1) };
     private readonly MainViewModel _viewModel = new();
+    private readonly MemMop.Services.HotkeyService _hotkey = new();
 
     /// <summary>Raised after each refresh with the text for the tray tooltip.</summary>
     public event Action<string>? MemoryRead;
@@ -25,6 +26,18 @@ public partial class MainWindow : Window
         InitializeComponent();
 
         DataContext = _viewModel;
+
+        _hotkey.Pressed += () =>
+        {
+            if (_viewModel.CleanCommand.CanExecute(null))
+                _viewModel.CleanCommand.Execute(null);
+        };
+
+        Loaded += (_, _) =>
+        {
+            _viewModel.HotkeyChanged += ApplyHotkey;
+            ApplyHotkey();
+        };
 
         Loaded += OnLoaded;
         Closed += (_, _) => _timer.Stop();
@@ -95,6 +108,17 @@ public partial class MainWindow : Window
     {
         if (FindName("Tabs") is System.Windows.Controls.TabControl tabs)
             tabs.SelectedIndex = index;
+    }
+
+    private void ApplyHotkey()
+    {
+        _hotkey.Unregister();
+
+        if (!_viewModel.HotkeyEnabled)
+            return;
+
+        if (!_hotkey.Register(this, (uint)_viewModel.HotkeyModifiers, (uint)_viewModel.HotkeyKey, out var error))
+            _viewModel.ReportHotkeyFailure("清理热键注册失败：" + error);
     }
 
     private void OnLanguageChanged(object sender, SelectionChangedEventArgs e)

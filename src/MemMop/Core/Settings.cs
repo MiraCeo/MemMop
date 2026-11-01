@@ -21,6 +21,15 @@ public static class Settings
     /// <summary>Gets or sets a value indicating whether the app starts hidden in the tray.</summary>
     public static bool StartMinimized { get; set; } = true;
 
+    /// <summary>Gets or sets a value indicating whether the clean hotkey is registered.</summary>
+    public static bool HotkeyEnabled { get; set; }
+
+    /// <summary>Gets or sets the hotkey modifiers (MOD_CONTROL etc).</summary>
+    public static int HotkeyModifiers { get; set; } = 0x0002;
+
+    /// <summary>Gets or sets the hotkey virtual-key code (defaults to C).</summary>
+    public static int HotkeyKey { get; set; } = 0x43;
+
     /// <summary>Gets or sets a value indicating whether the program starts at logon.</summary>
     public static bool RunOnStartup { get; set; }
 
@@ -68,6 +77,9 @@ public static class Settings
             StartMinimized = ReadInt(key, nameof(StartMinimized), StartMinimized ? 1 : 0) != 0;
             AutoCleanSafeOnly = ReadInt(key, nameof(AutoCleanSafeOnly), AutoCleanSafeOnly ? 1 : 0) != 0;
             RunOnStartup = ReadInt(key, nameof(RunOnStartup), RunOnStartup ? 1 : 0) != 0;
+            HotkeyEnabled = ReadInt(key, nameof(HotkeyEnabled), HotkeyEnabled ? 1 : 0) != 0;
+            HotkeyModifiers = ReadInt(key, nameof(HotkeyModifiers), HotkeyModifiers);
+            HotkeyKey = ReadInt(key, nameof(HotkeyKey), HotkeyKey);
             ShowCommitted = ReadInt(key, nameof(ShowCommitted), ShowCommitted ? 1 : 0) != 0;
             DetailedMemory = ReadInt(key, nameof(DetailedMemory), DetailedMemory ? 1 : 0) != 0;
 
@@ -102,6 +114,9 @@ public static class Settings
             key.SetValue(nameof(StartMinimized), StartMinimized ? 1 : 0, RegistryValueKind.DWord);
             key.SetValue(nameof(AutoCleanSafeOnly), AutoCleanSafeOnly ? 1 : 0, RegistryValueKind.DWord);
             key.SetValue(nameof(RunOnStartup), RunOnStartup ? 1 : 0, RegistryValueKind.DWord);
+            key.SetValue(nameof(HotkeyEnabled), HotkeyEnabled ? 1 : 0, RegistryValueKind.DWord);
+            key.SetValue(nameof(HotkeyModifiers), HotkeyModifiers, RegistryValueKind.DWord);
+            key.SetValue(nameof(HotkeyKey), HotkeyKey, RegistryValueKind.DWord);
             key.SetValue(nameof(ShowCommitted), ShowCommitted ? 1 : 0, RegistryValueKind.DWord);
             key.SetValue(nameof(DetailedMemory), DetailedMemory ? 1 : 0, RegistryValueKind.DWord);
             key.SetValue(nameof(ExcludedProcesses), string.Join("\n", ExcludedProcesses), RegistryValueKind.String);

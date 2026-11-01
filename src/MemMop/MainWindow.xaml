@@ -151,6 +151,10 @@
                 </Grid>
 
                 <CheckBox Margin="0, 8, 0, 0"
+                          Content="启用清理热键（Ctrl+C）"
+                          IsChecked="{Binding HotkeyEnabled}" />
+
+                <CheckBox Margin="0, 8, 0, 0"
                           Content="开机自启"
                           IsChecked="{Binding RunOnStartup}" />
 

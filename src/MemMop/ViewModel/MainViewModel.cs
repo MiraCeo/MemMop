@@ -274,6 +274,56 @@ public sealed class MainViewModel : ObservableObject
         }
     }
 
+    /// <summary>
+    /// Gets or sets a value indicating whether the clean hotkey is active. Registration failures are reported
+    /// through <see cref="CleanCompleted"/> and the switch rolls back.
+    /// </summary>
+    public bool HotkeyEnabled
+    {
+        get => Settings.HotkeyEnabled;
+        set
+        {
+            Settings.HotkeyEnabled = value;
+            Settings.Save();
+            Raise();
+
+            HotkeyChanged?.Invoke();
+        }
+    }
+
+    /// <summary>Raised whenever the hotkey settings changed and the window must re-register.</summary>
+    public event Action? HotkeyChanged;
+
+    /// <summary>Gets or sets the hotkey modifier flags.</summary>
+    public int HotkeyModifiers
+    {
+        get => Settings.HotkeyModifiers;
+        set
+        {
+            Settings.HotkeyModifiers = value;
+            Settings.Save();
+            Raise();
+            HotkeyChanged?.Invoke();
+        }
+    }
+
+    /// <summary>Gets or sets the hotkey virtual-key code.</summary>
+    public int HotkeyKey
+    {
+        get => Settings.HotkeyKey;
+        set
+        {
+            Settings.HotkeyKey = value;
+            Settings.Save();
+            Raise();
+            HotkeyChanged?.Invoke();
+        }
+    }
+
+    /// <summary>Reports that the hotkey could not be registered.</summary>
+    /// <param name="reason">Why.</param>
+    public void ReportHotkeyFailure(string reason) => CleanCompleted?.Invoke(reason);
+
     /// <summary>Gets when the last successful clean finished.</summary>
     public DateTime? LastCleanAt { get; private set; }
 
