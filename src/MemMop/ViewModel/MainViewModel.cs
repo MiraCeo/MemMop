@@ -1,0 +1,125 @@
+using System.Collections.ObjectModel;
+using System.Windows.Input;
+using MemMop.Core;
+using MemMop.Core.Reclaimers;
+
+namespace MemMop.ViewModel;
+
+/// <summary>
+/// The home view model: the area list, the clean command and a one-line summary of the last run.
+/// </summary>
+public sealed class MainViewModel : ObservableObject
+{
+    private readonly CleaningEngine _engine;
+    private bool _isBusy;
+    private string _summary = string.Empty;
+    private string _physicalText = string.Empty;
+    private string _segmentText = string.Empty;
+
+    /// <summary>
+    /// Initializes a new instance of the <see cref="MainViewModel"/> class.
+    /// </summary>
+    public MainViewModel()
+    {
+        var reclaimers = new IMemoryReclaimer[]
+        {
+            new StandbyListReclaimer(),
+            new StandbyListReclaimer(true),
+            new ModifiedPageListReclaimer(),
+            new CombinedPageListReclaimer(),
+            new SystemFileCacheReclaimer(),
+            new RegistryCacheReclaimer(),
+            new WorkingSetReclaimer(),
+        };
+
+        _engine = new CleaningEngine(reclaimers);
+
+        // the texts mirror SPEC §2.1: a name that says what happens, and a cost that is not hidden
+        Areas = new ObservableCollection<AreaItem>
+        {
+            new(new StandbyListReclaimer(), "清理待机缓存", "清空文件缓存，再次读取需重新读盘"),
+            new(new StandbyListReclaimer(true), "仅清理低优先级待机缓存", "只清理最冷的待机页，与上一项互斥"),
+            new(new ModifiedPageListReclaimer(), "写回已修改内存", "等待未写盘的数据落盘，这一步最慢"),
+            new(new CombinedPageListReclaimer(), "合并重复内存页", "合并内容相同的物理页，不删除数据"),
+            new(new SystemFileCacheReclaimer(), "收缩系统缓存", "降低文件缓存上限，之后读写可能变慢"),
+            new(new RegistryCacheReclaimer(), "注册表缓存整理", "整理注册表的内存缓存，收益不确定"),
+            new(new WorkingSetReclaimer(), "收缩程序驻留内存", "移出各程序驻留的内存，重用时可能卡顿"),
+        };
+
+        CleanCommand = new RelayCommand(Clean, () => !IsBusy && Areas.Any(a => a.IsSelected));
+    }
+
+    /// <summary>Gets or sets the physical memory headline.</summary>
+    public string PhysicalText
+    {
+        get => _physicalText;
+        set => Set(ref _physicalText, value);
+    }
+
+    /// <summary>Gets or sets the four-segment breakdown line.</summary>
+    public string SegmentText
+    {
+        get => _segmentText;
+        set => Set(ref _segmentText, value);
+    }
+
+    /// <summary>Gets the areas shown on the home tab.</summary>
+    public ObservableCollection<AreaItem> Areas { get; }
+
+    /// <summary>Gets the clean command.</summary>
+    public ICommand CleanCommand { get; }
+
+    /// <summary>Gets or sets a value indicating whether a run is in progress.</summary>
+    public bool IsBusy
+    {
+        get => _isBusy;
+        private set
+        {
+            if (Set(ref _isBusy, value))
+                ((RelayCommand)CleanCommand).RaiseCanExecuteChanged();
+        }
+    }
+
+    /// <summary>Gets or sets the summary of the last run.</summary>
+    public string Summary
+    {
+        get => _summary;
+        private set => Set(ref _summary, value);
+    }
+
+    private async void Clean()
+    {
+        var selected = Areas.Where(a => a.IsSelected).ToList();
+
+        if (selected.Count == 0)
+            return;
+
+        IsBusy = true;
+        Summary = "清理中…";
+
+        try
+        {
+            var results = await Task.Run(() => _engine.Run(selected.Select(a => a.Reclaimer.Name)));
+
+            foreach (var (name, result) in results)
+            {
+                var row = Areas.FirstOrDefault(a => a.Reclaimer.Name == name);
+
+                row?.Apply(result);
+            }
+
+            var released = results.Where(r => r.Result.Succeeded).Sum(r => Math.Max(0, r.Result.FreedBytes));
+            var failed = results.Count(r => !r.Result.Succeeded);
+
+            Summary = failed > 0
+                ? $"{selected.Count - failed} 项完成，{failed} 项失败"
+                : released > 0
+                    ? string.Format(System.Globalization.CultureInfo.InvariantCulture, "本次释放 {0:0.#} GB", released / (1024d * 1024 * 1024))
+                    : "本次无可测量的释放";
+        }
+        finally
+        {
+            IsBusy = false;
+        }
+    }
+}

@@ -20,7 +20,12 @@
     <Compile Include="..\..\src\MemMop\Core\Reclaimers\WorkingSetReclaimer.cs" Link="WorkingSetReclaimer.cs" />
     <Compile Include="..\..\src\MemMop\Core\Reclaimers\CombinedPageListReclaimer.cs" Link="CombinedPageListReclaimer.cs" />
     <Compile Include="..\..\src\MemMop\Core\Reclaimers\SystemFileCacheReclaimer.cs" Link="SystemFileCacheReclaimer.cs" />
+    <Compile Include="..\..\src\MemMop\ViewModel\MainViewModel.cs" Link="MainViewModel.cs" />
+    <Compile Include="..\..\src\MemMop\ViewModel\AreaItem.cs" Link="AreaItem.cs" />
+    <Compile Include="..\..\src\MemMop\ViewModel\ObservableObject.cs" Link="ObservableObject.cs" />
+    <Compile Include="..\..\src\MemMop\ViewModel\RelayCommand.cs" Link="RelayCommand.cs" />
   </ItemGroup>
 </Project>
+
 
 

@@ -1,17 +1,18 @@
-﻿using MemMop.Core;
-using MemMop.Core.Reclaimers;
+﻿using MemMop.ViewModel;
 
-const double gb = 1024d * 1024 * 1024;
-var engine = new CleaningEngine(new IMemoryReclaimer[]
-{
-    new StandbyListReclaimer(),
-    new StandbyListReclaimer(true),
-    new ModifiedPageListReclaimer(),
-    new CombinedPageListReclaimer(),
-    new SystemFileCacheReclaimer(),
-    new RegistryCacheReclaimer(),
-    new WorkingSetReclaimer(),
-});
+var vm = new MainViewModel();
+Console.WriteLine($"areas        {vm.Areas.Count}");
+Console.WriteLine($"can execute  {vm.CleanCommand.CanExecute(null)}");
 
-foreach (var (name, r) in engine.Run(new[] { "StandbyList", "StandbyListLowPriority", "ModifiedPageList", "CombinedPageList", "SystemFileCache", "RegistryCache", "WorkingSet" }))
-    Console.WriteLine($"{name,-22} ok={r.Succeeded,-5} freed={r.FreedBytes / gb,6:0.00} GB  {r.Message ?? "-"}");
+foreach (var a in vm.Areas)
+    Console.WriteLine($"  {(a.IsSelected ? "x" : " ")} {a.Title,-16} {a.Risk}");
+
+vm.Areas[0].IsSelected = false;
+Console.WriteLine($"after untick can-execute still {vm.CleanCommand.CanExecute(null)}");
+
+vm.Areas[0].Apply(new MemMop.Core.ReclaimResult(true, 3L * 1024 * 1024 * 1024, null));
+Console.WriteLine($"row result   {vm.Areas[0].LastResult}");
+vm.Areas[0].Apply(new MemMop.Core.ReclaimResult(true, -5, null));
+Console.WriteLine($"zero result  {vm.Areas[0].LastResult}");
+vm.Areas[0].Apply(MemMop.Core.ReclaimResult.Failure("privilege not held"));
+Console.WriteLine($"failure      {vm.Areas[0].LastResult}");

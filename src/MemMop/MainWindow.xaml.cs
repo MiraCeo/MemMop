@@ -1,17 +1,18 @@
-using System.Globalization;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Threading;
 using MemMop.Core;
+using MemMop.ViewModel;
 
 namespace MemMop;
 
 /// <summary>
-/// Main window. Reads memory once a second; the cleaner does not exist yet.
+/// Main window. Memory is read once a second; the cleaner runs on demand.
 /// </summary>
 public partial class MainWindow : Window
 {
     private readonly DispatcherTimer _timer = new() { Interval = TimeSpan.FromSeconds(1) };
+    private readonly MainViewModel _viewModel = new();
 
     /// <summary>
     /// Initializes a new instance of the <see cref="MainWindow"/> class.
@@ -20,15 +21,15 @@ public partial class MainWindow : Window
     {
         InitializeComponent();
 
+        DataContext = _viewModel;
+
         Loaded += OnLoaded;
         Closed += (_, _) => _timer.Stop();
     }
 
     private static string Size(long bytes)
     {
-        var gb = bytes / (1024d * 1024 * 1024);
-
-        return string.Format(CultureInfo.InvariantCulture, "{0:0.#} GB", gb);
+        return string.Format(System.Globalization.CultureInfo.InvariantCulture, "{0:0.#} GB", bytes / (1024d * 1024 * 1024));
     }
 
     private void OnLoaded(object sender, RoutedEventArgs e)
@@ -57,15 +58,11 @@ public partial class MainWindow : Window
     {
         var snapshot = MemorySnapshot.Capture();
 
-        PhysicalText.Text = $"物理内存 {Size(snapshot.Total - snapshot.Available)} / {Size(snapshot.Total)}";
+        _viewModel.PhysicalText = $"物理内存 {Size(snapshot.Total - snapshot.Available)} / {Size(snapshot.Total)}";
 
-        SegmentText.Text = snapshot.HasSegments
+        _viewModel.SegmentText = snapshot.HasSegments
             ? $"活动 {Size(snapshot.Active)} · 已修改 {Size(snapshot.Modified)} · 待机 {Size(snapshot.Standby)} · 空闲 {Size(snapshot.Free)}"
             : "四段构成：当前系统版本无法读取";
-
-        CommitText.Text = snapshot.CommitLimit > 0
-            ? $"已提交 {Size(snapshot.CommitUsed)} / {Size(snapshot.CommitLimit)}"
-            : "已提交：不可用";
     }
 
     private void OnLanguageChanged(object sender, SelectionChangedEventArgs e)
