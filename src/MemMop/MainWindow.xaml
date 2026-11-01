@@ -1,0 +1,16 @@
+<Window x:Class="MemMop.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="MemMop" Height="560" Width="520">
+    <TabControl Margin="10">
+        <TabItem Header="主页">
+            <TextBlock Margin="12" Text="内存区域与进程占用（待实现）" />
+        </TabItem>
+        <TabItem Header="设置">
+            <TextBlock Margin="12" Text="（待实现）" />
+        </TabItem>
+        <TabItem Header="关于">
+            <TextBlock Margin="12" Text="（待实现）" />
+        </TabItem>
+    </TabControl>
+</Window>
