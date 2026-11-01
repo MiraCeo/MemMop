@@ -8,11 +8,12 @@ internal static class Program
 {
     private static readonly string[] Themes = { "Ceobe" };
 
-    private static readonly (string Name, double Accent, double Highlight)[] Variants =
+    private static readonly (string Name, double Accent, double Highlight, string Surface)[] Variants =
     {
-        ("A", 0, 0),
-        ("AB", 0.6, 0),
-        ("AC", 0, 0.10),
+        ("L1", 0.6, 0, "#1C150F"),
+        ("L2", 0.6, 0, "#221A13"),
+        ("L3", 0.6, 0, "#281F16"),
+        ("L4", 0.6, 0, "#2E241A"),
     };
 
     [STAThread]
@@ -32,6 +33,9 @@ internal static class Program
             foreach (var variant in Variants)
             {
                 System.Windows.Application.Current.Resources["TitleBarAccentOpacity"] = variant.Accent;
+                System.Windows.Application.Current.Resources["TitleBarSurface"] =
+                    new System.Windows.Media.SolidColorBrush(
+                        (System.Windows.Media.Color)System.Windows.Media.ColorConverter.ConvertFromString(variant.Surface));
                 System.Windows.Application.Current.Resources["TitleBarHighlightOpacity"] = variant.Highlight;
 
                 Render(Path.Combine(output, theme.ToLowerInvariant() + "-" + variant.Name + ".png"), 540, 640, false, 0);
