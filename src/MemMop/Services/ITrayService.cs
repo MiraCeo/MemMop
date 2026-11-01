@@ -39,5 +39,5 @@ public interface ITrayService : IDisposable
     /// Shows a balloon once.
     /// </summary>
     /// <param name="message">The message.</param>
-    void Notify(string message);
+    void Notify(string? message);
 }

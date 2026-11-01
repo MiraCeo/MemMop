@@ -11,7 +11,7 @@ public sealed class ReclaimResult
     /// <param name="succeeded">Whether the operation was carried out.</param>
     /// <param name="freedBytes">Measured change in available memory.</param>
     /// <param name="message">Why it failed, or null on success.</param>
-    public ReclaimResult(bool succeeded, long freedBytes, string message)
+    public ReclaimResult(bool succeeded, long freedBytes, string? message)
     {
         Succeeded = succeeded;
         FreedBytes = freedBytes;
@@ -25,7 +25,7 @@ public sealed class ReclaimResult
     public long FreedBytes { get; }
 
     /// <summary>Gets why it failed, or null on success.</summary>
-    public string Message { get; }
+    public string? Message { get; }
 
     /// <summary>Gets a value indicating whether the measurement showed any release at all.</summary>
     public bool ReleasedAnything => FreedBytes > 0;
@@ -35,5 +35,5 @@ public sealed class ReclaimResult
     /// </summary>
     /// <param name="message">The reason.</param>
     /// <returns>The result.</returns>
-    public static ReclaimResult Failure(string message) => new ReclaimResult(false, 0, message);
+    public static ReclaimResult Failure(string? message) => new ReclaimResult(false, 0, message);
 }

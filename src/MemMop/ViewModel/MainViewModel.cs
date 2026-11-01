@@ -229,7 +229,7 @@ public sealed class MainViewModel : ObservableObject
 
     private void AddExclusion(string? name)
     {
-        if (string.IsNullOrWhiteSpace(name) || !Settings.ExcludedProcesses.Add(name))
+        if (string.IsNullOrWhiteSpace(name) || !Settings.ExcludedProcesses.Add(name!))
             return;
 
         Settings.Save();
@@ -240,7 +240,7 @@ public sealed class MainViewModel : ObservableObject
 
     private void RemoveExclusion(string? name)
     {
-        if (string.IsNullOrWhiteSpace(name) || !Settings.ExcludedProcesses.Remove(name))
+        if (string.IsNullOrWhiteSpace(name) || !Settings.ExcludedProcesses.Remove(name!))
             return;
 
         Settings.Save();

@@ -89,9 +89,10 @@ public sealed class TrayService : ITrayService
     }
 
     /// <inheritdoc/>
-    public void Notify(string message)
+    public void Notify(string? message)
     {
-        _icon?.ShowBalloonTip(5000, null, message, ToolTipIcon.None);
+        if (!string.IsNullOrEmpty(message))
+            _icon?.ShowBalloonTip(5000, null, message, ToolTipIcon.None);
     }
 
     /// <summary>

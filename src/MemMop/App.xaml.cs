@@ -67,7 +67,7 @@ public partial class App : Application
         _tray.Initialize();
         _tray.ShowRequested += ShowWindow;
         _tray.ViewRequested += ShowView;
-        _tray.CleanRequested += () => (MainWindow?.DataContext as MainViewModel)?.CleanCommand.Execute(null);
+        _tray.CleanRequested += () => (Window?.DataContext as MainViewModel)?.CleanCommand.Execute(null);
         _tray.ExitRequested += Quit;
 
         Log.Info("started, version " + (typeof(App).Assembly.GetName().Version?.ToString() ?? "?"));
@@ -114,7 +114,7 @@ public partial class App : Application
         base.OnExit(e);
     }
 
-    private MainWindow? MainWindow => _window;
+    private MainWindow? Window => _window;
 
     private static void LogCrash(Exception? exception)
     {
