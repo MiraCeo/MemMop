@@ -21,6 +21,9 @@ public static class Settings
     /// <summary>Gets or sets a value indicating whether the app starts hidden in the tray.</summary>
     public static bool StartMinimized { get; set; } = true;
 
+    /// <summary>Gets or sets a value indicating whether the tray hint has been shown.</summary>
+    public static bool ShownTrayHint { get; set; }
+
     /// <summary>Gets or sets the automatic clean interval in minutes; 0 disables it.</summary>
     public static int AutoCleanMinutes { get; set; }
 
@@ -43,6 +46,7 @@ public static class Settings
             FontSizeIndex = ReadInt(key, nameof(FontSizeIndex), FontSizeIndex);
             CloseToTray = ReadInt(key, nameof(CloseToTray), CloseToTray ? 1 : 0) != 0;
             StartMinimized = ReadInt(key, nameof(StartMinimized), StartMinimized ? 1 : 0) != 0;
+            ShownTrayHint = ReadInt(key, nameof(ShownTrayHint), ShownTrayHint ? 1 : 0) != 0;
             AutoCleanMinutes = ReadInt(key, nameof(AutoCleanMinutes), AutoCleanMinutes);
             LowMemoryPercent = ReadInt(key, nameof(LowMemoryPercent), LowMemoryPercent);
         }
@@ -69,6 +73,7 @@ public static class Settings
             key.SetValue(nameof(FontSizeIndex), FontSizeIndex, RegistryValueKind.DWord);
             key.SetValue(nameof(CloseToTray), CloseToTray ? 1 : 0, RegistryValueKind.DWord);
             key.SetValue(nameof(StartMinimized), StartMinimized ? 1 : 0, RegistryValueKind.DWord);
+            key.SetValue(nameof(ShownTrayHint), ShownTrayHint ? 1 : 0, RegistryValueKind.DWord);
             key.SetValue(nameof(AutoCleanMinutes), AutoCleanMinutes, RegistryValueKind.DWord);
             key.SetValue(nameof(LowMemoryPercent), LowMemoryPercent, RegistryValueKind.DWord);
         }

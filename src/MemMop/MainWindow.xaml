@@ -8,7 +8,7 @@
         </Style>
     </Window.Resources>
 
-    <TabControl Margin="10">
+    <TabControl x:Name="Tabs" Margin="10">
         <TabItem Header="主页">
             <Grid Margin="12">
                 <Grid.RowDefinitions>

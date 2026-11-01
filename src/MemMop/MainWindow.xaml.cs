@@ -14,6 +14,9 @@ public partial class MainWindow : Window
     private readonly DispatcherTimer _timer = new() { Interval = TimeSpan.FromSeconds(1) };
     private readonly MainViewModel _viewModel = new();
 
+    /// <summary>Raised after each refresh with the text for the tray tooltip.</summary>
+    public event Action<string>? MemoryRead;
+
     /// <summary>
     /// Initializes a new instance of the <see cref="MainWindow"/> class.
     /// </summary>
@@ -60,9 +63,21 @@ public partial class MainWindow : Window
 
         _viewModel.PhysicalText = $"物理内存 {Size(snapshot.Total - snapshot.Available)} / {Size(snapshot.Total)}";
 
+        MemoryRead?.Invoke($"物理内存 {Size(snapshot.Total - snapshot.Available)} / {Size(snapshot.Total)}");
+
         _viewModel.SegmentText = snapshot.HasSegments
             ? $"活动 {Size(snapshot.Active)} · 已修改 {Size(snapshot.Modified)} · 待机 {Size(snapshot.Standby)} · 空闲 {Size(snapshot.Free)}"
             : "四段构成：当前系统版本无法读取";
+    }
+
+    /// <summary>
+    /// Brings a tab to the front.
+    /// </summary>
+    /// <param name="index">0 home, 1 settings, 2 about.</param>
+    public void ShowTab(int index)
+    {
+        if (FindName("Tabs") is System.Windows.Controls.TabControl tabs)
+            tabs.SelectedIndex = index;
     }
 
     private void OnLanguageChanged(object sender, SelectionChangedEventArgs e)
