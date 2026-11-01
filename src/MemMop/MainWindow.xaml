@@ -287,32 +287,33 @@
 
                     <Border Background="{DynamicResource Nav}" CornerRadius="8" Padding="16">
                         <StackPanel>
-                            <TextBlock Margin="0, 0, 0, 12" FontSize="11" Foreground="{DynamicResource TextMuted}" Text="设置" />
+                            <TextBlock Margin="0, 0, 0, 14"
+                                       FontSize="13"
+                                       FontWeight="SemiBold"
+                                       Foreground="{DynamicResource TextPrimary}"
+                                       Text="设置" />
 
-                            <Grid Margin="0, 0, 0, 10">
+                            <Grid Margin="0, 0, 0, 12">
                                 <Grid.ColumnDefinitions>
-                                    <ColumnDefinition Width="70" />
+                                    <ColumnDefinition Width="56" />
                                     <ColumnDefinition Width="*" />
+                                    <ColumnDefinition Width="56" />
+                                    <ColumnDefinition Width="Auto" />
                                 </Grid.ColumnDefinitions>
+
                                 <TextBlock VerticalAlignment="Center" Text="语言" />
                                 <ComboBox x:Name="LanguageBox"
                                           Grid.Column="1"
-                                          Width="220"
-                                          HorizontalAlignment="Left"
+                                          Margin="0, 0, 16, 0"
+                                          HorizontalAlignment="Stretch"
                                           SelectionChanged="OnLanguageChanged">
                                     <ComboBoxItem Content="简体中文" Tag="zh-Hans" />
                                     <ComboBoxItem Content="English" Tag="en" />
                                 </ComboBox>
-                            </Grid>
 
-                            <Grid Margin="0, 0, 0, 12">
-                                <Grid.ColumnDefinitions>
-                                    <ColumnDefinition Width="70" />
-                                    <ColumnDefinition Width="*" />
-                                </Grid.ColumnDefinitions>
-                                <TextBlock VerticalAlignment="Center" Text="字号" />
-                                <ComboBox Grid.Column="1"
-                                          Width="140"
+                                <TextBlock Grid.Column="2" VerticalAlignment="Center" Text="字号" />
+                                <ComboBox Grid.Column="3"
+                                          Width="100"
                                           HorizontalAlignment="Left"
                                           SelectedIndex="{Binding FontSizeIndex}">
                                     <ComboBoxItem Content="小" />
@@ -331,7 +332,8 @@
                                 <CheckBox Margin="0, 4" Content="显示清理通知" IsChecked="{Binding ShowNotifications}" />
                                 <CheckBox Margin="0, 4, 16, 4" Content="显示已提交" IsChecked="{Binding ShowCommitted}" />
                                 <CheckBox Margin="0, 4" Content="详细内存信息" IsChecked="{Binding DetailedMemory}" />
-                                <CheckBox Margin="0, 4, 16, 4" Content="启用清理热键" IsChecked="{Binding HotkeyEnabled}" />
+                                <CheckBox Margin="0, 4, 16, 4" Content="启用清理热键（Ctrl+Alt+M）" IsChecked="{Binding HotkeyEnabled}" />
+                                <CheckBox Margin="0, 4" Content="自动清理只做保守操作" IsChecked="{Binding AutoCleanSafeOnly}" />
                             </UniformGrid>
                         </StackPanel>
                     </Border>
@@ -341,9 +343,10 @@
                             Background="{DynamicResource Nav}"
                             CornerRadius="8">
                         <StackPanel>
-                            <TextBlock Margin="0, 0, 0, 12"
-                                       FontSize="11"
-                                       Foreground="{DynamicResource TextMuted}"
+                            <TextBlock Margin="0, 0, 0, 14"
+                                       FontSize="13"
+                                       FontWeight="SemiBold"
+                                       Foreground="{DynamicResource TextPrimary}"
                                        Text="排除的进程（不参与清理）" />
 
                             <TextBlock Margin="0, 0, 0, 6"

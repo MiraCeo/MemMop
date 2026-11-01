@@ -457,6 +457,18 @@ public sealed class MainViewModel : ObservableObject
         }
     }
 
+    /// <summary>Gets or sets a value indicating whether automatic cleaning stays on the conservative subset.</summary>
+    public bool AutoCleanSafeOnly
+    {
+        get => Settings.AutoCleanSafeOnly;
+        set
+        {
+            Settings.AutoCleanSafeOnly = value;
+            Settings.Save();
+            Raise();
+        }
+    }
+
     /// <summary>Gets or sets a value indicating whether cleaning raises a tray notification.</summary>
     public bool ShowNotifications
     {
