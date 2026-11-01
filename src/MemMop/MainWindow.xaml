@@ -35,7 +35,18 @@
             </Grid.RowDefinitions>
 
             <!-- Title bar -->
-            <Grid x:Name="TitleBar" Grid.Row="0" Background="Transparent" MouseLeftButtonDown="OnTitleBarMouseDown">
+            <Grid x:Name="TitleBar" Grid.Row="0" Background="{DynamicResource TitleBarSurface}" MouseLeftButtonDown="OnTitleBarMouseDown">
+                <!-- decorative layers; both are opacity tokens so a variant is a number, not a rewrite -->
+                <Rectangle Height="2"
+                           VerticalAlignment="Bottom"
+                           Fill="{DynamicResource Accent}"
+                           IsHitTestVisible="False"
+                           Opacity="{DynamicResource TitleBarAccentOpacity}" />
+                <Rectangle Height="1"
+                           VerticalAlignment="Top"
+                           Fill="#FFFFFF"
+                           IsHitTestVisible="False"
+                           Opacity="{DynamicResource TitleBarHighlightOpacity}" />
                 <TextBlock Margin="12, 0, 0, 0"
                            VerticalAlignment="Center"
                            FontSize="12"

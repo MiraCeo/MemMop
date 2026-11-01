@@ -1,5 +1,6 @@
 <ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
-                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:sys="clr-namespace:System;assembly=mscorlib">
     <!-- Ember -->
     <SolidColorBrush x:Key="Surface" Color="#140F0D" />
     <SolidColorBrush x:Key="SurfaceAlt" Color="#1D1613" />
@@ -12,4 +13,7 @@
     <SolidColorBrush x:Key="SegModified" Color="#9C8272" />
     <SolidColorBrush x:Key="SegStandby" Color="#5F8598" />
     <SolidColorBrush x:Key="SegFree" Color="#7FA95B" />
+    <SolidColorBrush x:Key="TitleBarSurface" Color="#1A1411" />
+    <sys:Double x:Key="TitleBarAccentOpacity">0</sys:Double>
+    <sys:Double x:Key="TitleBarHighlightOpacity">0</sys:Double>
 </ResourceDictionary>

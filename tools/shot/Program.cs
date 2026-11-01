@@ -6,7 +6,14 @@ using MemMop;
 
 internal static class Program
 {
-    private static readonly string[] Themes = { "Ceobe", "Amber", "Mono", "Slate" };
+    private static readonly string[] Themes = { "Ceobe" };
+
+    private static readonly (string Name, double Accent, double Highlight)[] Variants =
+    {
+        ("A", 0, 0),
+        ("AB", 0.6, 0),
+        ("AC", 0, 0.10),
+    };
 
     [STAThread]
     private static void Main(string[] args)
@@ -22,8 +29,15 @@ internal static class Program
         {
             ApplyTheme(theme);
 
-            Render(Path.Combine(output, theme.ToLowerInvariant() + "-normal.png"), 540, 640, false, 0);
-            Render(Path.Combine(output, theme.ToLowerInvariant() + "-settings.png"), 540, 640, false, 1);
+            foreach (var variant in Variants)
+            {
+                System.Windows.Application.Current.Resources["TitleBarAccentOpacity"] = variant.Accent;
+                System.Windows.Application.Current.Resources["TitleBarHighlightOpacity"] = variant.Highlight;
+
+                Render(Path.Combine(output, theme.ToLowerInvariant() + "-" + variant.Name + ".png"), 540, 640, false, 0);
+            }
+
+
             Render(Path.Combine(output, theme.ToLowerInvariant() + "-compact.png"), 320, 190, true, 0);
         }
 
