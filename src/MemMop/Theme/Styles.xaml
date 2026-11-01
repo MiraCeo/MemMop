@@ -204,7 +204,7 @@
                                 Background="{DynamicResource Nav}"
                                 BorderBrush="{DynamicResource Border}"
                                 BorderThickness="0, 0, 0, 1">
-                            <TabPanel Margin="22, 0, 0, 0" IsItemsHost="True" />
+                            <TabPanel Margin="8, 0, 0, 0" IsItemsHost="True" />
                         </Border>
 
                         <ContentPresenter Grid.Row="1" ContentSource="SelectedContent" />
