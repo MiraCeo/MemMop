@@ -93,6 +93,9 @@ public sealed class MainViewModel : ObservableObject
     /// <summary>Gets the names that can be excluded.</summary>
     public ObservableCollection<string> AvailableProcesses { get; } = new();
 
+    /// <summary>Gets a value indicating whether any name is excluded, for the empty state.</summary>
+    public bool HasExclusions => ExcludedProcesses.Count > 0;
+
     /// <summary>Gets the excluded names.</summary>
     public ObservableCollection<string> ExcludedProcesses { get; } = new();
 
@@ -227,6 +230,8 @@ public sealed class MainViewModel : ObservableObject
 
         foreach (var name in Settings.ExcludedProcesses.OrderBy(n => n, StringComparer.OrdinalIgnoreCase))
             ExcludedProcesses.Add(name);
+
+        Raise(nameof(HasExclusions));
     }
 
     private void AddExclusion(string? name)

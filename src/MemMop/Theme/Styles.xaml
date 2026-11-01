@@ -98,7 +98,7 @@
                                 Width="16"
                                 Height="16"
                                 Background="{DynamicResource SurfaceAlt}"
-                                BorderBrush="{DynamicResource Border}"
+                                BorderBrush="{DynamicResource InputBorder}"
                                 BorderThickness="1"
                                 CornerRadius="4"
                                 VerticalAlignment="Center">

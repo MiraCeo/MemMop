@@ -320,13 +320,18 @@
                     <CheckBox Margin="0, 10, 0, 0" Content="开机自启（登录时以最高权限启动，不弹 UAC）" IsChecked="{Binding RunOnStartup}" />
                     <CheckBox Margin="0, 10, 0, 0" Content="启用清理热键（Ctrl+Alt+M）" IsChecked="{Binding HotkeyEnabled}" />
 
-                    <TextBlock Margin="0, 22, 0, 10"
+                    <TextBlock Margin="0, 22, 0, 2"
                                FontSize="11"
                                Foreground="{DynamicResource TextMuted}"
-                               Text="{Binding Source={x:Static core:Strings.Current}, Path=Exclusions}" />
+                               Text="排除的进程" />
+                    <TextBlock Margin="0, 0, 0, 10"
+                               FontSize="10"
+                               Foreground="{DynamicResource InputBorder}"
+                               Text="这些进程不参与「收缩程序驻留内存」" />
 
                     <Grid>
-                        <TextBox Padding="34, 6, 10, 6"
+                        <TextBox Margin="0, 0, 42, 0"
+                                 Padding="34, 6, 10, 6"
                                  Text="{Binding ProcessSearchText, UpdateSourceTrigger=PropertyChanged}"
                                  ToolTip="{Binding Source={x:Static core:Strings.Current}, Path=SearchProcess}" />
                         <Grid Width="14"
@@ -370,9 +375,17 @@
                             <ColumnDefinition Width="*" />
                             <ColumnDefinition Width="Auto" />
                         </Grid.ColumnDefinitions>
-                        <ListBox Height="120"
-                                 ItemsSource="{Binding ExcludedProcesses}"
-                                 SelectedItem="{Binding SelectedExclusion}" />
+                        <Grid>
+                            <ListBox Height="88"
+                                     ItemsSource="{Binding ExcludedProcesses}"
+                                     SelectedItem="{Binding SelectedExclusion}" />
+                            <TextBlock HorizontalAlignment="Center"
+                                       VerticalAlignment="Center"
+                                       FontSize="11"
+                                       Foreground="{DynamicResource InputBorder}"
+                                       Text="列表为空"
+                                       Visibility="{Binding HasExclusions, Converter={StaticResource InverseBoolToVisibility}}" />
+                        </Grid>
                         <Button Grid.Column="1"
                                 Width="34"
                                 Height="32"
