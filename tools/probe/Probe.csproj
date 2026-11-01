@@ -10,5 +10,10 @@
     <Compile Include="Program.cs" />
     <Compile Include="..\..\src\MemMop\Core\MemorySnapshot.cs" Link="MemorySnapshot.cs" />
     <Compile Include="..\..\src\MemMop\Core\NativeMethods.cs" Link="NativeMethods.cs" />
+    <Compile Include="..\..\src\MemMop\Core\Privileges.cs" Link="Privileges.cs" />
+    <Compile Include="..\..\src\MemMop\Core\CleaningEngine.cs" Link="CleaningEngine.cs" />
+    <Compile Include="..\..\src\MemMop\Core\IMemoryReclaimer.cs" Link="IMemoryReclaimer.cs" />
+    <Compile Include="..\..\src\MemMop\Core\ReclaimResult.cs" Link="ReclaimResult.cs" />
+    <Compile Include="..\..\src\MemMop\Core\Reclaimers\StandbyListReclaimer.cs" Link="StandbyListReclaimer.cs" />
   </ItemGroup>
 </Project>

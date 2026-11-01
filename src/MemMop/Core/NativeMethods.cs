@@ -10,6 +10,19 @@ internal static class NativeMethods
     /// <summary>SystemMemoryListInformation - the kernel's page list counters.</summary>
     internal const int SystemMemoryListInformation = 80;
 
+    /// <summary>Purge the whole standby list.</summary>
+    internal const int MemoryPurgeStandbyList = 4;
+
+    /// <summary>Purge only the lowest-priority standby pages.</summary>
+    internal const int MemoryPurgeLowPriorityStandbyList = 5;
+
+    /// <summary>SeProfileSingleProcessPrivilege - needed to purge the standby list.</summary>
+    internal const string SeProfileSingleProcess = "SeProfileSingleProcessPrivilege";
+
+    internal const uint TokenAdjustPrivileges = 0x0020;
+    internal const uint TokenQuery = 0x0008;
+    internal const uint SePrivilegeEnabled = 0x00000002;
+
     [StructLayout(LayoutKind.Sequential)]
     internal struct MemoryStatusEx
     {
@@ -43,6 +56,21 @@ internal static class NativeMethods
         public uint ThreadCount;
     }
 
+    [StructLayout(LayoutKind.Sequential)]
+    internal struct Luid
+    {
+        public uint LowPart;
+        public int HighPart;
+    }
+
+    [StructLayout(LayoutKind.Sequential)]
+    internal struct TokenPrivileges
+    {
+        public uint PrivilegeCount;
+        public Luid Luid;
+        public uint Attributes;
+    }
+
     [DllImport("kernel32.dll", SetLastError = true)]
     [return: MarshalAs(UnmanagedType.Bool)]
     internal static extern bool GlobalMemoryStatusEx(ref MemoryStatusEx buffer);
@@ -53,4 +81,26 @@ internal static class NativeMethods
 
     [DllImport("ntdll.dll")]
     internal static extern int NtQuerySystemInformation(int informationClass, IntPtr buffer, uint length, out uint returned);
+
+    [DllImport("ntdll.dll")]
+    internal static extern int NtSetSystemInformation(int informationClass, IntPtr buffer, uint length);
+
+    [DllImport("advapi32.dll", SetLastError = true)]
+    [return: MarshalAs(UnmanagedType.Bool)]
+    internal static extern bool OpenProcessToken(IntPtr process, uint access, out IntPtr token);
+
+    [DllImport("advapi32.dll", SetLastError = true, CharSet = CharSet.Unicode)]
+    [return: MarshalAs(UnmanagedType.Bool)]
+    internal static extern bool LookupPrivilegeValue(string? system, string name, out Luid luid);
+
+    [DllImport("advapi32.dll", SetLastError = true)]
+    [return: MarshalAs(UnmanagedType.Bool)]
+    internal static extern bool AdjustTokenPrivileges(IntPtr token, [MarshalAs(UnmanagedType.Bool)] bool disableAll, ref TokenPrivileges newState, uint bufferLength, IntPtr previousState, IntPtr returnLength);
+
+    [DllImport("kernel32.dll")]
+    internal static extern IntPtr GetCurrentProcess();
+
+    [DllImport("kernel32.dll", SetLastError = true)]
+    [return: MarshalAs(UnmanagedType.Bool)]
+    internal static extern bool CloseHandle(IntPtr handle);
 }
