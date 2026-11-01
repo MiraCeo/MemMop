@@ -84,6 +84,10 @@ public sealed class MainViewModel : ObservableObject
     private string _processSearchText = string.Empty;
     private string _selectedProcess = string.Empty;
     private string _selectedExclusion = string.Empty;
+    private string _activeText = string.Empty;
+    private string _modifiedText = string.Empty;
+    private string _standbyText = string.Empty;
+    private string _freeText = string.Empty;
     private string _usedPercentText = string.Empty;
     private string _usedText = string.Empty;
 
@@ -306,16 +310,32 @@ public sealed class MainViewModel : ObservableObject
     }
 
     /// <summary>Gets or sets the active segment line.</summary>
-    public string ActiveText { get; set; } = string.Empty;
+    public string ActiveText
+    {
+        get => _activeText;
+        set => Set(ref _activeText, value);
+    }
 
     /// <summary>Gets or sets the modified segment line.</summary>
-    public string ModifiedText { get; set; } = string.Empty;
+    public string ModifiedText
+    {
+        get => _modifiedText;
+        set => Set(ref _modifiedText, value);
+    }
 
     /// <summary>Gets or sets the standby segment line.</summary>
-    public string StandbyText { get; set; } = string.Empty;
+    public string StandbyText
+    {
+        get => _standbyText;
+        set => Set(ref _standbyText, value);
+    }
 
     /// <summary>Gets or sets the free segment line.</summary>
-    public string FreeText { get; set; } = string.Empty;
+    public string FreeText
+    {
+        get => _freeText;
+        set => Set(ref _freeText, value);
+    }
 
     /// <summary>Gets the used percentage shown in the compact view.</summary>
     public string UsedPercentText

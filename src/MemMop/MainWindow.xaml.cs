@@ -152,7 +152,7 @@ public partial class MainWindow : Window
         if (_viewModel.CompactMode)
         {
             Width = 320;
-            Height = 190;
+            Height = 212;
         }
         else
         {

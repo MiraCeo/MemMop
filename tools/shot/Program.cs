@@ -37,11 +37,12 @@ internal static class Program
 
                 Render(Path.Combine(output, theme.ToLowerInvariant() + "-" + variant.Name + ".png"), 540, 640, false, 0);
                 var settings = Path.Combine(output, theme.ToLowerInvariant() + "-settings.png");
+                Render(Path.Combine(output, theme.ToLowerInvariant() + "-compact.png"), 320, 212, true, 0);
                 Render(settings, 540, 640, false, 1);
             }
 
 
-            Render(Path.Combine(output, theme.ToLowerInvariant() + "-compact.png"), 320, 190, true, 0);
+            Render(Path.Combine(output, theme.ToLowerInvariant() + "-compact.png"), 320, 212, true, 0);
         }
 
         Console.WriteLine(output);
