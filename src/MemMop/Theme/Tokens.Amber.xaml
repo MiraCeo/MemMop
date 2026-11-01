@@ -1,0 +1,18 @@
+<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:sys="clr-namespace:System;assembly=mscorlib">
+    <!-- Amber -->
+    <SolidColorBrush x:Key="Surface" Color="#1A1614" />
+    <SolidColorBrush x:Key="SurfaceAlt" Color="#221C18" />
+    <SolidColorBrush x:Key="Hover" Color="#2C241E" />
+    <SolidColorBrush x:Key="Border" Color="#352C25" />
+    <SolidColorBrush x:Key="TextPrimary" Color="#F4EBE1" />
+    <SolidColorBrush x:Key="TextMuted" Color="#A38D7C" />
+    <SolidColorBrush x:Key="Accent" Color="#FF8A3D" />
+    <SolidColorBrush x:Key="SegActive" Color="#FF7043" />
+    <SolidColorBrush x:Key="SegModified" Color="#A38D7C" />
+    <SolidColorBrush x:Key="SegStandby" Color="#6E8FA8" />
+    <SolidColorBrush x:Key="SegFree" Color="#8FB56B" />
+    <sys:String x:Key="SegmentPalette">#FF7043,#A38D7C,#6E8FA8,#8FB56B</sys:String>
+    <sys:String x:Key="CommitPalette">#FF7043,#8FB56B</sys:String>
+</ResourceDictionary>

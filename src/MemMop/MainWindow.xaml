@@ -17,9 +17,6 @@
     <Window.Resources>
         <BooleanToVisibilityConverter x:Key="BoolToVisibility" />
         <converters:InverseBoolToVisibility x:Key="InverseBoolToVisibility" />
-        <Style TargetType="CheckBox">
-            <Setter Property="VerticalAlignment" Value="Center" />
-        </Style>
     </Window.Resources>
 
 
@@ -109,7 +106,7 @@
 
             <controls:RingChart Width="132"
                                 Height="132"
-                                Palette="{Binding PhysicalPalette}"
+                                Palette="{DynamicResource SegmentPalette}"
                                 RingThickness="16"
                                 Values="{Binding PhysicalSegments}" />
 
@@ -141,14 +138,14 @@
                 <StackPanel Grid.Row="1" Margin="0, 4, 0, 0">
                     <controls:ProportionBar Height="10"
                                              Margin="0, 6, 0, 0"
-                                             Palette="{Binding PhysicalPalette}"
+                                             Palette="{DynamicResource SegmentPalette}"
                                              Values="{Binding PhysicalSegments}" />
                     <TextBlock Foreground="#999999"
                                Text="{Binding SegmentText}"
                                Visibility="{Binding DetailedMemory, Converter={StaticResource BoolToVisibility}}" />
                     <controls:ProportionBar Height="10"
                                              Margin="0, 8, 0, 0"
-                                             Palette="{Binding CommitPalette}"
+                                             Palette="{DynamicResource CommitPalette}"
                                              Values="{Binding CommitSegments}" />
                     <TextBlock Margin="0, 2, 0, 0"
                                Foreground="#999999"

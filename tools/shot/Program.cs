@@ -6,7 +6,7 @@ using MemMop;
 
 internal static class Program
 {
-    private static readonly string[] Themes = { "Slate", "Ink", "Mono" };
+    private static readonly string[] Themes = { "Ceobe", "Amber", "Mono", "Slate" };
 
     [STAThread]
     private static void Main(string[] args)

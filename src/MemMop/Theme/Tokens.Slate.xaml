@@ -1,5 +1,6 @@
 <ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
-                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:sys="clr-namespace:System;assembly=mscorlib">
     <!-- Slate -->
     <SolidColorBrush x:Key="Surface" Color="#1E2126" />
     <SolidColorBrush x:Key="SurfaceAlt" Color="#262A31" />
@@ -12,4 +13,6 @@
     <SolidColorBrush x:Key="SegModified" Color="#8C97A6" />
     <SolidColorBrush x:Key="SegStandby" Color="#4FB0C6" />
     <SolidColorBrush x:Key="SegFree" Color="#5FD38A" />
+    <sys:String x:Key="SegmentPalette">#FF6B5A,#8C97A6,#4FB0C6,#5FD38A</sys:String>
+    <sys:String x:Key="CommitPalette">#FF6B5A,#5FD38A</sys:String>
 </ResourceDictionary>
