@@ -10,7 +10,7 @@ public sealed class AutoCleanPolicy
     /// The areas an automatic run may use when the conservative switch is on: everything that does not
     /// evict working sets or cap the system cache, because both are felt by the user while he is away.
     /// </summary>
-    public static readonly IReadOnlySet<string> SafeAreas = new HashSet<string>(StringComparer.Ordinal)
+    public static readonly HashSet<string> SafeAreas = new HashSet<string>(StringComparer.Ordinal)
     {
         "StandbyList",
         "ModifiedPageList",

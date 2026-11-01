@@ -59,7 +59,7 @@ public static class Settings
             StartMinimized = ReadInt(key, nameof(StartMinimized), StartMinimized ? 1 : 0) != 0;
             AutoCleanSafeOnly = ReadInt(key, nameof(AutoCleanSafeOnly), AutoCleanSafeOnly ? 1 : 0) != 0;
 
-            foreach (var name in (key.GetValue(nameof(ExcludedProcesses)) as string ?? string.Empty).Split('\n', StringSplitOptions.RemoveEmptyEntries))
+            foreach (var name in (key.GetValue(nameof(ExcludedProcesses)) as string ?? string.Empty).Split(new[] { '\n' }, StringSplitOptions.RemoveEmptyEntries))
                 ExcludedProcesses.Add(name);
             ShownTrayHint = ReadInt(key, nameof(ShownTrayHint), ShownTrayHint ? 1 : 0) != 0;
             AutoCleanMinutes = ReadInt(key, nameof(AutoCleanMinutes), AutoCleanMinutes);

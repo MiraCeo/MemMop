@@ -65,7 +65,7 @@ public sealed class TrayService : ITrayService
             return;
 
         // the shell caps tooltips; keep it short rather than let it truncate mid-number
-        _icon.Text = text.Length > 120 ? text[..120] : text;
+        _icon.Text = text.Length > 120 ? text.Substring(0, 120) : text;
     }
 
     /// <inheritdoc/>

@@ -183,7 +183,7 @@ public sealed class MainViewModel : ObservableObject
             .Distinct(StringComparer.OrdinalIgnoreCase)
             .Where(n => !Settings.ExcludedProcesses.Contains(n))
             .Where(n => string.IsNullOrEmpty(_processSearchText)
-                        || n.Contains(_processSearchText, StringComparison.OrdinalIgnoreCase))
+                        || n.IndexOf(_processSearchText, StringComparison.OrdinalIgnoreCase) >= 0)
             .OrderBy(n => n, StringComparer.OrdinalIgnoreCase);
 
         AvailableProcesses.Clear();

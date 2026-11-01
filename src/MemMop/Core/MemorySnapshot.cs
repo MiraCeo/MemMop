@@ -10,31 +10,31 @@ public sealed class MemorySnapshot
     private const int SizeOfSizeT = 8;
 
     /// <summary>Gets the total physical memory in bytes.</summary>
-    public long Total { get; private init; }
+    public long Total { get; private set; }
 
     /// <summary>Gets the available physical memory in bytes (free + standby, as Windows reports it).</summary>
-    public long Available { get; private init; }
+    public long Available { get; private set; }
 
     /// <summary>Gets the active pages in bytes.</summary>
-    public long Active { get; private init; }
+    public long Active { get; private set; }
 
     /// <summary>Gets the modified (dirty) pages in bytes.</summary>
-    public long Modified { get; private init; }
+    public long Modified { get; private set; }
 
     /// <summary>Gets the standby (cached) pages in bytes.</summary>
-    public long Standby { get; private init; }
+    public long Standby { get; private set; }
 
     /// <summary>Gets the free (zeroed) pages in bytes.</summary>
-    public long Free { get; private init; }
+    public long Free { get; private set; }
 
     /// <summary>Gets the commit limit in bytes.</summary>
-    public long CommitLimit { get; private init; }
+    public long CommitLimit { get; private set; }
 
     /// <summary>Gets the committed memory in bytes.</summary>
-    public long CommitUsed { get; private init; }
+    public long CommitUsed { get; private set; }
 
     /// <summary>Gets a value indicating whether the four-way breakdown could be read and cross-checked.</summary>
-    public bool HasSegments { get; private init; }
+    public bool HasSegments { get; private set; }
 
     /// <summary>
     /// Reads the current memory state.
