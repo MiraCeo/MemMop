@@ -54,6 +54,10 @@ public sealed class MainViewModel : ObservableObject
         RefreshAvailableProcesses();
     }
 
+    /// <summary>Gets the window title, with the version so a screenshot identifies its build.</summary>
+    public string TitleText =>
+        "忆干二净 MemMop " + (System.Reflection.Assembly.GetExecutingAssembly().GetName().Version?.ToString(3) ?? "0.0.0");
+
     /// <summary>Gets the application version, read from the assembly rather than typed twice.</summary>
     public string VersionText =>
         (System.Reflection.Assembly.GetExecutingAssembly().GetName().Version?.ToString(3) ?? "0.0.0") + " · Windows";

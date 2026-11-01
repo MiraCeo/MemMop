@@ -52,7 +52,7 @@
                            FontSize="12.5"
                            FontWeight="Medium"
                            Foreground="{DynamicResource TextPrimary}"
-                           Text="忆干二净 MemMop" />
+                           Text="{Binding TitleText}" />
 
                 <StackPanel Margin="0, 0, 6, 0" HorizontalAlignment="Right" Orientation="Horizontal">
                     <ToggleButton x:Name="PinToggle"
@@ -282,185 +282,159 @@
         </TabItem>
 
         <TabItem Header="{Binding Source={x:Static core:Strings.Current}, Path=Settings}">
-            <Grid>
             <ScrollViewer HorizontalScrollBarVisibility="Disabled" VerticalScrollBarVisibility="Auto">
                 <StackPanel Margin="22, 18, 22, 24">
 
-                    <TextBlock Margin="0, 0, 0, 10" FontSize="11" Foreground="{DynamicResource TextMuted}" Text="外观" />
+                    <Border Background="{DynamicResource Nav}" CornerRadius="8" Padding="16">
+                        <StackPanel>
+                            <TextBlock Margin="0, 0, 0, 12" FontSize="11" Foreground="{DynamicResource TextMuted}" Text="设置" />
 
-                    <Grid Margin="0, 0, 0, 10">
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="120" />
-                            <ColumnDefinition Width="*" />
-                        </Grid.ColumnDefinitions>
-                        <TextBlock VerticalAlignment="Center" Text="{Binding Source={x:Static core:Strings.Current}, Path=Language}" />
-                        <ComboBox x:Name="LanguageBox"
-                                  Grid.Column="1"
-                                  Width="200"
-                                  HorizontalAlignment="Left"
-                                  SelectionChanged="OnLanguageChanged">
-                            <ComboBoxItem Content="简体中文" Tag="zh-Hans" />
-                            <ComboBoxItem Content="English" Tag="en" />
-                        </ComboBox>
-                    </Grid>
+                            <Grid Margin="0, 0, 0, 10">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="70" />
+                                    <ColumnDefinition Width="*" />
+                                </Grid.ColumnDefinitions>
+                                <TextBlock VerticalAlignment="Center" Text="语言" />
+                                <ComboBox x:Name="LanguageBox"
+                                          Grid.Column="1"
+                                          Width="220"
+                                          HorizontalAlignment="Left"
+                                          SelectionChanged="OnLanguageChanged">
+                                    <ComboBoxItem Content="简体中文" Tag="zh-Hans" />
+                                    <ComboBoxItem Content="English" Tag="en" />
+                                </ComboBox>
+                            </Grid>
 
-                    <Grid Margin="0, 0, 0, 4">
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="120" />
-                            <ColumnDefinition Width="*" />
-                        </Grid.ColumnDefinitions>
-                        <TextBlock VerticalAlignment="Center" Text="字号" />
-                        <ComboBox Grid.Column="1"
-                                  Width="140"
-                                  HorizontalAlignment="Left"
-                                  SelectedIndex="{Binding FontSizeIndex}">
-                            <ComboBoxItem Content="小" />
-                            <ComboBoxItem Content="标准" />
-                            <ComboBoxItem Content="大" />
-                        </ComboBox>
-                    </Grid>
+                            <Grid Margin="0, 0, 0, 12">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="70" />
+                                    <ColumnDefinition Width="*" />
+                                </Grid.ColumnDefinitions>
+                                <TextBlock VerticalAlignment="Center" Text="字号" />
+                                <ComboBox Grid.Column="1"
+                                          Width="140"
+                                          HorizontalAlignment="Left"
+                                          SelectedIndex="{Binding FontSizeIndex}">
+                                    <ComboBoxItem Content="小" />
+                                    <ComboBoxItem Content="标准" />
+                                    <ComboBoxItem Content="大" />
+                                </ComboBox>
+                            </Grid>
 
-                    <CheckBox Margin="0, 10, 0, 0" Content="显示已提交行" IsChecked="{Binding ShowCommitted}" />
-                    <CheckBox Margin="0, 10, 0, 0" Content="显示详细内存信息" IsChecked="{Binding DetailedMemory}" />
+                            <UniformGrid Columns="2">
+                                <CheckBox x:Name="CloseToTrayBox"
+                                          Margin="0, 4, 16, 4"
+                                          Content="{Binding Source={x:Static core:Strings.Current}, Path=CloseToTray}"
+                                          IsChecked="{Binding CloseToTray}" />
+                                <CheckBox Margin="0, 4" Content="静默启动" IsChecked="{Binding StartMinimized}" />
+                                <CheckBox Margin="0, 4, 16, 4" Content="开机自启" IsChecked="{Binding RunOnStartup}" />
+                                <CheckBox Margin="0, 4" Content="显示清理通知" IsChecked="{Binding ShowNotifications}" />
+                                <CheckBox Margin="0, 4, 16, 4" Content="显示已提交" IsChecked="{Binding ShowCommitted}" />
+                                <CheckBox Margin="0, 4" Content="详细内存信息" IsChecked="{Binding DetailedMemory}" />
+                                <CheckBox Margin="0, 4, 16, 4" Content="启用清理热键" IsChecked="{Binding HotkeyEnabled}" />
+                            </UniformGrid>
+                        </StackPanel>
+                    </Border>
 
-                    <Rectangle Height="1"
-                               Margin="0, 26, 0, 0"
-                               Fill="{DynamicResource Border}"
-                               Opacity="0.55" />
-
-                    <TextBlock Margin="0, 22, 0, 10" FontSize="11" Foreground="{DynamicResource TextMuted}" Text="行为" />
-
-                    <CheckBox x:Name="CloseToTrayBox"
-                              Content="{Binding Source={x:Static core:Strings.Current}, Path=CloseToTray}"
-                              IsChecked="{Binding CloseToTray}" />
-                    <CheckBox Margin="0, 10, 0, 0" Content="静默启动（启动时不显示窗口）" IsChecked="{Binding StartMinimized}" />
-                    <CheckBox Margin="0, 10, 0, 0" Content="开机自启（登录时以最高权限启动，不弹 UAC）" IsChecked="{Binding RunOnStartup}" />
-                    <CheckBox Margin="0, 10, 0, 0" Content="启用清理热键（Ctrl+Alt+M）" IsChecked="{Binding HotkeyEnabled}" />
-                    <CheckBox Margin="0, 10, 0, 0" Content="清理完成后显示通知" IsChecked="{Binding ShowNotifications}" />
-
-                    <Rectangle Height="1"
-                               Margin="0, 26, 0, 0"
-                               Fill="{DynamicResource Border}"
-                               Opacity="0.55" />
-
-                    <TextBlock Margin="0, 24, 0, 12"
-                               FontSize="11"
-                               Foreground="{DynamicResource TextMuted}"
-                               Text="排除的进程" />
-                    <TextBlock Margin="0, 0, 0, 10"
-                               FontSize="10"
-                               Foreground="{DynamicResource InputBorder}"
-                               Text="这些进程不参与「收缩程序驻留内存」" />
-
-                    <TextBlock Margin="0, 0, 0, 6"
-                               FontSize="10"
-                               Foreground="{DynamicResource TextMuted}"
-                               Text="查找进程" />
-
-                    <Grid>
-                        <TextBox Margin="0, 0, 42, 0"
-                                 Padding="34, 6, 10, 6"
-                                 Text="{Binding ProcessSearchText, UpdateSourceTrigger=PropertyChanged}"
-                                 ToolTip="{Binding Source={x:Static core:Strings.Current}, Path=SearchProcess}" />
-                        <Grid Width="14"
-                              Height="14"
-                              Margin="12, 0, 0, 0"
-                              HorizontalAlignment="Left"
-                              VerticalAlignment="Center"
-                              IsHitTestVisible="False">
-                            <Ellipse Width="9"
-                                     Height="9"
-                                     HorizontalAlignment="Left"
-                                     VerticalAlignment="Top"
-                                     Stroke="{DynamicResource TextMuted}"
-                                     StrokeThickness="1.3" />
-                            <Line X1="8"
-                                  Y1="8"
-                                  X2="13"
-                                  Y2="13"
-                                  Stroke="{DynamicResource TextMuted}"
-                                  StrokeThickness="1.3" />
-                        </Grid>
-                    </Grid>
-
-                    <TextBlock Margin="0, 16, 0, 6"
-                               FontSize="10"
-                               Foreground="{DynamicResource TextMuted}"
-                               Text="添加排除" />
-
-                    <Grid Margin="0, 0, 0, 0">
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="*" />
-                            <ColumnDefinition Width="Auto" />
-                        </Grid.ColumnDefinitions>
-                        <ComboBox ItemsSource="{Binding AvailableProcesses}" SelectedItem="{Binding SelectedProcess}" />
-                        <Button Grid.Column="1"
-                                Width="34"
-                                Height="32"
-                                Margin="8, 0, 0, 0"
-                                Command="{Binding AddExclusionCommand}"
-                                Style="{StaticResource FlatButton}"
-                                Padding="12, 0, 6, 0"
-                                Content="添加 »" />
-                    </Grid>
-
-                    <TextBlock Margin="0, 16, 0, 6"
-                               FontSize="10"
-                               Foreground="{DynamicResource TextMuted}"
-                               Text="已排除（不参与收缩）" />
-
-                    <Grid Margin="0, 0, 0, 0">
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="*" />
-                            <ColumnDefinition Width="Auto" />
-                        </Grid.ColumnDefinitions>
-                        <Grid>
-                            <ListBox Height="88"
-                                     ItemsSource="{Binding ExcludedProcesses}"
-                                     SelectedItem="{Binding SelectedExclusion}" />
-                            <TextBlock HorizontalAlignment="Center"
-                                       VerticalAlignment="Center"
+                    <Border Margin="0, 16, 0, 0"
+                            Padding="16"
+                            Background="{DynamicResource Nav}"
+                            CornerRadius="8">
+                        <StackPanel>
+                            <TextBlock Margin="0, 0, 0, 12"
                                        FontSize="11"
-                                       Foreground="{DynamicResource InputBorder}"
-                                       Text="列表为空"
-                                       Visibility="{Binding HasExclusions, Converter={StaticResource InverseBoolToVisibility}}" />
-                        </Grid>
-                        <Button Grid.Column="1"
-                                Width="34"
-                                Height="32"
-                                Margin="8, 0, 0, 0"
-                                VerticalAlignment="Top"
-                                Command="{Binding RemoveExclusionCommand}"
-                                Style="{StaticResource FlatButton}"
-                                Padding="12, 0, 6, 0"
-                                Content="移除" />
-                    </Grid>
+                                       Foreground="{DynamicResource TextMuted}"
+                                       Text="排除的进程（不参与清理）" />
 
-                    <Button Margin="0, 24, 0, 0"
+                            <TextBlock Margin="0, 0, 0, 6"
+                                       FontSize="10"
+                                       Foreground="{DynamicResource TextMuted}"
+                                       Text="查找进程" />
+
+                            <Grid>
+                                <TextBox Margin="0, 0, 0, 0"
+                                         Padding="34, 6, 10, 6"
+                                         Text="{Binding ProcessSearchText, UpdateSourceTrigger=PropertyChanged}"
+                                         ToolTip="{Binding Source={x:Static core:Strings.Current}, Path=SearchProcess}" />
+                                <Grid Width="14"
+                                      Height="14"
+                                      Margin="12, 0, 0, 0"
+                                      HorizontalAlignment="Left"
+                                      VerticalAlignment="Center"
+                                      IsHitTestVisible="False">
+                                    <Ellipse Width="9"
+                                             Height="9"
+                                             HorizontalAlignment="Left"
+                                             VerticalAlignment="Top"
+                                             Stroke="{DynamicResource TextMuted}"
+                                             StrokeThickness="1.3" />
+                                    <Line X1="8" Y1="8" X2="13" Y2="13" Stroke="{DynamicResource TextMuted}" StrokeThickness="1.3" />
+                                </Grid>
+                            </Grid>
+
+                            <TextBlock Margin="0, 12, 0, 6"
+                                       FontSize="10"
+                                       Foreground="{DynamicResource TextMuted}"
+                                       Text="添加排除" />
+
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*" />
+                                    <ColumnDefinition Width="Auto" />
+                                </Grid.ColumnDefinitions>
+                                <ComboBox ItemsSource="{Binding AvailableProcesses}" SelectedItem="{Binding SelectedProcess}" />
+                                <Button Grid.Column="1"
+                                        Width="64"
+                                        Height="32"
+                                        Margin="8, 0, 0, 0"
+                                        Command="{Binding AddExclusionCommand}"
+                                        Content="添加" />
+                            </Grid>
+
+                            <TextBlock Margin="0, 12, 0, 6"
+                                       FontSize="10"
+                                       Foreground="{DynamicResource TextMuted}"
+                                       Text="已排除" />
+
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*" />
+                                    <ColumnDefinition Width="Auto" />
+                                </Grid.ColumnDefinitions>
+                                <Grid>
+                                    <ListBox Height="88"
+                                             ItemsSource="{Binding ExcludedProcesses}"
+                                             SelectedItem="{Binding SelectedExclusion}" />
+                                    <TextBlock HorizontalAlignment="Center"
+                                               VerticalAlignment="Center"
+                                               FontSize="11"
+                                               Foreground="{DynamicResource InputBorder}"
+                                               Text="列表为空"
+                                               Visibility="{Binding HasExclusions, Converter={StaticResource InverseBoolToVisibility}}" />
+                                </Grid>
+                                <Button Grid.Column="1"
+                                        Width="64"
+                                        Height="32"
+                                        Margin="8, 0, 0, 0"
+                                        VerticalAlignment="Top"
+                                        Command="{Binding RemoveExclusionCommand}"
+                                        Content="移除" />
+                            </Grid>
+                        </StackPanel>
+                    </Border>
+
+                    <Button Margin="0, 16, 0, 0"
                             HorizontalAlignment="Left"
                             Padding="16, 7"
                             Command="{Binding ResetSettingsCommand}"
-                            Content="重置为默认" />
+                            Content="重置" />
                 </StackPanel>
             </ScrollViewer>
-                <Rectangle Height="64"
-                           VerticalAlignment="Bottom"
-                           IsHitTestVisible="False"
-                           Fill="{DynamicResource Surface}">
-                    <Rectangle.OpacityMask>
-                        <LinearGradientBrush StartPoint="0, 0" EndPoint="0, 1">
-                            <GradientStop Offset="0" Color="#00FFFFFF" />
-                            <GradientStop Offset="0.55" Color="#8CFFFFFF" />
-                            <GradientStop Offset="1" Color="#FFFFFFFF" />
-                        </LinearGradientBrush>
-                    </Rectangle.OpacityMask>
-                </Rectangle>
-            </Grid>
         </TabItem>
 
         <TabItem Header="{Binding Source={x:Static core:Strings.Current}, Path=About}">
             <StackPanel Margin="12">
-                <TextBlock FontSize="18" Text="忆干二净 MemMop" />
+                <TextBlock FontSize="18" Text="{Binding TitleText}" />
                 <TextBlock Margin="0, 2, 0, 0" Foreground="#999999" Text="{Binding VersionText}" />
                 <TextBlock Margin="0, 14, 0, 0"
                            TextWrapping="Wrap"
