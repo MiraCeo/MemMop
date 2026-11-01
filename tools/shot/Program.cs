@@ -61,6 +61,7 @@ internal static class Program
         };
 
         window.Show();
+        window.ShowTab(tab);
         window.UpdateLayout();
 
         const double scale = 1.5;

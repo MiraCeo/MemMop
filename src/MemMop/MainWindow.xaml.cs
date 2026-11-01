@@ -129,8 +129,9 @@ public partial class MainWindow : Window
     /// <param name="index">0 home, 1 settings, 2 about.</param>
     public void ShowTab(int index)
     {
-        if (FindName("Tabs") is System.Windows.Controls.TabControl tabs)
-            tabs.SelectedIndex = index;
+        // the generated field, not FindName: the name lives in the window namescope and a lookup there is a
+        // silent no-op when it misses
+        Tabs.SelectedIndex = index;
     }
 
     private void OnTitleBarMouseDown(object sender, System.Windows.Input.MouseButtonEventArgs e)
