@@ -4,6 +4,7 @@ obj/
 *.user
 *.suo
 .vs/
+*_wpftmp.csproj
 
 # artifacts
 /dist/
