@@ -91,6 +91,7 @@ public sealed class MainViewModel : ObservableObject
     private string _selectedProcess = string.Empty;
     private bool _isSearchOpen;
     private string _selectedExclusion = string.Empty;
+    private bool _isExclusionExpanded;
     private string _activeText = string.Empty;
     private string _modifiedText = string.Empty;
     private string _standbyText = string.Empty;
@@ -466,14 +467,26 @@ public sealed class MainViewModel : ObservableObject
     /// <summary>Gets or sets the excluded name selected for removal.</summary>
     public bool HasSelectedExclusion => !string.IsNullOrEmpty(SelectedExclusion);
 
+    /// <summary>
+    /// Gets or sets a value indicating whether the exclusion card is expanded. Collapsed by default, so the
+    /// settings page fits without scrolling; the card is the only one tall enough to push the reset button away.
+    /// </summary>
+    public bool IsExclusionExpanded
+    {
+        get => _isExclusionExpanded;
+        set => Set(ref _isExclusionExpanded, value);
+    }
+
     public string SelectedExclusion
     {
         get => _selectedExclusion;
         set
         {
             if (Set(ref _selectedExclusion, value))
+            {
                 Raise(nameof(HasSelectedExclusion));
                 (RemoveExclusionCommand as RelayCommand)?.RaiseCanExecuteChanged();
+            }
         }
     }
 
