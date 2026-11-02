@@ -436,7 +436,7 @@
             </ScrollViewer>
         </TabItem>
 
-        <TabItem Header="{Binding Source={x:Static core:Strings.Current}, Path=About}">
+        <TabItem Tag="last" Header="{Binding Source={x:Static core:Strings.Current}, Path=About}">
             <StackPanel Margin="12">
                 <TextBlock FontSize="18" Text="{Binding TitleText}" />
                 <TextBlock Margin="0, 2, 0, 0" Foreground="#999999" Text="{Binding VersionText}" />

@@ -162,19 +162,24 @@
             <Setter.Value>
                 <ControlTemplate TargetType="TabItem">
                     <Grid VerticalAlignment="Stretch">
-                        <ContentPresenter Margin="0, 0, 22, 0"
+                        <ContentPresenter Margin="24, 0, 24, 0"
                                           VerticalAlignment="Center"
                                           ContentSource="Header"
-                                          HorizontalAlignment="Center" />
+                                          HorizontalAlignment="Center">
+                            <ContentPresenter.Resources>
+                                <!-- the app-wide TextBlock style would otherwise pin this text to the primary colour -->
+                                <Style TargetType="TextBlock">
+                                    <Setter Property="Foreground" Value="{Binding Foreground, RelativeSource={RelativeSource AncestorType=TabItem}}" />
+                                </Style>
+                            </ContentPresenter.Resources>
+                        </ContentPresenter>
 
                         <Rectangle x:Name="Rule"
-                                   Width="1"
-                                   Height="13"
-                                   Margin="0, 0, 0, 0"
+                                   Width="2"
+                                   Height="18"
                                    HorizontalAlignment="Right"
                                    VerticalAlignment="Center"
-                                   Fill="{DynamicResource Border}"
-                                   Opacity="0.8" />
+                                   Fill="{DynamicResource Border}" />
                     </Grid>
                     <ControlTemplate.Triggers>
                         <Trigger Property="IsMouseOver" Value="True">
@@ -184,10 +189,10 @@
                             <Setter Property="Foreground" Value="{DynamicResource Accent}" />
                             <Setter Property="FontWeight" Value="Medium" />
                         </Trigger>
-                        <!-- no rule after the last tab -->
-                        <DataTrigger Binding="{Binding (ItemsControl.AlternationIndex), RelativeSource={RelativeSource TemplatedParent}}" Value="2">
+                        <!-- the consumer marks the final tab with Tag="last" -->
+                        <Trigger Property="Tag" Value="last">
                             <Setter TargetName="Rule" Property="Visibility" Value="Collapsed" />
-                        </DataTrigger>
+                        </Trigger>
                     </ControlTemplate.Triggers>
                 </ControlTemplate>
             </Setter.Value>
