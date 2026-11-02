@@ -76,26 +76,32 @@ Get-ChildItem src -Recurse -Include *.cs,*.xaml |
 ## 验证流程（每次改代码后）
 
 ```powershell
-# 1. 构建
-pwsh -NoProfile -File D:\MemClean\refs\wnmc\build.ps1
+# 1. 构建（先关掉正在运行的 MemMop）
+pwsh -NoProfile -File build.ps1
 
-# 2. 不变量（22 项：身份替换、清单、注册表键、通知、语言……）
-pwsh -NoProfile -File D:\MemClean\tools\verify-fork-invariants.ps1
+# 2. 探针：跑一遍逻辑，确认不崩（目前只覆盖热键，见 docs/HANDOFF.md 第四节）
+dotnet run --project tools/probe -c Release
 
-# 3. 语言加载（2 种语言，强制所有键非空）
-pwsh -NoProfile -File D:\MemClean\tools\verify_localization_load.ps1
+# 3. 改了界面就出图，逐张看
+dotnet build tools/shot/Shot.csproj -c Release
+tools\shot\bin\Release\net472\Shot.exe D:\MemMop\tools\mmshots\handoff
 
-# 4. 需要时截图（144 DPI 离屏渲染）
-pwsh -NoProfile -File D:\MemClean\tools\render-ui.ps1 -Normal
+# 4. 需要量数字时（居中、间距、包围盒）
+dotnet run --project tools/measure
 ```
 
-**语言校验的作用**：`Localizer` 在**任何**字符串属性为空时抛异常。
-所以"模型里有属性、JSON 里没有键"会让所有语言加载失败。删键时必须三边同步：
-`Localization.cs` 的属性 + 字段 + 每个 JSON 的键。
+**语言校验的作用（2.x 版本）**：文案不再是 JSON，全部内联在 `Core/Strings.cs`，
+属性为空不会抛异常，只会**显示空白**。所以加语言键时要三边同步：
+`Strings.cs` 的属性 + 中英文两个分支 + 引用它的 XAML。空值不会报错，只能靠截图发现。
 
 ---
 
-## 两个会互相干扰的默认值（已修正，但值得记住）
+## 以下两节是 1.x 的遗留（MemMop-Archived 分支，路径已不存在）
+
+留着是因为教训仍然成立，但**不要照抄命令**——`verify-fork-invariants.ps1`、`render-ui.ps1`
+和 `refs\wnmc` 都属于已归档的 1.x，与 2.x 仓库无关。
+
+### 两个会互相干扰的默认值（已修正，但值得记住）
 
 ### 截图之后，`bin\Release` 里是无清单版本
 
@@ -125,19 +131,22 @@ WMC（3.0.8），不是我们的构建。漏传参数就会得到一堆莫名其
 
 ## 工具与约定
 
-- **Shell**：优先 `pwsh`（PowerShell 7）。5.1 会把中文输出写成乱码；四个脚本已加 UTF-8 守卫，但新脚本仍建议走 pwsh。
-- **截图工具参数**：`-TextSize n`、`-Detailed`、`-Expanded`、`-Compact`、`-Normal`、`-Pin`、`-Focus <元素名>`、`-SkipBuild`、`-Out`
-- **截图会读真实配置**：用户注册表里的状态会影响渲染结果，所以回归时用 `-Compact` / `-Normal` 等显式指定。
-- **构建产物**：`refs/wnmc/src/bin/Release/MemMop.exe`；交付包按 `MemMop_0NN.exe` 命名，版本号 = 构建号的三位数字（`049` → `0.4.9`）。
+- **Shell**：这个环境里 `pwsh` 工具实际跑的是 Windows PowerShell **5.1**，`Get-Content` 默认按 GBK 解码，
+  读 UTF-8 无 BOM 的中文源码会变成乱码。读中文一律 `-Encoding utf8` 或 `[System.IO.File]::ReadAllText($p, [Text.Encoding]::UTF8)`；
+  跑脚本用 `pwsh -NoProfile -File`（7.6.9 已装）。写回时同理——默认编码会把中文写坏。
+- **截图工具**：`tools/shot`（离屏渲染主页/设置/紧凑，540×640 @144 DPI），参数只有一个输出目录。
+- **截图会读真实配置**：用户注册表里的状态会影响渲染结果，所以对比前后图时要固定配置。
+- **构建产物**：`dist\MemMop.exe`；版本号 `0.2.0+<git sha>` 由 csproj 的 `<Version>` 和构建时的提交决定。
 - **打包需要允许**：未经同意不要复制到 `dist/`。
 
 ---
 
 ## 版本与交付
 
-- 版本号规则：构建号 `0NN` 直接映射为版本 `0.N.N`（`046` → `0.4.6`）
-- 每次交付：构建 → 验证 → 复制为 `dist/MemMop/MemMop_0NN.exe` → 记录 sha256
+- 版本号在 `src/MemMop/MemMop.csproj` 的 `<Version>`，当前 `0.2.0`；构建输出会附加 git sha（`0.2.0+8d00749…`）
+- 每次交付：构建 → 关掉旧进程 → 用新 exe 手动跑一遍（清理、托盘、热键）→ 记下 sha256
 - 大改动前先升版本，方便使用者确认跑的是哪一版
+- 不要用 1.x 的 `0NN` 映射规则（那是已归档分支的命名法）
 
 ---
 
