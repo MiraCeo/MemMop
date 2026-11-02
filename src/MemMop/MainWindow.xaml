@@ -353,11 +353,6 @@
                                                            Foreground="{DynamicResource TextPrimary}"
                                                            Text="排除的进程（不参与清理）" />
 
-                                                <TextBlock Margin="0, 0, 0, 5"
-                                                           FontSize="10"
-                                                           Foreground="{DynamicResource TextMuted}"
-                                                           Text="添加排除" />
-
                                                 <Grid>
                                                     <Grid.ColumnDefinitions>
                                                         <ColumnDefinition Width="Auto" />
@@ -370,6 +365,7 @@
                                                                   Height="32"
                                                                   VerticalAlignment="Top"
                                                                   IsChecked="{Binding IsSearchOpen}"
+                                                                  Style="{StaticResource IconButton}"
                                                                   ToolTip="搜索进程">
                                                         <Path Width="13"
                                                               Height="13"
@@ -417,33 +413,35 @@
                                                            Text="排除列表" />
 
                                                 <Grid>
-                                                    <Grid.ColumnDefinitions>
-                                                        <ColumnDefinition Width="*" />
-                                                        <ColumnDefinition Width="Auto" />
-                                                    </Grid.ColumnDefinitions>
-
-                                                    <Grid>
-                                                        <ListBox Height="64"
-                                                                 VerticalAlignment="Top"
-                                                                 ItemsSource="{Binding ExcludedProcesses}"
-                                                                 SelectedItem="{Binding SelectedExclusion}" />
-                                                        <TextBlock Height="64"
-                                                                   HorizontalAlignment="Center"
-                                                                   VerticalAlignment="Center"
-                                                                   FontSize="11"
-                                                                   Foreground="{DynamicResource InputBorder}"
-                                                                   Text="列表为空"
-                                                                   Visibility="{Binding HasExclusions, Converter={StaticResource InverseBoolToVisibility}}" />
-                                                    </Grid>
-
-                                                    <Button Grid.Column="1"
-                                                            Width="32"
-                                                            Height="32"
-                                                            Margin="8, 0, 0, 0"
-                                                            VerticalAlignment="Top"
-                                                            Command="{Binding RemoveExclusionCommand}"
-                                                            Content="−" />
+                                                    <ListBox Height="64"
+                                                             VerticalAlignment="Top"
+                                                             ItemsSource="{Binding ExcludedProcesses}"
+                                                             SelectedItem="{Binding SelectedExclusion}" />
+                                                    <TextBlock Height="64"
+                                                               HorizontalAlignment="Center"
+                                                               VerticalAlignment="Center"
+                                                               FontSize="11"
+                                                               Foreground="{DynamicResource InputBorder}"
+                                                               Text="列表为空"
+                                                               Visibility="{Binding HasExclusions, Converter={StaticResource InverseBoolToVisibility}}" />
                                                 </Grid>
+
+                                                <StackPanel Margin="0, 8, 0, 0"
+                                                            HorizontalAlignment="Right"
+                                                            Orientation="Horizontal"
+                                                            Visibility="{Binding HasSelectedExclusion, Converter={StaticResource BoolToVisibility}}">
+                                                    <Button Margin="0, 0, 6, 0"
+                                                            Padding="12, 5"
+                                                            Command="{Binding MoveUpCommand}"
+                                                            Content="上移" />
+                                                    <Button Margin="0, 0, 6, 0"
+                                                            Padding="12, 5"
+                                                            Command="{Binding MoveDownCommand}"
+                                                            Content="下移" />
+                                                    <Button Padding="12, 5"
+                                                            Command="{Binding RemoveExclusionCommand}"
+                                                            Content="删除" />
+                                                </StackPanel>
                                             </StackPanel>
                                         </Border>
 
