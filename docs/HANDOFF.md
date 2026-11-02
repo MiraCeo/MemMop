@@ -186,16 +186,19 @@ pwsh -File D:\MemClean\tools\render-ui.ps1 -Normal
 | 路径 | 是什么 | 交接后还要吗 |
 |---|---|---|
 | `MemMop/` | **当前仓库（2.x）** | 要。唯一真相 |
+| `MemClean/` | KoshyJohn Memory Cleaner 3.00 的逆向资料（原版 exe、反编译源码、`FINDINGS.md`） | 要。结论的来源 |
+| `refs/` | **参考资料**（见 `refs/README.md`）：`wnmc/` 1.x 分支源码、`WMC/` 上游原版 | 要 |
+| `dist/MemMop_Archived.7z` | 1.x 的 72 个 exe 归档（29 MB → 1.2 MB） | 要 |
 | `docs/`（根目录，4 个 md） | 仓库 `docs/` 的旧副本，`EDITING.md` 比仓库里的旧 30 行 | 不要 |
-| `refs/wnmc/` | 1.x 的 WinMemoryCleaner 分支（已归档为 MemMop-Archived），自带 git 与 235 MB NuGet packages | 只当"1.x 长什么样"的参考；已归档，可删可留 |
-| `dist/MemMop/MemMop_001..064.exe` | 1.x 的 64 个交付快照（27.8 MB） | 最多留 `_064` |
-| `dist/WMC/`、`dist/WinMemoryCleaner.exe` | 上游原版，对照用 | 可留（0.5 MB） |
-| `tools/`（根目录） | 会话期一次性脚本：212 个 `.py`、AutoIt 3 的安装包与解包（32.5 MB）、截图、反编译产物 | 不要 |
-| `build/` | 中途放弃的 AutoIt 路线（`memclean.au3` 87 KB + 编译产物 + msbuild 日志） | 不要 |
-| `MemMop/src/MemMop/bin/`、`obj/` | 构建中间产物；其中 **160 MB 是 .NET 8 自包含发布的残留**（`bin/Release/net8.0-windows/win-x64`），当前 net472 产物只有约 1 MB | 不要（可重建） |
-| `MemClean.exe`、`proxy.txt`、`self-update.txt`、`debug.log`、`bin/cmap.api` | 1.x / 上游 / 无关的散落文件 | 不要 |
+| `tools/`（根目录） | 会话期一次性脚本：212 个 `.py`、截图、1.x 时代的 `.ps1` | 不要 |
+| `build/` | 1.x WPF 阶段的构建残留（`qa/` + msbuild 日志） | 不要 |
+| `debug.log` | 会话日志 | 不要 |
 
 精确体积与删除分级见工作区根目录的 `CLEANUP.md`。
+
+> 2026-11-03 已清理：`MemMop/src/MemMop/bin`（160.7 MB，其中 160.4 MB 是 .NET 8 死产物）、`obj`、
+> 三个工具的 `bin`/`obj`、`MemClean/toolchain/autoit3`（32.5 MB）、`refs/wnmc/src/packages`（234.7 MB）
+> 等共 480 MB 已删。删完 `build.ps1` 复验通过，`bin` 从 160.7 MB 变成 0.13 MB。
 
 ---
 
