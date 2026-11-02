@@ -52,7 +52,7 @@ public static class Settings
     /// Gets the process names excluded from working-set trimming. Stored verbatim: Windows reports names
     /// without an extension, keeping their case, and names may contain spaces.
     /// </summary>
-    public static HashSet<string> ExcludedProcesses { get; } = new(StringComparer.OrdinalIgnoreCase);
+    public static List<string> ExcludedProcesses { get; } = new();
 
     /// <summary>
     /// Gets or sets a value indicating whether automatic cleaning stays on the conservative subset.

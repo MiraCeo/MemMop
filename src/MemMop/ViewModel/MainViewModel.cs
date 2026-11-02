@@ -48,6 +48,8 @@ public sealed class MainViewModel : ObservableObject
         CleanCommand = new RelayCommand(Clean, () => !IsBusy && Areas.Any(a => a.IsSelected));
         AddExclusionCommand = new RelayCommand(() => AddExclusion(SelectedProcess), () => !string.IsNullOrEmpty(SelectedProcess));
         ResetSettingsCommand = new RelayCommand(ResetSettings);
+        MoveUpCommand = new RelayCommand(() => Move(-1));
+        MoveDownCommand = new RelayCommand(() => Move(1));
         RemoveExclusionCommand = new RelayCommand(() => RemoveExclusion(SelectedExclusion), () => !string.IsNullOrEmpty(SelectedExclusion));
 
         RefreshExcluded();
@@ -157,6 +159,12 @@ public sealed class MainViewModel : ObservableObject
     /// <summary>Gets the command that adds the selected name to the exclusion list.</summary>
     public ICommand AddExclusionCommand { get; }
 
+    /// <summary>Gets the command that moves the selected name one place up.</summary>
+    public ICommand MoveUpCommand { get; private set; } = null!;
+
+    /// <summary>Gets the command that moves the selected name one place down.</summary>
+    public ICommand MoveDownCommand { get; private set; } = null!;
+
     /// <summary>Gets the command that removes a name from the exclusion list.</summary>
     public ICommand RemoveExclusionCommand { get; }
 
@@ -257,13 +265,33 @@ public sealed class MainViewModel : ObservableObject
 
     private void AddExclusion(string? name)
     {
-        if (string.IsNullOrWhiteSpace(name) || !Settings.ExcludedProcesses.Add(name!))
+        if (string.IsNullOrWhiteSpace(name) || Settings.ExcludedProcesses.Contains(name!))
             return;
+
+        Settings.ExcludedProcesses.Add(name!);
 
         Settings.Save();
         RefreshExcluded();
         RefreshAvailableProcesses();
         ((RelayCommand)RemoveExclusionCommand).RaiseCanExecuteChanged();
+    }
+
+    private void Move(int delta)
+    {
+        var index = ExcludedProcesses.IndexOf(SelectedExclusion);
+
+        if (index < 0 || index + delta < 0 || index + delta >= ExcludedProcesses.Count)
+            return;
+
+        var name = ExcludedProcesses[index];
+
+        ExcludedProcesses.Move(index, index + delta);
+
+        Settings.ExcludedProcesses.Clear();
+        Settings.ExcludedProcesses.AddRange(ExcludedProcesses);
+
+        Settings.Save();
+        SelectedExclusion = name;
     }
 
     private void RemoveExclusion(string? name)
@@ -436,12 +464,15 @@ public sealed class MainViewModel : ObservableObject
     }
 
     /// <summary>Gets or sets the excluded name selected for removal.</summary>
+    public bool HasSelectedExclusion => !string.IsNullOrEmpty(SelectedExclusion);
+
     public string SelectedExclusion
     {
         get => _selectedExclusion;
         set
         {
             if (Set(ref _selectedExclusion, value))
+                Raise(nameof(HasSelectedExclusion));
                 (RemoveExclusionCommand as RelayCommand)?.RaiseCanExecuteChanged();
         }
     }
