@@ -430,7 +430,17 @@
                         </StackPanel>
                     </Border>
 
-                    <Button Margin="0, 16, 0, 0"
+                    <Rectangle Height="1"
+                               Margin="0, 24, 0, 0"
+                               Fill="{DynamicResource Border}"
+                               Opacity="0.55" />
+
+                    <TextBlock Margin="0, 16, 0, 8"
+                               FontSize="10"
+                               Foreground="{DynamicResource TextMuted}"
+                               Text="重置会清除所有已保存的设置" />
+
+                    <Button Margin="0, 0, 0, 0"
                             HorizontalAlignment="Left"
                             Padding="16, 7"
                             Command="{Binding ResetSettingsCommand}"
