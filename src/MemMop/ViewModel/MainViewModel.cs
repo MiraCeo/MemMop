@@ -87,6 +87,7 @@ public sealed class MainViewModel : ObservableObject
     private bool _processUsageExpanded;
     private string _processSearchText = string.Empty;
     private string _selectedProcess = string.Empty;
+    private bool _isSearchOpen;
     private string _selectedExclusion = string.Empty;
     private string _activeText = string.Empty;
     private string _modifiedText = string.Empty;
@@ -131,6 +132,16 @@ public sealed class MainViewModel : ObservableObject
                 RefreshAvailableProcesses();
         }
     }
+
+    /// <summary>Gets or sets a value indicating whether the candidate search field is open.</summary>
+    public bool IsSearchOpen
+    {
+        get => _isSearchOpen;
+        set => Set(ref _isSearchOpen, value);
+    }
+
+    /// <summary>Gets a value indicating whether any candidate is available.</summary>
+    public bool HasAvailableProcesses => AvailableProcesses.Count > 0;
 
     /// <summary>Gets or sets the selected name in the picker.</summary>
     public string SelectedProcess
@@ -227,6 +238,8 @@ public sealed class MainViewModel : ObservableObject
 
         foreach (var name in names)
             AvailableProcesses.Add(name);
+
+        Raise(nameof(HasAvailableProcesses));
 
         if (!AvailableProcesses.Contains(_selectedProcess))
             SelectedProcess = AvailableProcesses.FirstOrDefault() ?? string.Empty;
