@@ -10,18 +10,34 @@ using Path = System.Windows.Shapes.Path;
 internal static class Program
 {
     /// <summary>
+    /// Finds the shipped template: first beside the assembly, otherwise by walking up from the build output to the
+    /// repository root, so the tool survives the repository being moved or renamed.
+    /// </summary>
+    private static string FindStyles()
+    {
+        var location = System.IO.Path.GetDirectoryName(typeof(Program).Assembly.Location) ?? ".";
+        var local = System.IO.Path.Combine(location, "Styles.xaml");
+
+        if (System.IO.File.Exists(local))
+            return local;
+
+        for (var current = new DirectoryInfo(location); current != null; current = current.Parent)
+        {
+            var candidate = System.IO.Path.Combine(current.FullName, "src", "MemMop", "Theme", "Styles.xaml");
+
+            if (System.IO.File.Exists(candidate))
+                return candidate;
+        }
+
+        throw new FileNotFoundException("Styles.xaml could not be found above " + location);
+    }
+
+    /// <summary>
     /// Reads the chevron's geometry straight out of the shipped template, so the measurement cannot drift from it.
     /// </summary>
     private static (double Width, double Height, double Right, double Top) ReadChevron()
     {
-        var path = System.IO.Path.Combine(
-            System.IO.Path.GetDirectoryName(typeof(Program).Assembly.Location) ?? ".",
-            "Styles.xaml");
-
-        if (!System.IO.File.Exists(path))
-            path = @"D:\MemClean\MemMop\src\MemMop\Theme\Styles.xaml";
-
-        var text = System.IO.File.ReadAllText(path);
+        var text = System.IO.File.ReadAllText(FindStyles());
         var block = text.Substring(text.IndexOf("x:Name=\"Chevron\"", StringComparison.Ordinal));
 
         double Pick(string attribute)
