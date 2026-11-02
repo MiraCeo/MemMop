@@ -207,13 +207,13 @@
                 <ControlTemplate TargetType="TabControl">
                     <Grid>
                         <Grid.RowDefinitions>
-                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="52" />
                             <RowDefinition Height="*" />
                         </Grid.RowDefinitions>
 
                         <!-- one surface: the nav is separated by rules, not by a band -->
                         <Grid Grid.Row="0" Background="{DynamicResource Surface}">
-                            <TabPanel Margin="22, 0, 0, 0" VerticalAlignment="Bottom" IsItemsHost="True" />
+                            <TabPanel Margin="16, 0, 0, 0" IsItemsHost="True" />
                         </Grid>
 
                         <ContentPresenter Grid.Row="1" ContentSource="SelectedContent" />
