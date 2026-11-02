@@ -89,7 +89,7 @@ public sealed class MainViewModel : ObservableObject
     private bool _processUsageExpanded;
     private string _processSearchText = string.Empty;
     private string _selectedProcess = string.Empty;
-    private bool _isSearchOpen;
+    private bool _isPickerOpen;
     private string _selectedExclusion = string.Empty;
     private bool _isExclusionExpanded;
     private string _activeText = string.Empty;
@@ -136,11 +136,11 @@ public sealed class MainViewModel : ObservableObject
         }
     }
 
-    /// <summary>Gets or sets a value indicating whether the candidate search field is open.</summary>
-    public bool IsSearchOpen
+    /// <summary>Gets or sets a value indicating whether the add-a-process picker is open.</summary>
+    public bool IsPickerOpen
     {
-        get => _isSearchOpen;
-        set => Set(ref _isSearchOpen, value);
+        get => _isPickerOpen;
+        set => Set(ref _isPickerOpen, value);
     }
 
     /// <summary>Gets a value indicating whether any candidate is available.</summary>

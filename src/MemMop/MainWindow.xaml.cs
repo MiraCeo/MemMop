@@ -49,6 +49,19 @@ public partial class MainWindow : Window
         {
             if (args.PropertyName == nameof(MainViewModel.CompactMode))
                 ApplyWindowSize();
+
+            // The picker sits at the bottom of a page that is taller than the window, so opening it would
+            // otherwise show a list the user cannot see. Scroll it into view once the layout has caught up.
+            if (args.PropertyName == nameof(MainViewModel.IsPickerOpen) && _viewModel.IsPickerOpen)
+            {
+                Dispatcher.BeginInvoke(
+                    new Action(() =>
+                    {
+                        SettingsScroll.UpdateLayout();
+                        SettingsScroll.ScrollToEnd();
+                    }),
+                    System.Windows.Threading.DispatcherPriority.Background);
+            }
         };
 
         Loaded += (_, _) => ApplyWindowSize();

@@ -283,7 +283,7 @@
         </TabItem>
 
         <TabItem Header="{Binding Source={x:Static core:Strings.Current}, Path=Settings}">
-            <ScrollViewer HorizontalScrollBarVisibility="Disabled" VerticalScrollBarVisibility="Auto">
+            <ScrollViewer x:Name="SettingsScroll" HorizontalScrollBarVisibility="Disabled" VerticalScrollBarVisibility="Auto">
                 <StackPanel Margin="22, 12, 22, 16">
 
                     <Border Background="{DynamicResource Nav}" CornerRadius="8" Padding="16">
@@ -377,61 +377,7 @@
 
                             <StackPanel Margin="0, 14, 0, 0"
                                         Visibility="{Binding IsExclusionExpanded, Converter={StaticResource BoolToVisibility}}">
-                                <Grid>
-                                    <Grid.ColumnDefinitions>
-                                        <ColumnDefinition Width="Auto" />
-                                        <ColumnDefinition Width="Auto" />
-                                        <ColumnDefinition Width="*" />
-                                        <ColumnDefinition Width="Auto" />
-                                    </Grid.ColumnDefinitions>
-
-                                    <ToggleButton Width="32"
-                                                  Height="32"
-                                                  VerticalAlignment="Top"
-                                                  IsChecked="{Binding IsSearchOpen}"
-                                                  Style="{StaticResource IconButton}"
-                                                  ToolTip="搜索进程">
-                                        <Path Width="13"
-                                              Height="13"
-                                              Data="M 6 1 A 5 5 0 1 0 6 11 A 5 5 0 1 0 6 1 M 9.6 9.6 L 13 13"
-                                              Stretch="Uniform"
-                                              Stroke="{DynamicResource TextMuted}"
-                                              StrokeThickness="1.3" />
-                                    </ToggleButton>
-
-                                    <TextBox Grid.Column="1"
-                                             Width="140"
-                                             Height="32"
-                                             Margin="8, 0, 0, 0"
-                                             Padding="8, 6"
-                                             VerticalAlignment="Top"
-                                             Text="{Binding ProcessSearchText, UpdateSourceTrigger=PropertyChanged}"
-                                             Visibility="{Binding IsSearchOpen, Converter={StaticResource BoolToVisibility}}" />
-
-                                    <Grid Grid.Column="2" Margin="8, 0, 0, 0">
-                                        <ListBox Height="110"
-                                                 VerticalAlignment="Top"
-                                                 ItemsSource="{Binding AvailableProcesses}"
-                                                 SelectedItem="{Binding SelectedProcess}" />
-                                        <TextBlock Height="110"
-                                                   HorizontalAlignment="Center"
-                                                   VerticalAlignment="Center"
-                                                   FontSize="11"
-                                                   Foreground="{DynamicResource InputBorder}"
-                                                   Text="无匹配的进程"
-                                                   Visibility="{Binding HasAvailableProcesses, Converter={StaticResource InverseBoolToVisibility}}" />
-                                    </Grid>
-
-                                    <Button Grid.Column="3"
-                                            Width="32"
-                                            Height="32"
-                                            Margin="8, 0, 0, 0"
-                                            VerticalAlignment="Top"
-                                            Command="{Binding AddExclusionCommand}"
-                                            Content="+" />
-                                </Grid>
-
-                                <TextBlock Margin="0, 12, 0, 5"
+                                <TextBlock Margin="0, 0, 0, 5"
                                            FontSize="10"
                                            Foreground="{DynamicResource TextMuted}"
                                            Text="排除列表" />
@@ -466,6 +412,69 @@
                                             Command="{Binding RemoveExclusionCommand}"
                                             Content="删除" />
                                 </StackPanel>
+
+                                <ToggleButton Margin="0, 12, 0, 0"
+                                              HorizontalAlignment="Left"
+                                              IsChecked="{Binding IsPickerOpen}"
+                                              Style="{StaticResource CardHeader}">
+                                    <StackPanel Orientation="Horizontal">
+                                        <Path Width="12"
+                                              Height="12"
+                                              VerticalAlignment="Center"
+                                              Data="M 6 1 A 5 5 0 1 0 6 11 A 5 5 0 1 0 6 1 M 9.6 9.6 L 13 13"
+                                              Stretch="Uniform"
+                                              Stroke="{DynamicResource TextMuted}"
+                                              StrokeThickness="1.3" />
+                                        <TextBlock Margin="8, 0, 0, 0"
+                                                   VerticalAlignment="Center"
+                                                   FontSize="12"
+                                                   Foreground="{DynamicResource TextMuted}"
+                                                   Text="添加排除" />
+                                    </StackPanel>
+                                </ToggleButton>
+
+                                <Grid Margin="0, 8, 0, 0"
+                                      Visibility="{Binding IsPickerOpen, Converter={StaticResource BoolToVisibility}}">
+                                    <Grid.RowDefinitions>
+                                        <RowDefinition Height="Auto" />
+                                        <RowDefinition Height="Auto" />
+                                    </Grid.RowDefinitions>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="*" />
+                                        <ColumnDefinition Width="Auto" />
+                                    </Grid.ColumnDefinitions>
+
+                                    <TextBox Grid.Row="0"
+                                             Grid.ColumnSpan="2"
+                                             Height="30"
+                                             Padding="8, 5"
+                                             VerticalAlignment="Top"
+                                             Text="{Binding ProcessSearchText, UpdateSourceTrigger=PropertyChanged}" />
+
+                                    <Grid Grid.Row="1" Margin="0, 6, 0, 0">
+                                        <ListBox Height="96"
+                                                 VerticalAlignment="Top"
+                                                 ItemsSource="{Binding AvailableProcesses}"
+                                                 SelectedItem="{Binding SelectedProcess}" />
+                                        <TextBlock Height="96"
+                                                   HorizontalAlignment="Center"
+                                                   VerticalAlignment="Center"
+                                                   FontSize="11"
+                                                   Foreground="{DynamicResource InputBorder}"
+                                                   Text="无匹配的进程"
+                                                   Visibility="{Binding HasAvailableProcesses, Converter={StaticResource InverseBoolToVisibility}}" />
+                                    </Grid>
+
+                                    <Button Grid.Row="1"
+                                            Grid.Column="1"
+                                            Width="32"
+                                            Height="32"
+                                            Margin="8, 6, 0, 0"
+                                            Padding="0"
+                                            VerticalAlignment="Top"
+                                            Command="{Binding AddExclusionCommand}"
+                                            Content="+" />
+                                </Grid>
                             </StackPanel>
                         </StackPanel>
                     </Border>
