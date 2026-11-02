@@ -144,6 +144,7 @@
         </Grid>
 
     <TabControl x:Name="Tabs"
+                AlternationCount="3"
                 Margin="0"
                 Visibility="{Binding CompactMode, Converter={StaticResource InverseBoolToVisibility}}">
         <TabItem Header="{Binding Source={x:Static core:Strings.Current}, Path=Home}">

@@ -162,26 +162,32 @@
             <Setter.Value>
                 <ControlTemplate TargetType="TabItem">
                     <Grid VerticalAlignment="Stretch">
-                        <Border x:Name="Chip"
-                                Background="Transparent"
-                                BorderBrush="Transparent"
-                                BorderThickness="1, 1, 1, 0"
-                                CornerRadius="8, 8, 0, 0"
-                                Padding="20, 0, 20, 0">
-                            <ContentPresenter ContentSource="Header"
-                                              HorizontalAlignment="Center"
-                                              VerticalAlignment="Center" />
-                        </Border>
+                        <ContentPresenter Margin="0, 0, 22, 0"
+                                          VerticalAlignment="Center"
+                                          ContentSource="Header"
+                                          HorizontalAlignment="Center" />
+
+                        <Rectangle x:Name="Rule"
+                                   Width="1"
+                                   Height="13"
+                                   Margin="0, 0, 0, 0"
+                                   HorizontalAlignment="Right"
+                                   VerticalAlignment="Center"
+                                   Fill="{DynamicResource Border}"
+                                   Opacity="0.8" />
                     </Grid>
                     <ControlTemplate.Triggers>
                         <Trigger Property="IsMouseOver" Value="True">
                             <Setter Property="Foreground" Value="{DynamicResource TextPrimary}" />
                         </Trigger>
                         <Trigger Property="IsSelected" Value="True">
-                            <Setter Property="Foreground" Value="{DynamicResource TextPrimary}" />
-                            <Setter TargetName="Chip" Property="Background" Value="{DynamicResource Surface}" />
-                            <Setter TargetName="Chip" Property="BorderBrush" Value="{DynamicResource InputBorder}" />
+                            <Setter Property="Foreground" Value="{DynamicResource Accent}" />
+                            <Setter Property="FontWeight" Value="Medium" />
                         </Trigger>
+                        <!-- no rule after the last tab -->
+                        <DataTrigger Binding="{Binding (ItemsControl.AlternationIndex), RelativeSource={RelativeSource TemplatedParent}}" Value="2">
+                            <Setter TargetName="Rule" Property="Visibility" Value="Collapsed" />
+                        </DataTrigger>
                     </ControlTemplate.Triggers>
                 </ControlTemplate>
             </Setter.Value>
@@ -200,9 +206,9 @@
                             <RowDefinition Height="*" />
                         </Grid.RowDefinitions>
 
-                        <!-- darker than the page: the open tab shares the page colour and merges into it -->
-                        <Grid Grid.Row="0" Background="{DynamicResource TabStrip}">
-                            <TabPanel Margin="3, 6, 0, 0" VerticalAlignment="Stretch" IsItemsHost="True" />
+                        <!-- one surface: the nav is separated by rules, not by a band -->
+                        <Grid Grid.Row="0" Background="{DynamicResource Surface}">
+                            <TabPanel Margin="22, 0, 0, 0" VerticalAlignment="Bottom" IsItemsHost="True" />
                         </Grid>
 
                         <ContentPresenter Grid.Row="1" ContentSource="SelectedContent" />
