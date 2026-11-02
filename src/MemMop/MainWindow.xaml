@@ -289,10 +289,10 @@
                     <Border Background="{DynamicResource Nav}" CornerRadius="8" Padding="16">
                         <StackPanel>
                             <TextBlock Margin="0, 0, 0, 14"
-                                       FontSize="13"
+                                       FontSize="16"
                                        FontWeight="SemiBold"
                                        Foreground="{DynamicResource TextPrimary}"
-                                       Text="设置" />
+                                       Text="通用设置" />
 
                             <Grid Margin="0, 0, 0, 12">
                                 <Grid.ColumnDefinitions>
@@ -333,9 +333,12 @@
                                 <CheckBox Margin="0, 4" Content="显示清理通知" IsChecked="{Binding ShowNotifications}" />
                                 <CheckBox Margin="0, 4, 16, 4" Content="显示已提交" IsChecked="{Binding ShowCommitted}" />
                                 <CheckBox Margin="0, 4" Content="详细内存信息" IsChecked="{Binding DetailedMemory}" />
-                                <CheckBox Margin="0, 4, 16, 4" Content="启用清理热键（Ctrl+Alt+M）" IsChecked="{Binding HotkeyEnabled}" />
                                 <CheckBox Margin="0, 4" Content="自动清理只做保守操作" IsChecked="{Binding AutoCleanSafeOnly}" />
                             </UniformGrid>
+
+                            <CheckBox Margin="0, 8, 0, 0"
+                                      Content="启用清理热键（Ctrl+Alt+M）"
+                                      IsChecked="{Binding HotkeyEnabled}" />
                         </StackPanel>
                     </Border>
 
