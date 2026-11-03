@@ -58,7 +58,9 @@ public sealed class AutoCleanPolicy
     }
 
     /// <summary>
-    /// Gets whether available memory has fallen below the threshold.
+    /// Gets whether memory usage has risen above the threshold. Usage is total minus available, so standby
+    /// memory - which is still available - does not count against the user; that is the same figure Task
+    /// Manager calls "in use", and the same direction the home page headline is written in.
     /// </summary>
     /// <param name="snapshot">The current memory state.</param>
     /// <param name="percent">The configured threshold; 0 means disabled.</param>
@@ -68,8 +70,8 @@ public sealed class AutoCleanPolicy
         if (percent <= 0 || snapshot.Total <= 0)
             return false;
 
-        var availablePercent = snapshot.Available * 100.0 / snapshot.Total;
+        var usedPercent = (snapshot.Total - snapshot.Available) * 100.0 / snapshot.Total;
 
-        return availablePercent < percent;
+        return usedPercent > percent;
     }
 }

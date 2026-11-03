@@ -104,10 +104,11 @@ public sealed class MainViewModel : ObservableObject
     private static readonly int[] IntervalStops = { 0, 15, 30, 60, 120 };
 
     /// <summary>
-    /// The low-memory stops, as a floor on available memory. The useful range is low: available memory is
-    /// free plus standby, so a healthy machine already sits around 20%, and a 60% floor would fire forever.
+    /// The usage stops, as a ceiling on memory in use. Usage is total minus available, so standby memory
+    /// does not count against the user; the range is high because a healthy machine already sits well above
+    /// half, and a 70% ceiling would fire on a machine with ten gigabytes still free.
     /// </summary>
-    private static readonly int[] ThresholdStops = { 0, 10, 15, 20, 25 };
+    private static readonly int[] ThresholdStops = { 0, 75, 80, 85, 90 };
 
     /// <summary>Gets the process rows, largest first.</summary>
     public ObservableCollection<ProcessUsage> ProcessUsageItems { get; } = new();
@@ -599,7 +600,7 @@ public sealed class MainViewModel : ObservableObject
                 parts.Add("每 " + DescribeMinutes(Settings.AutoCleanMinutes));
 
             if (Settings.LowMemoryPercent > 0)
-                parts.Add($"可用低于 {Settings.LowMemoryPercent}% 时");
+                parts.Add($"占用超过 {Settings.LowMemoryPercent}% 时");
 
             return parts.Count == 0 ? string.Empty : "自动清理：" + string.Join(" · ", parts);
         }

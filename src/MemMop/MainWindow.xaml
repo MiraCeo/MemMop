@@ -18,6 +18,7 @@
         <BooleanToVisibilityConverter x:Key="BoolToVisibility" />
         <converters:InverseBoolToVisibility x:Key="InverseBoolToVisibility" />
         <converters:ActiveIndexBrush x:Key="ActiveIndexBrush" />
+        <converters:ActiveIndexWeight x:Key="ActiveIndexWeight" />
     </Window.Resources>
 
 
@@ -391,7 +392,7 @@
                                             Value="{Binding AutoCleanIntervalIndex}" />
                                 </Grid>
 
-                                <Grid Grid.Row="1" Grid.Column="1" Margin="0, 2, 0, 0">
+                                <Grid Grid.Row="1" Grid.Column="1" Margin="0, 4, 0, 0">
                                     <Grid.ColumnDefinitions>
                                         <ColumnDefinition Width="*" />
                                         <ColumnDefinition Width="*" />
@@ -400,15 +401,20 @@
                                         <ColumnDefinition Width="*" />
                                     </Grid.ColumnDefinitions>
 
-                                    <TextBlock Grid.Column="0" HorizontalAlignment="Center" FontSize="10" Text="关闭"
+                                    <TextBlock Grid.Column="0" HorizontalAlignment="Center" FontSize="11" Text="关闭"
+                                               FontWeight="{Binding AutoCleanIntervalIndex, Converter={StaticResource ActiveIndexWeight}, ConverterParameter=0}"
                                                Foreground="{Binding AutoCleanIntervalIndex, Converter={StaticResource ActiveIndexBrush}, ConverterParameter=0}" />
-                                    <TextBlock Grid.Column="1" HorizontalAlignment="Center" FontSize="10" Text="15 分"
+                                    <TextBlock Grid.Column="1" HorizontalAlignment="Center" FontSize="11" Text="15 分"
+                                               FontWeight="{Binding AutoCleanIntervalIndex, Converter={StaticResource ActiveIndexWeight}, ConverterParameter=1}"
                                                Foreground="{Binding AutoCleanIntervalIndex, Converter={StaticResource ActiveIndexBrush}, ConverterParameter=1}" />
-                                    <TextBlock Grid.Column="2" HorizontalAlignment="Center" FontSize="10" Text="30 分"
+                                    <TextBlock Grid.Column="2" HorizontalAlignment="Center" FontSize="11" Text="30 分"
+                                               FontWeight="{Binding AutoCleanIntervalIndex, Converter={StaticResource ActiveIndexWeight}, ConverterParameter=2}"
                                                Foreground="{Binding AutoCleanIntervalIndex, Converter={StaticResource ActiveIndexBrush}, ConverterParameter=2}" />
-                                    <TextBlock Grid.Column="3" HorizontalAlignment="Center" FontSize="10" Text="1 小时"
+                                    <TextBlock Grid.Column="3" HorizontalAlignment="Center" FontSize="11" Text="1 小时"
+                                               FontWeight="{Binding AutoCleanIntervalIndex, Converter={StaticResource ActiveIndexWeight}, ConverterParameter=3}"
                                                Foreground="{Binding AutoCleanIntervalIndex, Converter={StaticResource ActiveIndexBrush}, ConverterParameter=3}" />
-                                    <TextBlock Grid.Column="4" HorizontalAlignment="Center" FontSize="10" Text="2 小时"
+                                    <TextBlock Grid.Column="4" HorizontalAlignment="Center" FontSize="11" Text="2 小时"
+                                               FontWeight="{Binding AutoCleanIntervalIndex, Converter={StaticResource ActiveIndexWeight}, ConverterParameter=4}"
                                                Foreground="{Binding AutoCleanIntervalIndex, Converter={StaticResource ActiveIndexBrush}, ConverterParameter=4}" />
                                 </Grid>
                             </Grid>
@@ -423,7 +429,7 @@
                                     <RowDefinition Height="Auto" />
                                 </Grid.RowDefinitions>
 
-                                <TextBlock Grid.Row="0" Grid.Column="0" VerticalAlignment="Center" Text="低内存阈值" />
+                                <TextBlock Grid.Row="0" Grid.Column="0" VerticalAlignment="Center" Text="占用超过" />
 
                                 <Grid Grid.Row="0" Grid.Column="1">
                                     <Grid.ColumnDefinitions>
@@ -441,7 +447,7 @@
                                             Value="{Binding AutoCleanThresholdIndex}" />
                                 </Grid>
 
-                                <Grid Grid.Row="1" Grid.Column="1" Margin="0, 2, 0, 0">
+                                <Grid Grid.Row="1" Grid.Column="1" Margin="0, 4, 0, 0">
                                     <Grid.ColumnDefinitions>
                                         <ColumnDefinition Width="*" />
                                         <ColumnDefinition Width="*" />
@@ -450,15 +456,20 @@
                                         <ColumnDefinition Width="*" />
                                     </Grid.ColumnDefinitions>
 
-                                    <TextBlock Grid.Column="0" HorizontalAlignment="Center" FontSize="10" Text="关闭"
+                                    <TextBlock Grid.Column="0" HorizontalAlignment="Center" FontSize="11" Text="关闭"
+                                               FontWeight="{Binding AutoCleanThresholdIndex, Converter={StaticResource ActiveIndexWeight}, ConverterParameter=0}"
                                                Foreground="{Binding AutoCleanThresholdIndex, Converter={StaticResource ActiveIndexBrush}, ConverterParameter=0}" />
-                                    <TextBlock Grid.Column="1" HorizontalAlignment="Center" FontSize="10" Text="10%"
+                                    <TextBlock Grid.Column="1" HorizontalAlignment="Center" FontSize="11" Text="75%"
+                                               FontWeight="{Binding AutoCleanThresholdIndex, Converter={StaticResource ActiveIndexWeight}, ConverterParameter=1}"
                                                Foreground="{Binding AutoCleanThresholdIndex, Converter={StaticResource ActiveIndexBrush}, ConverterParameter=1}" />
-                                    <TextBlock Grid.Column="2" HorizontalAlignment="Center" FontSize="10" Text="15%"
+                                    <TextBlock Grid.Column="2" HorizontalAlignment="Center" FontSize="11" Text="80%"
+                                               FontWeight="{Binding AutoCleanThresholdIndex, Converter={StaticResource ActiveIndexWeight}, ConverterParameter=2}"
                                                Foreground="{Binding AutoCleanThresholdIndex, Converter={StaticResource ActiveIndexBrush}, ConverterParameter=2}" />
-                                    <TextBlock Grid.Column="3" HorizontalAlignment="Center" FontSize="10" Text="20%"
+                                    <TextBlock Grid.Column="3" HorizontalAlignment="Center" FontSize="11" Text="85%"
+                                               FontWeight="{Binding AutoCleanThresholdIndex, Converter={StaticResource ActiveIndexWeight}, ConverterParameter=3}"
                                                Foreground="{Binding AutoCleanThresholdIndex, Converter={StaticResource ActiveIndexBrush}, ConverterParameter=3}" />
-                                    <TextBlock Grid.Column="4" HorizontalAlignment="Center" FontSize="10" Text="25%"
+                                    <TextBlock Grid.Column="4" HorizontalAlignment="Center" FontSize="11" Text="90%"
+                                               FontWeight="{Binding AutoCleanThresholdIndex, Converter={StaticResource ActiveIndexWeight}, ConverterParameter=4}"
                                                Foreground="{Binding AutoCleanThresholdIndex, Converter={StaticResource ActiveIndexBrush}, ConverterParameter=4}" />
                                 </Grid>
                             </Grid>
