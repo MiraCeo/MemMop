@@ -2,6 +2,7 @@ using System.IO;
 using System.Windows;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
+using System.Windows.Media;
 using MemMop;
 using MemMop.ViewModel;
 
@@ -44,45 +45,10 @@ internal static class Program
         // 1a. the statistics page with a line worth looking at: a sawtooth, which is what a machine that is
         // being cleaned actually looks like. The readings go through the view model, so the chart is drawn
         // from real data rather than a mock-up.
-        Render(Path.Combine(output, "statistics-chart.png"), 540, 640, false, 1, vm =>
-        {
-            const long total = 33500744909;   // 31.2 GB
-            var random = new Random(7);
-            var used = total * 0.72;
+        Render(Path.Combine(output, "statistics-chart.png"), 540, 640, false, 1, SeedStatistics);
 
-            for (var i = 0; i < 180; i++)
-            {
-                used += random.Next(-40, 90) * 1024L * 1024;
-
-                if (i == 60 || i == 120)
-                    used -= total * 0.06;
-
-                used = Math.Max(total * 0.55, Math.Min(total * 0.95, used));
-
-                vm.SampleMemory((long)used, (long)(total * 0.08), (long)(total * 0.02));
-            }
-
-            // two runs, so the "last clean" and "history" cards have something in them and the chart gets
-            // its markers. The values go through the same path a real run takes.
-            vm.RecordClean(false, TimeSpan.FromSeconds(17), new[]
-            {
-                ("清理待机缓存", 1288490189L),
-                ("仅清理低优先级待机缓存", 0L),
-                ("写回已修改内存", 429496730L),
-                ("合并重复内存页", 92274688L),
-                ("收缩系统缓存", 0L),
-                ("注册表缓存整理", 12582912L),
-                ("收缩程序驻留内存", 2254857830L),
-            });
-
-            vm.RecordClean(true, TimeSpan.FromSeconds(9), new[]
-            {
-                ("清理待机缓存", 644245094L),
-                ("写回已修改内存", 0L),
-                ("合并重复内存页", 0L),
-                ("注册表缓存整理", 0L),
-            });
-        });
+        // 1a2. the same page scrolled to the bottom, so the history card can be checked
+        Render(Path.Combine(output, "statistics-bottom.png"), 540, 640, false, 1, SeedStatistics, scrollToEnd: true);
 
         // 1b. the home page as it looks after a run: each row reports what it released. The values go
         // through AreaItem.Apply, so the screenshot shows the real formatting rather than a mock-up.
@@ -190,6 +156,51 @@ internal static class Program
         Environment.ExitCode = 1;
     }
 
+    /// <summary>
+    /// Fills the statistics page with a sawtooth and two runs. Everything goes through the view model, so the
+    /// screenshot shows what the real path produces rather than a mock-up.
+    /// </summary>
+    private static void SeedStatistics(MainViewModel vm)
+    {
+        const long total = 33500744909;   // 31.2 GB
+        var random = new Random(7);
+        var used = total * 0.72;
+
+        for (var i = 0; i < 180; i++)
+        {
+            used += random.Next(-40, 90) * 1024L * 1024;
+
+            if (i == 60 || i == 120)
+                used -= total * 0.06;
+
+            used = Math.Max(total * 0.55, Math.Min(total * 0.95, used));
+
+            vm.SampleMemory((long)used, (long)(total * 0.08), (long)(total * 0.02));
+        }
+
+        // The automatic run comes first so the newest record - the one the "last clean" card shows - is the
+        // manual one with all seven areas; an automatic run only touches the conservative subset, which is
+        // four, and that is what the card showed before this was reordered.
+        vm.RecordClean(true, TimeSpan.FromSeconds(9), new[]
+        {
+            ("清理待机缓存", 644245094L),
+            ("写回已修改内存", 0L),
+            ("合并重复内存页", 0L),
+            ("注册表缓存整理", 0L),
+        });
+
+        vm.RecordClean(false, TimeSpan.FromSeconds(17), new[]
+        {
+            ("清理待机缓存", 1288490189L),
+            ("仅清理低优先级待机缓存", 0L),
+            ("写回已修改内存", 429496730L),
+            ("合并重复内存页", 92274688L),
+            ("收缩系统缓存", 0L),
+            ("注册表缓存整理", 12582912L),
+            ("收缩程序驻留内存", 2254857830L),
+        });
+    }
+
     private static void SeedExclusions()
     {
         MemMop.Core.Settings.ExcludedProcesses.Clear();
@@ -226,7 +237,8 @@ internal static class Program
         double height,
         bool compact,
         int tab,
-        Action<MainViewModel> prepare = null)
+        Action<MainViewModel> prepare = null,
+        bool scrollToEnd = false)
     {
         var window = new MainWindow
         {
@@ -249,6 +261,17 @@ internal static class Program
             window.UpdateLayout();
         }
 
+        if (scrollToEnd)
+        {
+            var scroll = FindScrollViewer(window);
+
+            if (scroll != null)
+            {
+                scroll.ScrollToEnd();
+                window.UpdateLayout();
+            }
+        }
+
         const double scale = 1.5;
         var bitmap = new RenderTargetBitmap(
             (int)(width * scale),
@@ -266,5 +289,23 @@ internal static class Program
         encoder.Save(stream);
 
         window.Close();
+    }
+
+    private static System.Windows.Controls.ScrollViewer FindScrollViewer(DependencyObject root)
+    {
+        for (var i = 0; i < VisualTreeHelper.GetChildrenCount(root); i++)
+        {
+            var child = VisualTreeHelper.GetChild(root, i);
+
+            if (child is System.Windows.Controls.ScrollViewer found)
+                return found;
+
+            var nested = FindScrollViewer(child);
+
+            if (nested != null)
+                return nested;
+        }
+
+        return null;
     }
 }

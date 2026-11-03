@@ -163,6 +163,19 @@ public sealed class MainViewModel : ObservableObject
         private set => Set(ref _chartMaximum, value);
     }
 
+    /// <summary>Gets the label for the top of the chart, so the line's height can be read as a number.</summary>
+    public string ChartMaxLabel => _chartMaximum <= 0
+        ? string.Empty
+        : string.Format(System.Globalization.CultureInfo.InvariantCulture, "{0:0.#} GB", _chartMaximum / (1024d * 1024 * 1024));
+
+    /// <summary>Gets the label for the left edge of the chart: how far back the window reaches.</summary>
+    public string ChartStartLabel => _chartWindowIndex switch
+    {
+        0 => "-5 分钟",
+        1 => "-15 分钟",
+        _ => "-1 小时",
+    };
+
     /// <summary>Gets a value indicating whether there are enough readings to draw a line.</summary>
     public bool HasChartData => _memory.Count >= 2;
 
@@ -173,7 +186,10 @@ public sealed class MainViewModel : ObservableObject
         set
         {
             if (Set(ref _chartWindowIndex, value))
+            {
+                Raise(nameof(ChartStartLabel));
                 RefreshChart();
+            }
         }
     }
 
@@ -378,6 +394,7 @@ public sealed class MainViewModel : ObservableObject
             Raise(nameof(ChartValues));
             Raise(nameof(ChartMarkers));
             Raise(nameof(ChartMaximum));
+            Raise(nameof(ChartMaxLabel));
             Raise(nameof(HasChartData));
 
             return;
@@ -412,6 +429,7 @@ public sealed class MainViewModel : ObservableObject
         Raise(nameof(ChartValues));
         Raise(nameof(ChartMarkers));
         Raise(nameof(ChartMaximum));
+        Raise(nameof(ChartMaxLabel));
         Raise(nameof(HasChartData));
     }
 
