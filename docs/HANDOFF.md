@@ -192,11 +192,27 @@ origin/main 072e437  chore: project founding            2026-11-01 16:16
 
 仍是三个 TextBlock 堆着，没有按卡片规则排。文案与 `Strings.AboutText` 重复。
 
-### 6. 交付形态
+### 6. 图标（2026-11-03 已完成，留作记录）
+
+`src/MemMop/Assets/MemMop.ico`，七个尺寸（16/20/24/32/48/64/256），从 `MemMop-256.png` 生成。
+
+**两个坑**：
+
+- **16 和 20 用简化版**：扫帚的刷毛分隔线在那个尺寸下比一个像素还细，缩下去变成噪点。
+  生成脚本把黄色区域做一次形态学闭运算填掉细线，只留粗外框。
+- **128 及以下必须存成未压缩位图**：`System.Drawing.Icon`（托盘要用）在 .NET Framework 上
+  **读不了 PNG 压缩的 ico 条目**，会返回彩色噪点。256 用 PNG，其余用 32bpp DIB。
+
+**接了三处**：csproj 的 `ApplicationIcon`（exe 和任务栏）、`MainWindow.Icon`（pack URI）、
+`TrayService.LoadIcon()`（托盘，按 `SystemInformation.SmallIconSize` 取对应尺寸）。
+
+**代价**：exe 从 127.5 KB 涨到 239.5 KB——图标嵌了两份（Win32 资源 + WPF 资源）。
+
+### 7. 交付形态
 
 图标仍是系统默认、没有安装包、没有签名、`app.manifest` 已要求 `requireAdministrator`。
 
-### 7. 仓库卫生（已完成）
+### 8. 仓库卫生（已完成）
 
 3 个被 git 跟踪的 WPF 临时工程已 `git rm`，`.gitignore` 加了 `*_wpftmp.csproj`。
 

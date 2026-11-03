@@ -31,7 +31,7 @@ public sealed class TrayService : ITrayService
     {
         _icon = new NotifyIcon
         {
-            Icon = SystemIcons.Application,
+            Icon = LoadIcon(),
             Text = "MemMop",
             Visible = true,
         };
@@ -114,5 +114,30 @@ public sealed class TrayService : ITrayService
         _icon.Visible = false;
         _icon.Dispose();
         _icon = null;
+    }
+
+    /// <summary>
+    /// Loads the program's own icon at the size the tray asks for. The generic Windows icon is the fallback
+    /// rather than the default: a program with no face of its own is hard to find in a tray full of them.
+    /// </summary>
+    private static Icon LoadIcon()
+    {
+        try
+        {
+            var resource = System.Windows.Application.GetResourceStream(
+                new Uri("pack://application:,,,/MemMop;component/Assets/MemMop.ico"));
+
+            if (resource == null)
+                return SystemIcons.Application;
+
+            using var stream = resource.Stream;
+            using var source = new Icon(stream);
+
+            return new Icon(source, SystemInformation.SmallIconSize);
+        }
+        catch (Exception)
+        {
+            return SystemIcons.Application;
+        }
     }
 }
