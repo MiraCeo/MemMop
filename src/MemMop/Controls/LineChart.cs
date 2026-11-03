@@ -70,11 +70,6 @@ public sealed class LineChart : FrameworkElement
         nameof(Threshold), typeof(double), typeof(LineChart),
         new FrameworkPropertyMetadata(0d, FrameworkPropertyMetadataOptions.AffectsRender));
 
-    /// <summary>Identifies the <see cref="WarnBrush"/> property.</summary>
-    public static readonly DependencyProperty WarnBrushProperty = DependencyProperty.Register(
-        nameof(WarnBrush), typeof(Brush), typeof(LineChart),
-        new FrameworkPropertyMetadata(null, FrameworkPropertyMetadataOptions.AffectsRender));
-
     /// <summary>Identifies the <see cref="TooltipBrush"/> property.</summary>
     public static readonly DependencyProperty TooltipBrushProperty = DependencyProperty.Register(
         nameof(TooltipBrush), typeof(Brush), typeof(LineChart),
@@ -158,13 +153,6 @@ public sealed class LineChart : FrameworkElement
     {
         get => (double)GetValue(ThresholdProperty);
         set => SetValue(ThresholdProperty, value);
-    }
-
-    /// <summary>Gets or sets the colour used above the threshold; null leaves the line one colour.</summary>
-    public Brush WarnBrush
-    {
-        get => (Brush)GetValue(WarnBrushProperty);
-        set => SetValue(WarnBrushProperty, value);
     }
 
     /// <summary>Gets or sets the background of the hover label; null draws the text bare.</summary>
@@ -315,30 +303,10 @@ public sealed class LineChart : FrameworkElement
 
             geometry.Figures.Add(area);
 
-            // the area is a hint, not a second reading: the line carries the value. Above the threshold it
-            // changes colour, so "when was it over the line" is a shape rather than a comparison.
-            if (Threshold > 0 && WarnBrush != null)
-            {
-                var split = plotHeight - Math.Min(1, Threshold / 100) * plotHeight;
-
-                context.PushClip(new RectangleGeometry(new Rect(LabelWidth, 0, plotWidth, split)));
-                context.PushOpacity(0.30);
-                context.DrawGeometry(WarnBrush, null, geometry);
-                context.Pop();
-                context.Pop();
-
-                context.PushClip(new RectangleGeometry(new Rect(LabelWidth, split, plotWidth, plotHeight - split)));
-                context.PushOpacity(0.12);
-                context.DrawGeometry(FillBrush, null, geometry);
-                context.Pop();
-                context.Pop();
-            }
-            else
-            {
-                context.PushOpacity(0.12);
-                context.DrawGeometry(FillBrush, null, geometry);
-                context.Pop();
-            }
+            // the area is a hint, not a second reading: the line carries the value
+            context.PushOpacity(0.12);
+            context.DrawGeometry(FillBrush, null, geometry);
+            context.Pop();
         }
 
         var line = new PathFigure { StartPoint = points[0] };
@@ -351,15 +319,6 @@ public sealed class LineChart : FrameworkElement
         stroke.Figures.Add(line);
         context.DrawGeometry(null, new Pen(LineBrush, 1.5) { LineJoin = PenLineJoin.Round }, stroke);
 
-        if (Threshold > 0 && WarnBrush != null)
-        {
-            var split = plotHeight - Math.Min(1, Threshold / 100) * plotHeight;
-
-            context.PushClip(new RectangleGeometry(new Rect(LabelWidth, 0, plotWidth, split)));
-            context.DrawGeometry(null, new Pen(WarnBrush, 1.5) { LineJoin = PenLineJoin.Round }, stroke);
-            context.Pop();
-        }
-
         // the newest reading gets a dot, so "now" is a place on the line and not just a number in the title
         var last = points[points.Length - 1];
 
@@ -368,8 +327,6 @@ public sealed class LineChart : FrameworkElement
         if (MarkerBrush == null)
             return;
 
-        var markerPen = new Pen(MarkerBrush, 1);
-
         foreach (var index in Numbers(Markers))
         {
             var i = (int)Math.Round(index);
@@ -377,10 +334,11 @@ public sealed class LineChart : FrameworkElement
             if (i < 0 || i >= points.Length)
                 continue;
 
-            context.DrawLine(markerPen, new Point(points[i].X, 0), new Point(points[i].X, plotHeight));
+            // a dot where the line lands, not a line down the whole plot: the drop is already a shape, and a
+            // full-height rule reads as another grid line rather than as an event
+            context.DrawEllipse(null, new Pen(LineBrush, 1.5), points[i], 3, 3);
 
-            // how much the clean actually freed, measured across the marker: the marker says when, this
-            // says whether it was worth doing
+            // how much the clean actually freed, measured across the drop
             if (LabelBrush == null || i == 0)
                 continue;
 
@@ -390,7 +348,7 @@ public sealed class LineChart : FrameworkElement
                 continue;
 
             var freed = Label("-" + drop.ToString("0", CultureInfo.InvariantCulture) + "%", typeface, dpi);
-            var freedLeft = Math.Max(LabelWidth, Math.Min(ActualWidth - freed.Width, points[i].X + 3));
+            var freedLeft = Math.Max(LabelWidth, Math.Min(ActualWidth - freed.Width, points[i].X + 5));
 
             context.DrawText(freed, new Point(freedLeft, points[i].Y + 2));
         }

@@ -353,7 +353,6 @@
                                                 GridBrush="{DynamicResource Border}"
                                                 LabelBrush="{DynamicResource TextMuted}"
                                                 ThresholdBrush="{DynamicResource TextMuted}"
-                                                WarnBrush="{DynamicResource Warn}"
                                                 TooltipBrush="{DynamicResource Surface}"
                                                 Visibility="{Binding HasChartData, Converter={StaticResource BoolToVisibility}}" />
 

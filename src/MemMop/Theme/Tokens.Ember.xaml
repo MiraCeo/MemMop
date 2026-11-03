@@ -10,7 +10,6 @@
     <SolidColorBrush x:Key="TextMuted" Color="#A08573" />
     <SolidColorBrush x:Key="Accent" Color="#FF5F2E" />
     <SolidColorBrush x:Key="SegActive" Color="#FF5F2E" />
-    <SolidColorBrush x:Key="Warn" Color="#FF3B30" />
     <SolidColorBrush x:Key="SegModified" Color="#9C8272" />
     <SolidColorBrush x:Key="SegStandby" Color="#5F8598" />
     <SolidColorBrush x:Key="SegFree" Color="#7FA95B" />
