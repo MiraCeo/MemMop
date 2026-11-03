@@ -321,27 +321,43 @@
 
                     <Border Background="{DynamicResource Nav}" CornerRadius="8" Padding="16">
                         <StackPanel>
-                            <TextBlock FontSize="16"
-                                       FontWeight="SemiBold"
-                                       Foreground="{DynamicResource TextPrimary}"
-                                       Text="内存占用" />
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*" />
+                                    <ColumnDefinition Width="Auto" />
+                                </Grid.ColumnDefinitions>
+
+                                <TextBlock FontSize="16"
+                                           FontWeight="SemiBold"
+                                           Foreground="{DynamicResource TextPrimary}"
+                                           Text="内存占用" />
+
+                                <TextBlock Grid.Column="1"
+                                           VerticalAlignment="Center"
+                                           FontSize="16"
+                                           FontWeight="SemiBold"
+                                           Foreground="{DynamicResource Accent}"
+                                           Text="{Binding ChartCurrentLabel}" />
+                            </Grid>
 
                             <TextBlock Margin="0, 4, 0, 12"
                                        FontSize="11"
                                        Foreground="{DynamicResource TextMuted}"
                                        TextWrapping="Wrap"
-                                       Text="纵轴是整机内存，所以线的高度就是占用率。竖线是清理发生的位置。" />
+                                       Text="纵轴是整机内存的百分比，横轴是时间。竖线是清理发生的位置，虚线是自动清理的阈值。" />
 
                             <controls:LineChart Height="140"
                                                 Values="{Binding ChartValues}"
                                                 Maximum="{Binding ChartMaximum}"
                                                 Markers="{Binding ChartMarkers}"
                                                 WindowMinutes="{Binding ChartWindowMinutes}"
+                                                Threshold="{Binding ChartThreshold}"
                                                 LineBrush="{DynamicResource Accent}"
                                                 FillBrush="{DynamicResource Accent}"
                                                 MarkerBrush="{DynamicResource TextMuted}"
                                                 GridBrush="{DynamicResource Border}"
                                                 LabelBrush="{DynamicResource TextMuted}"
+                                                ThresholdBrush="{DynamicResource TextMuted}"
                                                 Visibility="{Binding HasChartData, Converter={StaticResource BoolToVisibility}}" />
 
                             <Grid Height="140"

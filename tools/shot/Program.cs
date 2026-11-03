@@ -45,10 +45,18 @@ internal static class Program
         // 1a. the statistics page with a line worth looking at: a sawtooth, which is what a machine that is
         // being cleaned actually looks like. The readings go through the view model, so the chart is drawn
         // from real data rather than a mock-up.
+        // the threshold line only exists when automatic cleaning has a memory trigger, so the preview turns
+        // one on for the two statistics renders and puts it back afterwards
+        var threshold = MemMop.Core.Settings.LowMemoryPercent;
+
+        MemMop.Core.Settings.LowMemoryPercent = 75;
+
         Render(Path.Combine(output, "statistics-chart.png"), 540, 640, false, 1, SeedStatistics);
 
         // 1a2. the same page scrolled to the bottom, so the history card can be checked
         Render(Path.Combine(output, "statistics-bottom.png"), 540, 640, false, 1, SeedStatistics, scrollToEnd: true);
+
+        MemMop.Core.Settings.LowMemoryPercent = threshold;
 
         // 1b. the home page as it looks after a run: each row reports what it released. The values go
         // through AreaItem.Apply, so the screenshot shows the real formatting rather than a mock-up.
@@ -164,7 +172,12 @@ internal static class Program
     {
         const long total = 33500744909;   // 31.2 GB
         var random = new Random(7);
-        var used = total * 0.72;
+        var used = total * 0.78;
+
+        // the readings are stamped backwards from now, so the markers land where the drops are instead of
+        // piling up at the right edge
+        var now = DateTime.Now;
+        // TimeSpan * int is not available on net472, so the offset is built in seconds
 
         for (var i = 0; i < 180; i++)
         {
@@ -178,7 +191,7 @@ internal static class Program
             // the three parts have to add up to the total, or the chart's vertical axis is wrong
             var standby = (long)(total * 0.08);
 
-            vm.SampleMemory((long)used, standby, total - (long)used - standby);
+            vm.SampleMemory((long)used, standby, total - (long)used - standby, now.AddSeconds(-5 * (179 - i)));
         }
 
         // The automatic run comes first so the newest record - the one the "last clean" card shows - is the
@@ -190,7 +203,7 @@ internal static class Program
             ("写回已修改内存", 0L),
             ("合并重复内存页", 0L),
             ("注册表缓存整理", 0L),
-        });
+        }, now.AddSeconds(-5 * (179 - 60)));
 
         vm.RecordClean(false, TimeSpan.FromSeconds(17), new[]
         {
@@ -201,7 +214,7 @@ internal static class Program
             ("收缩系统缓存", 0L),
             ("注册表缓存整理", 12582912L),
             ("收缩程序驻留内存", 2254857830L),
-        });
+        }, now.AddSeconds(-5 * (179 - 120)));
     }
 
     private static void SeedExclusions()

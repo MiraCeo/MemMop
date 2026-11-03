@@ -65,6 +65,16 @@ public sealed class LineChart : FrameworkElement
         nameof(GridBrush), typeof(Brush), typeof(LineChart),
         new FrameworkPropertyMetadata(null, FrameworkPropertyMetadataOptions.AffectsRender));
 
+    /// <summary>Identifies the <see cref="Threshold"/> property.</summary>
+    public static readonly DependencyProperty ThresholdProperty = DependencyProperty.Register(
+        nameof(Threshold), typeof(double), typeof(LineChart),
+        new FrameworkPropertyMetadata(0d, FrameworkPropertyMetadataOptions.AffectsRender));
+
+    /// <summary>Identifies the <see cref="ThresholdBrush"/> property.</summary>
+    public static readonly DependencyProperty ThresholdBrushProperty = DependencyProperty.Register(
+        nameof(ThresholdBrush), typeof(Brush), typeof(LineChart),
+        new FrameworkPropertyMetadata(null, FrameworkPropertyMetadataOptions.AffectsRender));
+
     /// <summary>Identifies the <see cref="LabelBrush"/> property.</summary>
     public static readonly DependencyProperty LabelBrushProperty = DependencyProperty.Register(
         nameof(LabelBrush), typeof(Brush), typeof(LineChart),
@@ -133,6 +143,20 @@ public sealed class LineChart : FrameworkElement
         set => SetValue(LabelBrushProperty, value);
     }
 
+    /// <summary>Gets or sets the usage percentage at which automatic cleaning fires; 0 draws no line.</summary>
+    public double Threshold
+    {
+        get => (double)GetValue(ThresholdProperty);
+        set => SetValue(ThresholdProperty, value);
+    }
+
+    /// <summary>Gets or sets the colour of the threshold line; null draws none.</summary>
+    public Brush ThresholdBrush
+    {
+        get => (Brush)GetValue(ThresholdBrushProperty);
+        set => SetValue(ThresholdBrushProperty, value);
+    }
+
     /// <inheritdoc/>
     protected override void OnRender(DrawingContext context)
     {
@@ -162,7 +186,7 @@ public sealed class LineChart : FrameworkElement
             if (LabelBrush == null)
                 continue;
 
-            var text = Label(FormatSize(maximum * ratio), typeface, dpi);
+            var text = Label(FormatPercent(ratio), typeface, dpi);
 
             // the top and bottom labels would hang outside the plot, so they are pulled back inside
             var top = Math.Max(0, Math.Min(plotHeight - text.Height, y - text.Height / 2));
@@ -186,7 +210,7 @@ public sealed class LineChart : FrameworkElement
             var text = Label(
                 i == Divisions
                     ? "现在"
-                    : "-" + minutes.ToString("0", CultureInfo.InvariantCulture) + " 分钟",
+                    : minutes.ToString("0", CultureInfo.InvariantCulture) + " 分钟前",
                 typeface,
                 dpi);
 
@@ -194,6 +218,23 @@ public sealed class LineChart : FrameworkElement
             var left = Math.Max(0, Math.Min(ActualWidth - text.Width, x - text.Width / 2));
 
             context.DrawText(text, new Point(left, plotHeight + 2));
+        }
+
+        // where automatic cleaning fires: the line crossing this is the whole point of the chart
+        if (Threshold > 0 && ThresholdBrush != null)
+        {
+            var y = plotHeight - Math.Min(1, Threshold / 100) * plotHeight;
+            var pen = new Pen(ThresholdBrush, 1) { DashStyle = new DashStyle(new double[] { 3, 3 }, 0) };
+
+            context.DrawLine(pen, new Point(LabelWidth, y), new Point(ActualWidth, y));
+
+            if (LabelBrush != null)
+            {
+                var text = Label("自动清理 " + Threshold.ToString("0", CultureInfo.InvariantCulture) + "%", typeface, dpi);
+
+                // below the line, where the readings are not: the space above it is where the data lives
+                context.DrawText(text, new Point(LabelWidth + 2, y + 1));
+            }
         }
 
         var points = new Point[values.Length];
@@ -235,6 +276,11 @@ public sealed class LineChart : FrameworkElement
         stroke.Figures.Add(line);
         context.DrawGeometry(null, new Pen(LineBrush, 1.5) { LineJoin = PenLineJoin.Round }, stroke);
 
+        // the newest reading gets a dot, so "now" is a place on the line and not just a number in the title
+        var last = points[points.Length - 1];
+
+        context.DrawEllipse(LineBrush, null, last, 2.5, 2.5);
+
         if (MarkerBrush == null)
             return;
 
@@ -248,6 +294,21 @@ public sealed class LineChart : FrameworkElement
                 continue;
 
             context.DrawLine(markerPen, new Point(points[i].X, 0), new Point(points[i].X, plotHeight));
+
+            // how much the clean actually freed, measured across the marker: the marker says when, this
+            // says whether it was worth doing
+            if (LabelBrush == null || i == 0)
+                continue;
+
+            var drop = (values[i - 1] - values[i]) / maximum * 100;
+
+            if (drop < 1)
+                continue;
+
+            var freed = Label("-" + drop.ToString("0", CultureInfo.InvariantCulture) + "%", typeface, dpi);
+            var freedLeft = Math.Max(LabelWidth, Math.Min(ActualWidth - freed.Width, points[i].X + 3));
+
+            context.DrawText(freed, new Point(freedLeft, points[i].Y + 2));
         }
     }
 
@@ -261,17 +322,8 @@ public sealed class LineChart : FrameworkElement
             LabelBrush,
             dpi);
 
-    private static string FormatSize(double bytes)
-    {
-        const double gigabyte = 1024d * 1024 * 1024;
-
-        if (bytes <= 0)
-            return "0";
-
-        return bytes >= gigabyte
-            ? (bytes / gigabyte).ToString("0.#", CultureInfo.InvariantCulture) + " GB"
-            : (bytes / (1024d * 1024)).ToString("0", CultureInfo.InvariantCulture) + " MB";
-    }
+    private static string FormatPercent(double ratio)
+        => (ratio * 100).ToString("0", CultureInfo.InvariantCulture) + "%";
 
     private static double[] Numbers(string text)
     {

@@ -171,6 +171,26 @@ public sealed class MainViewModel : ObservableObject
         _ => 60,
     };
 
+    /// <summary>Gets the usage percentage at which automatic cleaning fires; 0 when it is off.</summary>
+    public double ChartThreshold => Settings.LowMemoryPercent;
+
+    /// <summary>Gets the newest reading as a percentage, so the card can say where the line ends.</summary>
+    public string ChartCurrentLabel
+    {
+        get
+        {
+            if (_memory.Count == 0)
+                return string.Empty;
+
+            var last = _memory[_memory.Count - 1];
+            var total = last.Used + last.Standby + last.Free;
+
+            return total <= 0
+                ? string.Empty
+                : (last.Used * 100.0 / total).ToString("0", System.Globalization.CultureInfo.InvariantCulture) + "%";
+        }
+    }
+
     /// <summary>Gets a value indicating whether there are enough readings to draw a line.</summary>
     public bool HasChartData => _memory.Count >= 2;
 
@@ -366,8 +386,19 @@ public sealed class MainViewModel : ObservableObject
     /// <param name="standby">Standby memory, in bytes.</param>
     /// <param name="free">Free memory, in bytes.</param>
     public void SampleMemory(long used, long standby, long free)
+        => SampleMemory(used, standby, free, DateTime.Now);
+
+    /// <summary>
+    /// Records a reading taken at a known time, so a caller replaying history does not have to pretend it all
+    /// happened just now.
+    /// </summary>
+    /// <param name="used">Memory in use, in bytes.</param>
+    /// <param name="standby">Standby memory, in bytes.</param>
+    /// <param name="free">Free memory, in bytes.</param>
+    /// <param name="at">When the reading was taken.</param>
+    public void SampleMemory(long used, long standby, long free, DateTime at)
     {
-        _memory.Add(new MemorySample(DateTime.Now, used, standby, free));
+        _memory.Add(new MemorySample(at, used, standby, free));
 
         RefreshChart();
     }
@@ -390,6 +421,7 @@ public sealed class MainViewModel : ObservableObject
             Raise(nameof(ChartMarkers));
             Raise(nameof(ChartMaximum));
             Raise(nameof(HasChartData));
+        Raise(nameof(ChartCurrentLabel));
 
             return;
         }
@@ -424,6 +456,7 @@ public sealed class MainViewModel : ObservableObject
         Raise(nameof(ChartMarkers));
         Raise(nameof(ChartMaximum));
         Raise(nameof(HasChartData));
+        Raise(nameof(ChartCurrentLabel));
     }
 
     /// <summary>
@@ -467,9 +500,10 @@ public sealed class MainViewModel : ObservableObject
     /// <param name="automatic">Whether the policy started the run.</param>
     /// <param name="duration">How long it took.</param>
     /// <param name="areas">What each area released, in bytes.</param>
-    public void RecordClean(bool automatic, TimeSpan duration, IReadOnlyList<(string Area, long Freed)> areas)
+    /// <param name="at">When the run finished; the current time when omitted.</param>
+    public void RecordClean(bool automatic, TimeSpan duration, IReadOnlyList<(string Area, long Freed)> areas, DateTime? at = null)
     {
-        _cleans.Add(new CleanRecord(DateTime.Now, automatic, duration, areas));
+        _cleans.Add(new CleanRecord(at ?? DateTime.Now, automatic, duration, areas));
 
         RefreshStatistics();
         RefreshChart();
