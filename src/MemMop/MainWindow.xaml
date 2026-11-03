@@ -340,13 +340,8 @@
                                            Text="{Binding ChartCurrentLabel}" />
                             </Grid>
 
-                            <TextBlock Margin="0, 4, 0, 12"
-                                       FontSize="11"
-                                       Foreground="{DynamicResource TextMuted}"
-                                       TextWrapping="Wrap"
-                                       Text="纵轴是整机内存的百分比，横轴是时间。竖线是清理发生的位置，虚线是自动清理的阈值。" />
-
                             <controls:LineChart Height="140"
+                                                Margin="0, 12, 0, 0"
                                                 Values="{Binding ChartValues}"
                                                 Maximum="{Binding ChartMaximum}"
                                                 Markers="{Binding ChartMarkers}"
@@ -358,6 +353,8 @@
                                                 GridBrush="{DynamicResource Border}"
                                                 LabelBrush="{DynamicResource TextMuted}"
                                                 ThresholdBrush="{DynamicResource TextMuted}"
+                                                WarnBrush="{DynamicResource Warn}"
+                                                TooltipBrush="{DynamicResource Surface}"
                                                 Visibility="{Binding HasChartData, Converter={StaticResource BoolToVisibility}}" />
 
                             <Grid Height="140"

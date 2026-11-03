@@ -70,6 +70,16 @@ public sealed class LineChart : FrameworkElement
         nameof(Threshold), typeof(double), typeof(LineChart),
         new FrameworkPropertyMetadata(0d, FrameworkPropertyMetadataOptions.AffectsRender));
 
+    /// <summary>Identifies the <see cref="WarnBrush"/> property.</summary>
+    public static readonly DependencyProperty WarnBrushProperty = DependencyProperty.Register(
+        nameof(WarnBrush), typeof(Brush), typeof(LineChart),
+        new FrameworkPropertyMetadata(null, FrameworkPropertyMetadataOptions.AffectsRender));
+
+    /// <summary>Identifies the <see cref="TooltipBrush"/> property.</summary>
+    public static readonly DependencyProperty TooltipBrushProperty = DependencyProperty.Register(
+        nameof(TooltipBrush), typeof(Brush), typeof(LineChart),
+        new FrameworkPropertyMetadata(null, FrameworkPropertyMetadataOptions.AffectsRender));
+
     /// <summary>Identifies the <see cref="ThresholdBrush"/> property.</summary>
     public static readonly DependencyProperty ThresholdBrushProperty = DependencyProperty.Register(
         nameof(ThresholdBrush), typeof(Brush), typeof(LineChart),
@@ -150,11 +160,53 @@ public sealed class LineChart : FrameworkElement
         set => SetValue(ThresholdProperty, value);
     }
 
+    /// <summary>Gets or sets the colour used above the threshold; null leaves the line one colour.</summary>
+    public Brush WarnBrush
+    {
+        get => (Brush)GetValue(WarnBrushProperty);
+        set => SetValue(WarnBrushProperty, value);
+    }
+
+    /// <summary>Gets or sets the background of the hover label; null draws the text bare.</summary>
+    public Brush TooltipBrush
+    {
+        get => (Brush)GetValue(TooltipBrushProperty);
+        set => SetValue(TooltipBrushProperty, value);
+    }
+
     /// <summary>Gets or sets the colour of the threshold line; null draws none.</summary>
     public Brush ThresholdBrush
     {
         get => (Brush)GetValue(ThresholdBrushProperty);
         set => SetValue(ThresholdBrushProperty, value);
+    }
+
+    /// <summary>Identifies the <see cref="HoverIndex"/> property.</summary>
+    public static readonly DependencyProperty HoverIndexProperty = DependencyProperty.Register(
+        nameof(HoverIndex), typeof(int), typeof(LineChart),
+        new FrameworkPropertyMetadata(-1, FrameworkPropertyMetadataOptions.AffectsRender));
+
+    /// <summary>Gets or sets which reading the pointer is on; -1 when it is not on the chart.</summary>
+    public int HoverIndex
+    {
+        get => (int)GetValue(HoverIndexProperty);
+        set => SetValue(HoverIndexProperty, value);
+    }
+
+    /// <inheritdoc/>
+    protected override void OnMouseMove(System.Windows.Input.MouseEventArgs e)
+    {
+        base.OnMouseMove(e);
+
+        HoverIndex = IndexAt(e.GetPosition(this).X);
+    }
+
+    /// <inheritdoc/>
+    protected override void OnMouseLeave(System.Windows.Input.MouseEventArgs e)
+    {
+        base.OnMouseLeave(e);
+
+        HoverIndex = -1;
     }
 
     /// <inheritdoc/>
@@ -169,6 +221,9 @@ public sealed class LineChart : FrameworkElement
 
         if (values.Length < 2 || maximum <= 0 || plotWidth <= 0 || plotHeight <= 0)
             return;
+
+        // a transparent fill so the whole control answers the pointer, not just the drawn line
+        context.DrawRectangle(Brushes.Transparent, null, new Rect(0, 0, ActualWidth, ActualHeight));
 
         var typeface = new Typeface("Segoe UI");
         var dpi = VisualTreeHelper.GetDpi(this).PixelsPerDip;
@@ -260,10 +315,30 @@ public sealed class LineChart : FrameworkElement
 
             geometry.Figures.Add(area);
 
-            // the area is a hint, not a second reading: the line carries the value
-            context.PushOpacity(0.12);
-            context.DrawGeometry(FillBrush, null, geometry);
-            context.Pop();
+            // the area is a hint, not a second reading: the line carries the value. Above the threshold it
+            // changes colour, so "when was it over the line" is a shape rather than a comparison.
+            if (Threshold > 0 && WarnBrush != null)
+            {
+                var split = plotHeight - Math.Min(1, Threshold / 100) * plotHeight;
+
+                context.PushClip(new RectangleGeometry(new Rect(LabelWidth, 0, plotWidth, split)));
+                context.PushOpacity(0.30);
+                context.DrawGeometry(WarnBrush, null, geometry);
+                context.Pop();
+                context.Pop();
+
+                context.PushClip(new RectangleGeometry(new Rect(LabelWidth, split, plotWidth, plotHeight - split)));
+                context.PushOpacity(0.12);
+                context.DrawGeometry(FillBrush, null, geometry);
+                context.Pop();
+                context.Pop();
+            }
+            else
+            {
+                context.PushOpacity(0.12);
+                context.DrawGeometry(FillBrush, null, geometry);
+                context.Pop();
+            }
         }
 
         var line = new PathFigure { StartPoint = points[0] };
@@ -275,6 +350,15 @@ public sealed class LineChart : FrameworkElement
 
         stroke.Figures.Add(line);
         context.DrawGeometry(null, new Pen(LineBrush, 1.5) { LineJoin = PenLineJoin.Round }, stroke);
+
+        if (Threshold > 0 && WarnBrush != null)
+        {
+            var split = plotHeight - Math.Min(1, Threshold / 100) * plotHeight;
+
+            context.PushClip(new RectangleGeometry(new Rect(LabelWidth, 0, plotWidth, split)));
+            context.DrawGeometry(null, new Pen(WarnBrush, 1.5) { LineJoin = PenLineJoin.Round }, stroke);
+            context.Pop();
+        }
 
         // the newest reading gets a dot, so "now" is a place on the line and not just a number in the title
         var last = points[points.Length - 1];
@@ -310,6 +394,58 @@ public sealed class LineChart : FrameworkElement
 
             context.DrawText(freed, new Point(freedLeft, points[i].Y + 2));
         }
+
+        var hover = HoverIndex;
+
+        if (hover < 0 || hover >= points.Length)
+            return;
+
+        // where the pointer is: a guide up the plot, a dot on the line, and the reading in words
+        var hovered = points[hover];
+
+        context.DrawLine(
+            new Pen(LabelBrush ?? LineBrush, 1) { DashStyle = new DashStyle(new double[] { 2, 2 }, 0) },
+            new Point(hovered.X, 0),
+            new Point(hovered.X, plotHeight));
+
+        context.DrawEllipse(LineBrush, null, hovered, 3, 3);
+
+        if (LabelBrush == null)
+            return;
+
+        var ago = WindowMinutes * (1 - (double)hover / (points.Length - 1));
+        var when = ago < 0.5
+            ? "现在"
+            : ago.ToString("0", CultureInfo.InvariantCulture) + " 分钟前";
+
+        var reading = Label(
+            when + " · " + (values[hover] / maximum * 100).ToString("0", CultureInfo.InvariantCulture) + "%",
+            typeface,
+            dpi);
+
+        var boxLeft = Math.Max(LabelWidth, Math.Min(ActualWidth - reading.Width - 8, hovered.X - reading.Width / 2 - 4));
+        var boxTop = Math.Max(0, hovered.Y - reading.Height - 10);
+
+        if (TooltipBrush != null)
+            context.DrawRoundedRectangle(TooltipBrush, null, new Rect(boxLeft, boxTop, reading.Width + 8, reading.Height + 4), 3, 3);
+
+        context.DrawText(reading, new Point(boxLeft + 4, boxTop + 2));
+    }
+
+    private int IndexAt(double x)
+    {
+        var values = Numbers(Values);
+        var plotWidth = ActualWidth - LabelWidth;
+
+        if (values.Length < 2 || plotWidth <= 0)
+            return -1;
+
+        var ratio = (x - LabelWidth) / plotWidth;
+
+        if (ratio < -0.02 || ratio > 1.02)
+            return -1;
+
+        return Math.Max(0, Math.Min(values.Length - 1, (int)Math.Round(ratio * (values.Length - 1))));
     }
 
     private FormattedText Label(string text, Typeface typeface, double dpi)

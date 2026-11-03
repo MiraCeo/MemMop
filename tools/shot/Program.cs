@@ -56,6 +56,9 @@ internal static class Program
         // 1a2. the same page scrolled to the bottom, so the history card can be checked
         Render(Path.Combine(output, "statistics-bottom.png"), 540, 640, false, 1, SeedStatistics, scrollToEnd: true);
 
+        // 1a3. the pointer resting on the chart, so the hover reading can be checked
+        Render(Path.Combine(output, "statistics-hover.png"), 540, 640, false, 1, SeedStatistics, hoverIndex: 96);
+
         MemMop.Core.Settings.LowMemoryPercent = threshold;
 
         // 1b. the home page as it looks after a run: each row reports what it released. The values go
@@ -254,7 +257,8 @@ internal static class Program
         bool compact,
         int tab,
         Action<MainViewModel> prepare = null,
-        bool scrollToEnd = false)
+        bool scrollToEnd = false,
+        int hoverIndex = -1)
     {
         var window = new MainWindow
         {
@@ -275,6 +279,17 @@ internal static class Program
         {
             prepare(viewModel);
             window.UpdateLayout();
+        }
+
+        if (hoverIndex >= 0)
+        {
+            var chart = FindChart(window);
+
+            if (chart != null)
+            {
+                chart.HoverIndex = hoverIndex;
+                window.UpdateLayout();
+            }
         }
 
         if (scrollToEnd)
@@ -305,6 +320,24 @@ internal static class Program
         encoder.Save(stream);
 
         window.Close();
+    }
+
+    private static MemMop.Controls.LineChart FindChart(DependencyObject root)
+    {
+        for (var i = 0; i < VisualTreeHelper.GetChildrenCount(root); i++)
+        {
+            var child = VisualTreeHelper.GetChild(root, i);
+
+            if (child is MemMop.Controls.LineChart found)
+                return found;
+
+            var nested = FindChart(child);
+
+            if (nested != null)
+                return nested;
+        }
+
+        return null;
     }
 
     private static System.Windows.Controls.ScrollViewer FindScrollViewer(DependencyObject root)
