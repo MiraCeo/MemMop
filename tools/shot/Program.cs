@@ -8,15 +8,27 @@ using MemMop.ViewModel;
 /// <summary>
 /// Renders the pages to PNG, including the states that need a seeded list or a switched-on setting.
 /// Everything is seeded in memory: the tool never calls <c>Settings.Save</c>, so the user's registry is
-/// left alone. Rebuild this project after any XAML change - it compiles the app's markup into its own exe.
+/// left alone - and it checks that afterwards, because the protection is a convention rather than a
+/// guarantee. Rebuild this project after any XAML change: it compiles the app's markup into its own exe.
 /// </summary>
 internal static class Program
 {
+    /// <summary>The key <see cref="MemMop.Core.Settings"/> writes to; duplicated here so the check can read it.</summary>
+    private const string SettingsKey = @"SOFTWARE\MemMop";
+
     [STAThread]
     private static void Main(string[] args)
     {
+        if (args.Contains("--self-test"))
+        {
+            SelfTest();
+            return;
+        }
+
         var output = args.Length > 0 ? args[0] : Path.Combine(Path.GetTempPath(), "memmop-shots");
         Directory.CreateDirectory(output);
+
+        var before = ReadSettingsKey();
 
         MemMop.Core.Settings.Load();
 
@@ -53,6 +65,75 @@ internal static class Program
         Console.WriteLine(output);
 
         app.Shutdown();
+
+        VerifyRegistryUntouched(before);
+    }
+
+    /// <summary>
+    /// Proves the check can fail: hands it a snapshot that differs from the live key by one value and
+    /// expects it to notice. Run with <c>--self-test</c>; it renders nothing.
+    /// </summary>
+    private static void SelfTest()
+    {
+        var doctored = new Dictionary<string, string>(ReadSettingsKey(), StringComparer.Ordinal)
+        {
+            ["AutoCleanMinutes"] = "999",
+        };
+
+        VerifyRegistryUntouched(doctored);
+
+        var caught = Environment.ExitCode == 1;
+        Environment.ExitCode = caught ? 0 : 1;
+
+        Console.WriteLine(caught ? "self-test: the check caught the change" : "self-test: THE CHECK MISSED IT");
+    }
+
+    /// <summary>
+    /// Reads the settings key as a name/value map, so the check compares every value rather than the three
+    /// the tool happens to seed.
+    /// </summary>
+    private static Dictionary<string, string> ReadSettingsKey()
+    {
+        var values = new Dictionary<string, string>(StringComparer.Ordinal);
+
+        using var key = Microsoft.Win32.Registry.CurrentUser.OpenSubKey(SettingsKey);
+
+        if (key == null)
+            return values;
+
+        foreach (var name in key.GetValueNames())
+            values[name] = key.GetValue(name)?.ToString() ?? string.Empty;
+
+        return values;
+    }
+
+    /// <summary>
+    /// Fails the run when the tool wrote to the registry. Seeding in memory is a convention, not a
+    /// guarantee: one call to a view-model setter that saves would silently overwrite the user's settings.
+    /// </summary>
+    private static void VerifyRegistryUntouched(Dictionary<string, string> before)
+    {
+        var after = ReadSettingsKey();
+        var changed = new List<string>();
+
+        foreach (var name in before.Keys.Union(after.Keys, StringComparer.Ordinal))
+        {
+            before.TryGetValue(name, out var was);
+            after.TryGetValue(name, out var now);
+
+            if (was != now)
+                changed.Add($"  {name}: [{was}] -> [{now}]");
+        }
+
+        if (changed.Count == 0)
+        {
+            Console.WriteLine("registry: untouched");
+            return;
+        }
+
+        Console.Error.WriteLine($"the tool wrote to HKCU\\{SettingsKey}, which it must not:");
+        changed.ForEach(Console.Error.WriteLine);
+        Environment.ExitCode = 1;
     }
 
     private static void SeedExclusions()
