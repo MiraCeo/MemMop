@@ -113,47 +113,46 @@ origin/main 072e437  chore: project founding            2026-11-01 16:16
 
 ## 六、未完成清单（按"能立刻动手"排序）
 
-### 1. 排除卡片还剩三处 XAML（数据层已就绪，只差界面）
+### 0. 白名单页（2026-11-03 已完成，留作记录）
 
-`MainWindow.xaml` 里「排除的进程（不参与清理）」那张 Border：
+原来的「排除的进程」卡片从设置页搬出来，成了第四个主界面。做完的事：
 
-| # | 要做什么 | 现状 |
-|---|---|---|
-| 1 | 删掉 `Text="添加排除"` 的小标题（连同上方的空行） | 还在，`MainWindow.xaml:356-359` |
-| 2 | 搜索用的 `ToggleButton` 加 `Style="{StaticResource IconButton}"` | 没有 `Style`，放大镜裸着，和右边的 `+` 按钮不齐 |
-| 3 | 「排除列表」去掉右侧 `−`，改成列表下方一行 `上移` / `下移` / `删除`，右对齐，`Visibility` 绑 `HasSelectedExclusion` | 还是单个 `−` 按钮，`MainWindow.xaml:419-446` |
+- 卡片标题、`添加排除` 小标题、单个 `−` 按钮全部消失，换成「搜索并添加进程」+ 搜索框 + `+`
+- 每行右侧三个快捷按钮：`↑` `↓` `✕`，用 `RelayCommand<string>` 把行自己的名字传进去；
+  首行 `↑`、末行 `↓` 自动置灰（`CanMove` + `RaiseCanExecuteChanged`）
+- 候选列表是**浮层**：聚焦搜索框出现，盖在白名单上而不是把它挤下去，
+  点一行把名字填进搜索框，点 `+` 加入并关闭，点外面关闭
+- 浮层用 `Surface` 背景 + `InputBorder` 边框和白名单区分（试过 `TextMuted` 边框，太刺眼）
+- 列表高度按行高算准：浮层 `5 × 32 + 8 + 2 = 170`，白名单 `5 × 36 + 8 + 2 = 190`。
+  **少 1px 就会冒出滚动条**，行宽被压窄，选中行的高亮看起来就是"错位"
 
-数据层都在：`MoveUpCommand`、`MoveDownCommand`、`HasSelectedExclusion`、`SelectedExclusion` 在 `MainViewModel`；`IconButton` 样式在 `Theme/Styles.xaml`。**只改 XAML，不要动 ViewModel。**
-
-### 2. 双语只做了三成
+### 1. 双语只做了三成
 
 `MainWindow.xaml` 里 **30 行写着硬编码中文**，只有 **6 行**绑定了 `Strings.Current`。所以切到 English 之后，标签页标题会变、设置页那一片不会变。
 
 `Strings.cs` 是内联的两份文案（没有 JSON、没有 Localizer），加键的成本是"改一个属性 + 两个分支"。要真正双语，得把 XAML 里 30 处中文换成绑定。
 
-### 3. 自动清理没有设置入口
+### 2. 自动清理没有设置入口
 
 逻辑全在（`AutoCleanPolicy` 的 `IsIntervalDue` / `IsMemoryDue` / `SelectForRun`，`App.xaml.cs:91` 的 30 秒定时器），但设置页没有间隔滑块、没有低内存阈值滑块，`Settings.AutoCleanMinutes` 和 `LowMemoryPercent` 默认 0，等于关。**要么加两个滑块，要么把这条能力从 README 里删掉。**
 
-### 4. 设置页内容超出窗口
+设置页现在只剩「通用设置 + 重置」，底部空出约 180px，正好放这两个滑块。
 
-截图可见：`排除列表` 的 ListBox 在窗口底部被裁掉，`重置` 按钮在折叠线以下。`ScrollViewer` 在，但默认视口不够。
-
-### 5. 主页密度
+### 3. 主页密度
 
 「清理区域」卡片在折叠线以上只露出 6 行（第 7 项 `收缩程序驻留内存` 要滚）；「进程占用」整段在折叠线以下。
 
-### 6. 关于页
+### 4. 关于页
 
 仍是三个 TextBlock 堆着，没有按卡片规则排。文案与 `Strings.AboutText` 重复。
 
-### 7. 交付形态
+### 5. 交付形态
 
 图标仍是系统默认、没有安装包、没有签名、`app.manifest` 已要求 `requireAdministrator`。
 
-### 8. 仓库卫生
+### 6. 仓库卫生（已完成）
 
-`src/MemMop/` 下有 3 个 **被 git 跟踪**的 WPF 临时工程：`MemMop_do5rt4j5_wpftmp.csproj`、`MemMop_n0rr53ki_wpftmp.csproj`、`MemMop_qkedarj5_wpftmp.csproj`。它们是 `dotnet build` 断掉时留下的垃圾，应当 `git rm` 并在 `.gitignore` 里加 `*_wpftmp.csproj`。
+3 个被 git 跟踪的 WPF 临时工程已 `git rm`，`.gitignore` 加了 `*_wpftmp.csproj`。
 
 ---
 
