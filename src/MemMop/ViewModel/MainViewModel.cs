@@ -100,6 +100,15 @@ public sealed class MainViewModel : ObservableObject
     private string _usedPercentText = string.Empty;
     private string _usedText = string.Empty;
 
+    /// <summary>The interval stops, in minutes. 0 is off.</summary>
+    private static readonly int[] IntervalStops = { 0, 15, 30, 60, 120 };
+
+    /// <summary>
+    /// The low-memory stops, as a floor on available memory. The useful range is low: available memory is
+    /// free plus standby, so a healthy machine already sits around 20%, and a 60% floor would fire forever.
+    /// </summary>
+    private static readonly int[] ThresholdStops = { 0, 10, 15, 20, 25 };
+
     /// <summary>Gets the process rows, largest first.</summary>
     public ObservableCollection<ProcessUsage> ProcessUsageItems { get; } = new();
 
@@ -271,6 +280,22 @@ public sealed class MainViewModel : ObservableObject
         (MoveUpCommand as RelayCommand<string>)?.RaiseCanExecuteChanged();
         (MoveDownCommand as RelayCommand<string>)?.RaiseCanExecuteChanged();
     }
+
+    private static int NearestStop(int[] stops, int value)
+    {
+        var best = 0;
+
+        for (var i = 1; i < stops.Length; i++)
+        {
+            if (Math.Abs(stops[i] - value) < Math.Abs(stops[best] - value))
+                best = i;
+        }
+
+        return best;
+    }
+
+    private static string DescribeMinutes(int minutes)
+        => minutes % 60 == 0 ? $"{minutes / 60} 小时" : $"{minutes} 分钟";
 
     private void AddExclusion(string? name)
     {
@@ -523,6 +548,60 @@ public sealed class MainViewModel : ObservableObject
             Settings.AutoCleanSafeOnly = value;
             Settings.Save();
             Raise();
+        }
+    }
+
+    /// <summary>
+    /// Gets or sets the interval stop. The slider moves between stops, not minutes: "every 37 minutes"
+    /// is not a decision anyone makes, and a 121-position track cannot be hit accurately with a mouse.
+    /// </summary>
+    public int AutoCleanIntervalIndex
+    {
+        get => NearestStop(IntervalStops, Settings.AutoCleanMinutes);
+        set
+        {
+            Settings.AutoCleanMinutes = IntervalStops[Math.Max(0, Math.Min(value, IntervalStops.Length - 1))];
+            Settings.Save();
+            Raise();
+            Raise(nameof(AutoCleanStatus));
+            Raise(nameof(HasAutoClean));
+        }
+    }
+
+    /// <summary>Gets or sets the low-memory stop, in the same terms as the interval.</summary>
+    public int AutoCleanThresholdIndex
+    {
+        get => NearestStop(ThresholdStops, Settings.LowMemoryPercent);
+        set
+        {
+            Settings.LowMemoryPercent = ThresholdStops[Math.Max(0, Math.Min(value, ThresholdStops.Length - 1))];
+            Settings.Save();
+            Raise();
+            Raise(nameof(AutoCleanStatus));
+            Raise(nameof(HasAutoClean));
+        }
+    }
+
+    /// <summary>Gets a value indicating whether automatic cleaning is configured at all.</summary>
+    public bool HasAutoClean => Settings.AutoCleanMinutes > 0 || Settings.LowMemoryPercent > 0;
+
+    /// <summary>
+    /// Gets the one-line description the home page shows while automatic cleaning is on. It is the only
+    /// place the user learns why memory changed on its own, so it names both triggers.
+    /// </summary>
+    public string AutoCleanStatus
+    {
+        get
+        {
+            var parts = new List<string>();
+
+            if (Settings.AutoCleanMinutes > 0)
+                parts.Add("每 " + DescribeMinutes(Settings.AutoCleanMinutes));
+
+            if (Settings.LowMemoryPercent > 0)
+                parts.Add($"可用低于 {Settings.LowMemoryPercent}% 时");
+
+            return parts.Count == 0 ? string.Empty : "自动清理：" + string.Join(" · ", parts);
         }
     }
 
