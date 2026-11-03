@@ -165,6 +165,7 @@ public partial class MainWindow : Window
 
         _viewModel.UsedPercentText = usedPercent.ToString("0", System.Globalization.CultureInfo.InvariantCulture) + "%";
         _viewModel.UsedText = Size(snapshot.Total - snapshot.Available) + " / " + Size(snapshot.Total);
+        _viewModel.AvailableText = "可用 " + Size(snapshot.Available) + " / " + Size(snapshot.Total);
         _viewModel.ActiveText = "活动 " + Size(snapshot.Active);
         _viewModel.ModifiedText = "已修改 " + Size(snapshot.Modified);
         _viewModel.StandbyText = "待机 " + Size(snapshot.Standby);

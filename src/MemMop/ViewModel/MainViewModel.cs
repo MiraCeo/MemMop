@@ -14,7 +14,7 @@ public sealed class MainViewModel : ObservableObject
     private readonly AutoCleanPolicy _policy = new();
     private readonly IMemoryReclaimer[] AllReclaimers;
     private bool _isBusy;
-    private string _summary = string.Empty;
+    private string _summary = "本次尚未清理";
     private string _physicalText = string.Empty;
     private string _segmentText = string.Empty;
     private string _commitText = string.Empty;
@@ -100,6 +100,7 @@ public sealed class MainViewModel : ObservableObject
     private string _freeText = string.Empty;
     private string _usedPercentText = string.Empty;
     private string _usedText = string.Empty;
+    private string _availableText = string.Empty;
 
     /// <summary>The interval stops, in minutes. 0 is off.</summary>
     private static readonly int[] IntervalStops = { 0, 15, 30, 60, 120 };
@@ -469,6 +470,16 @@ public sealed class MainViewModel : ObservableObject
     {
         get => _usedText;
         set => Set(ref _usedText, value);
+    }
+
+    /// <summary>
+    /// Gets the available / total line shown under the ring. Available is free plus standby, which is the
+    /// number that answers "can I open another program" - and the one the whole product argues about.
+    /// </summary>
+    public string AvailableText
+    {
+        get => _availableText;
+        set => Set(ref _availableText, value);
     }
 
     /// <summary>
