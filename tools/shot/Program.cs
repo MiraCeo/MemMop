@@ -82,6 +82,15 @@ internal static class Program
 
         MemMop.Core.Strings.Current.SetLanguage(false);
 
+        // 1a0. the home page with the sparkline filled in
+        var homeThreshold = MemMop.Core.Settings.LowMemoryPercent;
+
+        MemMop.Core.Settings.LowMemoryPercent = 75;
+
+        Render(Path.Combine(output, "home-chart.png"), 540, 640, false, 0, SeedStatistics);
+
+        MemMop.Core.Settings.LowMemoryPercent = homeThreshold;
+
         // 1a. the statistics page with a line worth looking at: a sawtooth, which is what a machine that is
         // being cleaned actually looks like. The readings go through the view model, so the chart is drawn
         // from real data rather than a mock-up.

@@ -68,6 +68,7 @@ public sealed class MainViewModel : ObservableObject
             Raise(nameof(NameText));
             Raise(nameof(VersionText));
             Raise(nameof(BuildText));
+            Raise(nameof(ChartWindowLabel));
         };
     }
 
@@ -261,6 +262,15 @@ public sealed class MainViewModel : ObservableObject
         }
     }
 
+    /// <summary>Gets the label under the home page sparkline: which window it covers.</summary>
+    public string ChartWindowLabel => _chartWindowIndex switch
+    {
+        0 => Strings.Current.LastMinute,
+        1 => Strings.Current.Last5Minutes,
+        2 => Strings.Current.Last15Minutes,
+        _ => Strings.Current.LastHour,
+    };
+
     /// <summary>Gets the usage percentage at which automatic cleaning fires; 0 when it is off.</summary>
     public double ChartThreshold => Settings.LowMemoryPercent;
 
@@ -293,6 +303,7 @@ public sealed class MainViewModel : ObservableObject
             if (Set(ref _chartWindowIndex, value))
             {
                 Raise(nameof(ChartWindowSeconds));
+                Raise(nameof(ChartWindowLabel));
                 RefreshChart();
             }
         }

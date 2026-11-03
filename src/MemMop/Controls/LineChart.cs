@@ -41,6 +41,11 @@ public sealed class LineChart : FrameworkElement
         nameof(Markers), typeof(string), typeof(LineChart),
         new FrameworkPropertyMetadata(string.Empty, FrameworkPropertyMetadataOptions.AffectsRender));
 
+    /// <summary>Identifies the <see cref="Bare"/> property.</summary>
+    public static readonly DependencyProperty BareProperty = DependencyProperty.Register(
+        nameof(Bare), typeof(bool), typeof(LineChart),
+        new FrameworkPropertyMetadata(false, FrameworkPropertyMetadataOptions.AffectsRender));
+
     /// <summary>Identifies the <see cref="WindowSeconds"/> property.</summary>
     public static readonly DependencyProperty WindowSecondsProperty = DependencyProperty.Register(
         nameof(WindowSeconds), typeof(double), typeof(LineChart),
@@ -110,6 +115,16 @@ public sealed class LineChart : FrameworkElement
     {
         get => (string)GetValue(MarkersProperty);
         set => SetValue(MarkersProperty, value);
+    }
+
+    /// <summary>
+    /// Gets or sets a value indicating whether the chart is drawn bare: no axes, no grid, no labels, and the
+    /// plot fills the control. That is what a sparkline on the home page wants.
+    /// </summary>
+    public bool Bare
+    {
+        get => (bool)GetValue(BareProperty);
+        set => SetValue(BareProperty, value);
     }
 
     /// <summary>Gets or sets how far back the chart reaches, in seconds.</summary>
@@ -231,8 +246,12 @@ public sealed class LineChart : FrameworkElement
 
         var values = Numbers(Values);
         var maximum = Maximum;
-        var plotWidth = ActualWidth - LabelWidth;
-        var plotHeight = ActualHeight - LabelHeight;
+
+        // a bare chart is a sparkline: no axes, no grid, no labels, and the plot fills the whole control
+        var inset = Bare ? 0 : LabelWidth;
+        var bottom = Bare ? 0 : LabelHeight;
+        var plotWidth = ActualWidth - inset;
+        var plotHeight = ActualHeight - bottom;
 
         if (values.Length < 2 || maximum <= 0 || plotWidth <= 0 || plotHeight <= 0)
             return;
@@ -242,16 +261,16 @@ public sealed class LineChart : FrameworkElement
 
         var typeface = new Typeface("Segoe UI");
         var dpi = VisualTreeHelper.GetDpi(this).PixelsPerDip;
-        var gridPen = GridBrush == null ? null : new Pen(GridBrush, 1);
+        var gridPen = Bare || GridBrush == null ? null : new Pen(GridBrush, 1);
 
         // the horizontal divisions, each labelled with the memory it represents
-        for (var i = 0; i <= Divisions; i++)
+        for (var i = 0; !Bare && i <= Divisions; i++)
         {
             var ratio = i / (double)Divisions;
             var y = plotHeight - ratio * plotHeight;
 
             if (gridPen != null)
-                context.DrawLine(gridPen, new Point(LabelWidth, y), new Point(ActualWidth, y));
+                context.DrawLine(gridPen, new Point(inset, y), new Point(ActualWidth, y));
 
             if (LabelBrush == null)
                 continue;
@@ -261,14 +280,14 @@ public sealed class LineChart : FrameworkElement
             // the top and bottom labels would hang outside the plot, so they are pulled back inside
             var top = Math.Max(0, Math.Min(plotHeight - text.Height, y - text.Height / 2));
 
-            context.DrawText(text, new Point(LabelWidth - text.Width - 6, top));
+            context.DrawText(text, new Point(inset - text.Width - 6, top));
         }
 
         // the vertical divisions, each labelled with how long ago it was
-        for (var i = 0; i <= Divisions; i++)
+        for (var i = 0; !Bare && i <= Divisions; i++)
         {
             var ratio = i / (double)Divisions;
-            var x = LabelWidth + ratio * plotWidth;
+            var x = inset + ratio * plotWidth;
 
             if (gridPen != null)
                 context.DrawLine(gridPen, new Point(x, 0), new Point(x, plotHeight));
@@ -300,9 +319,10 @@ public sealed class LineChart : FrameworkElement
             var y = plotHeight - Math.Min(1, Threshold / 100) * plotHeight;
             var pen = new Pen(ThresholdBrush, 1) { DashStyle = new DashStyle(new double[] { 3, 3 }, 0) };
 
-            context.DrawLine(pen, new Point(LabelWidth, y), new Point(ActualWidth, y));
+            context.DrawLine(pen, new Point(inset, y), new Point(ActualWidth, y));
 
-            if (LabelBrush != null)
+            // a sparkline has no room for the label; the line alone says where the threshold is
+            if (LabelBrush != null && !Bare)
             {
                 var text = Label(Strings.Current.AutoCleanThreshold((int)Threshold), typeface, dpi);
 
@@ -310,7 +330,7 @@ public sealed class LineChart : FrameworkElement
                 var firstRatio = Math.Max(0, Math.Min(1, values[0] / maximum));
                 var dataAbove = plotHeight - firstRatio * plotHeight < y;
 
-                context.DrawText(text, new Point(LabelWidth + 2, dataAbove ? y + 1 : y - text.Height - 1));
+                context.DrawText(text, new Point(inset + 2, dataAbove ? y + 1 : y - text.Height - 1));
             }
         }
 
@@ -323,7 +343,7 @@ public sealed class LineChart : FrameworkElement
         for (var i = 0; i < values.Length; i++)
         {
             var pointAgo = span * (1 - (double)i / (values.Length - 1));
-            var x = LabelWidth + plotWidth * (1 - pointAgo / WindowSeconds);
+            var x = inset + plotWidth * (1 - pointAgo / WindowSeconds);
             var ratio = Math.Max(0, Math.Min(1, values[i] / maximum));
 
             points[i] = new Point(x, plotHeight - ratio * plotHeight);
@@ -344,8 +364,9 @@ public sealed class LineChart : FrameworkElement
 
             geometry.Figures.Add(area);
 
-            // the area is a hint, not a second reading: the line carries the value
-            context.PushOpacity(0.12);
+            // the area is a hint, not a second reading: the line carries the value. A sparkline has no grid
+            // behind it, so the same tint reads heavier and is drawn lighter.
+            context.PushOpacity(Bare ? 0.08 : 0.12);
             context.DrawGeometry(FillBrush, null, geometry);
             context.Pop();
         }
@@ -365,7 +386,7 @@ public sealed class LineChart : FrameworkElement
 
         context.DrawEllipse(LineBrush, null, last, 2.5, 2.5);
 
-        if (MarkerBrush == null)
+        if (MarkerBrush == null || Bare)
             return;
 
         foreach (var index in Numbers(Markers))
@@ -389,14 +410,14 @@ public sealed class LineChart : FrameworkElement
                 continue;
 
             var freed = Label("-" + drop.ToString("0", CultureInfo.InvariantCulture) + "%", typeface, dpi);
-            var freedLeft = Math.Max(LabelWidth, Math.Min(ActualWidth - freed.Width, points[i].X + 5));
+            var freedLeft = Math.Max(inset, Math.Min(ActualWidth - freed.Width, points[i].X + 5));
 
             context.DrawText(freed, new Point(freedLeft, points[i].Y + 2));
         }
 
         var hover = HoverIndex;
 
-        if (hover < 0 || hover >= points.Length)
+        if (Bare || hover < 0 || hover >= points.Length)
             return;
 
         // where the pointer is: a guide up the plot, a dot on the line, and the reading in words
@@ -420,7 +441,7 @@ public sealed class LineChart : FrameworkElement
             typeface,
             dpi);
 
-        var boxLeft = Math.Max(LabelWidth, Math.Min(ActualWidth - reading.Width - 8, hovered.X - reading.Width / 2 - 4));
+        var boxLeft = Math.Max(inset, Math.Min(ActualWidth - reading.Width - 8, hovered.X - reading.Width / 2 - 4));
         var boxTop = Math.Max(0, hovered.Y - reading.Height - 10);
 
         if (TooltipBrush != null)
@@ -435,12 +456,12 @@ public sealed class LineChart : FrameworkElement
     private int IndexAt(double x)
     {
         var values = Numbers(Values);
-        var plotWidth = ActualWidth - LabelWidth;
+        var plotWidth = ActualWidth - (Bare ? 0 : LabelWidth);
 
         if (values.Length < 2 || plotWidth <= 0)
             return -1;
 
-        var ratio = (x - LabelWidth) / plotWidth;
+        var ratio = (x - (Bare ? 0 : LabelWidth)) / plotWidth;
 
         if (ratio < -0.02 || ratio > 1.02)
             return -1;

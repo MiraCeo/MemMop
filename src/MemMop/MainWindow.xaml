@@ -168,6 +168,7 @@
                         <Grid.RowDefinitions>
                             <RowDefinition Height="Auto" />
                             <RowDefinition Height="Auto" />
+                            <RowDefinition Height="Auto" />
                         </Grid.RowDefinitions>
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="Auto" />
@@ -286,10 +287,39 @@
                                        TextWrapping="Wrap" />
                         </Grid>
 
-                        <Button Grid.Row="1"
+                        <!-- the trend, at a glance: no axes, no labels, no markers - the statistics page has those -->
+                        <StackPanel Grid.Row="1" Grid.ColumnSpan="2" Margin="0, 14, 0, 0">
+                            <controls:LineChart Height="80"
+                                                Bare="True"
+                                                Values="{Binding ChartValues}"
+                                                Maximum="{Binding ChartMaximum}"
+                                                SpanSeconds="{Binding ChartSpanSeconds}"
+                                                WindowSeconds="{Binding ChartWindowSeconds}"
+                                                Threshold="{Binding ChartThreshold}"
+                                                LineBrush="{DynamicResource Accent}"
+                                                FillBrush="{DynamicResource Accent}"
+                                                ThresholdBrush="{DynamicResource TextMuted}"
+                                                Visibility="{Binding HasChartData, Converter={StaticResource BoolToVisibility}}" />
+
+                            <Grid Height="80"
+                                  Visibility="{Binding HasChartData, Converter={StaticResource InverseBoolToVisibility}}">
+                                <TextBlock HorizontalAlignment="Center"
+                                           VerticalAlignment="Center"
+                                           FontSize="11"
+                                           Foreground="{DynamicResource TextMuted}"
+                                           Text="{c:Text Sampling}" />
+                            </Grid>
+
+                            <TextBlock Margin="0, 4, 0, 0"
+                                       FontSize="10"
+                                       Foreground="{DynamicResource TextMuted}"
+                                       Text="{Binding ChartWindowLabel}" />
+                        </StackPanel>
+
+                        <Button Grid.Row="2"
                                 Grid.ColumnSpan="2"
                                 Height="38"
-                                Margin="0, 16, 0, 0"
+                                Margin="0, 12, 0, 0"
                                 Command="{Binding CleanCommand}"
                                 Content="{Binding Source={x:Static core:Strings.Current}, Path=Clean}" />
                     </Grid>
