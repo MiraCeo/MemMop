@@ -332,12 +332,20 @@
                                            Foreground="{DynamicResource TextPrimary}"
                                            Text="内存占用" />
 
-                                <TextBlock Grid.Column="1"
-                                           VerticalAlignment="Center"
-                                           FontSize="16"
-                                           FontWeight="SemiBold"
-                                           Foreground="{DynamicResource Accent}"
-                                           Text="{Binding ChartCurrentLabel}" />
+                                <StackPanel Grid.Column="1"
+                                            VerticalAlignment="Center"
+                                            Orientation="Horizontal">
+                                    <TextBlock FontSize="16"
+                                               FontWeight="SemiBold"
+                                               Foreground="{DynamicResource Accent}"
+                                               Text="{Binding ChartCurrentLabel}" />
+
+                                    <TextBlock Margin="10, 0, 0, 0"
+                                               VerticalAlignment="Center"
+                                               FontSize="11"
+                                               Foreground="{DynamicResource TextMuted}"
+                                               Text="{Binding ChartUsedLabel}" />
+                                </StackPanel>
                             </Grid>
 
                             <controls:LineChart Height="140"

@@ -108,6 +108,12 @@ public sealed class MainViewModel : ObservableObject
     /// <summary>How often a reading is taken, in seconds. The chart buckets these; it does not draw them.</summary>
     private const int SampleSeconds = 2;
 
+    /// <summary>
+    /// How far a bucket has to swing, in percentage points of total memory, before it reports its extreme
+    /// instead of its mean. Below this the bucket is quiet and the mean is the honest answer.
+    /// </summary>
+    private const double SwingPercent = 1.5;
+
     /// <summary>The four windows, in seconds: one minute, five, fifteen, an hour.</summary>
     private static readonly int[] WindowSeconds = { 60, 300, 900, 3600 };
 
@@ -185,6 +191,27 @@ public sealed class MainViewModel : ObservableObject
 
     private static double ChartWindowSecondsFor(int index)
         => WindowSeconds[Math.Max(0, Math.Min(index, WindowSeconds.Length - 1))];
+
+    /// <summary>Gets the newest reading as used over total, so a percentage has something to be a percentage of.</summary>
+    public string ChartUsedLabel
+    {
+        get
+        {
+            if (_memory.Count == 0)
+                return string.Empty;
+
+            var last = _memory[_memory.Count - 1];
+            var total = last.Used + last.Standby + last.Free;
+
+            return total <= 0
+                ? string.Empty
+                : string.Format(
+                    System.Globalization.CultureInfo.InvariantCulture,
+                    "{0:0.#} / {1:0.#} GB",
+                    last.Used / (1024d * 1024 * 1024),
+                    total / (1024d * 1024 * 1024));
+        }
+    }
 
     /// <summary>Gets the usage percentage at which automatic cleaning fires; 0 when it is off.</summary>
     public double ChartThreshold => Settings.LowMemoryPercent;
@@ -435,6 +462,11 @@ public sealed class MainViewModel : ObservableObject
         // rounded away - otherwise the line would step at every bucket boundary.
         var sums = new double[buckets];
         var weights = new double[buckets];
+        var lowest = new double[buckets];
+        var highest = new double[buckets];
+        var opening = new double[buckets];
+        var closing = new double[buckets];
+        var seen = new bool[buckets];
 
         for (var i = 0; i < _memory.Count; i++)
         {
@@ -459,6 +491,19 @@ public sealed class MainViewModel : ObservableObject
 
                 sums[b] += sample.Used * overlap;
                 weights[b] += overlap;
+
+                if (!seen[b])
+                {
+                    lowest[b] = highest[b] = opening[b] = sample.Used;
+                    seen[b] = true;
+                }
+                else
+                {
+                    lowest[b] = Math.Min(lowest[b], sample.Used);
+                    highest[b] = Math.Max(highest[b], sample.Used);
+                }
+
+                closing[b] = sample.Used;
             }
         }
 
@@ -487,23 +532,60 @@ public sealed class MainViewModel : ObservableObject
             Raise(nameof(ChartSpanSeconds));
             Raise(nameof(HasChartData));
             Raise(nameof(ChartCurrentLabel));
+            Raise(nameof(ChartUsedLabel));
 
             return;
         }
+
+        var newest = _memory[_memory.Count - 1];
+        var maximum = newest.Used + newest.Standby + newest.Free;
 
         var values = new List<double>(buckets - firstUsed);
 
         for (var b = firstUsed; b < buckets; b++)
         {
             // a bucket with no readings keeps the previous value rather than punching a hole in the line
-            values.Add(weights[b] > 0
-                ? sums[b] / weights[b]
-                : values.Count > 0 ? values[values.Count - 1] : 0);
+            if (!seen[b])
+            {
+                values.Add(values.Count > 0 ? values[values.Count - 1] : 0);
+
+                continue;
+            }
+
+            var mean = sums[b] / weights[b];
+            var swing = maximum > 0 ? (highest[b] - lowest[b]) / maximum * 100 : 0;
+
+            // A quiet bucket is its mean. A bucket with a real swing is not: averaging a clean away is how a
+            // six-percent drop becomes a three-percent one, so the bucket reports the end of the swing that
+            // made it interesting - the trough for a fall, the peak for a rise.
+            if (swing < SwingPercent)
+            {
+                values.Add(mean);
+
+                continue;
+            }
+
+            // The direction decides first: a bucket that ends lower than it started is a fall, and the fall is
+            // the thing worth keeping. Only when it ends where it started - a spike or a dip that came back -
+            // does the extreme furthest from the mean win.
+            if (closing[b] < opening[b])
+            {
+                values.Add(lowest[b]);
+
+                continue;
+            }
+
+            if (closing[b] > opening[b])
+            {
+                values.Add(highest[b]);
+
+                continue;
+            }
+
+            values.Add(highest[b] - mean > mean - lowest[b] ? highest[b] : lowest[b]);
         }
 
-        var newest = _memory[_memory.Count - 1];
-
-        ChartMaximum = newest.Used + newest.Standby + newest.Free;
+        ChartMaximum = maximum;
         ChartValues = string.Join(",", values.Select(v => (long)v));
         ChartSpanSeconds = (buckets - firstUsed) * bucket;
 

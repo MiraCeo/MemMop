@@ -295,8 +295,11 @@ public sealed class LineChart : FrameworkElement
             {
                 var text = Label("自动清理 " + Threshold.ToString("0", CultureInfo.InvariantCulture) + "%", typeface, dpi);
 
-                // below the line, where the readings are not: the space above it is where the data lives
-                context.DrawText(text, new Point(LabelWidth + 2, y + 1));
+                // the label goes on whichever side of the threshold the readings are not
+                var firstRatio = Math.Max(0, Math.Min(1, values[0] / maximum));
+                var dataAbove = plotHeight - firstRatio * plotHeight < y;
+
+                context.DrawText(text, new Point(LabelWidth + 2, dataAbove ? y + 1 : y - text.Height - 1));
             }
         }
 
@@ -451,6 +454,16 @@ public sealed class LineChart : FrameworkElement
 
         if (whole < 60)
             return whole.ToString(CultureInfo.InvariantCulture) + " 秒前";
+
+        if (whole >= 3600)
+        {
+            var hours = whole / 3600;
+            var hourRest = whole % 3600 / 60;
+
+            return hourRest == 0
+                ? hours.ToString(CultureInfo.InvariantCulture) + " 小时前"
+                : hours.ToString(CultureInfo.InvariantCulture) + " 小时 " + hourRest.ToString(CultureInfo.InvariantCulture) + " 分前";
+        }
 
         var minutes = whole / 60;
         var rest = whole % 60;
