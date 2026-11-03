@@ -48,9 +48,11 @@ public sealed class MainViewModel : ObservableObject
         CleanCommand = new RelayCommand(Clean, () => !IsBusy && Areas.Any(a => a.IsSelected));
         AddExclusionCommand = new RelayCommand(() => AddExclusion(SelectedProcess), () => !string.IsNullOrEmpty(SelectedProcess));
         ResetSettingsCommand = new RelayCommand(ResetSettings);
-        MoveUpCommand = new RelayCommand(() => Move(-1));
-        MoveDownCommand = new RelayCommand(() => Move(1));
-        RemoveExclusionCommand = new RelayCommand(() => RemoveExclusion(SelectedExclusion), () => !string.IsNullOrEmpty(SelectedExclusion));
+
+        // one command instance serves every row: the row passes its own name in
+        MoveUpCommand = new RelayCommand<string>(name => Move(name, -1), name => CanMove(name, -1));
+        MoveDownCommand = new RelayCommand<string>(name => Move(name, 1), name => CanMove(name, 1));
+        RemoveExclusionCommand = new RelayCommand<string>(name => RemoveExclusion(name), name => !string.IsNullOrEmpty(name));
 
         RefreshExcluded();
         RefreshAvailableProcesses();
@@ -91,7 +93,6 @@ public sealed class MainViewModel : ObservableObject
     private string _selectedProcess = string.Empty;
     private bool _isPickerOpen;
     private string _selectedExclusion = string.Empty;
-    private bool _isExclusionExpanded;
     private string _activeText = string.Empty;
     private string _modifiedText = string.Empty;
     private string _standbyText = string.Empty;
@@ -136,15 +137,18 @@ public sealed class MainViewModel : ObservableObject
         }
     }
 
-    /// <summary>Gets or sets a value indicating whether the add-a-process picker is open.</summary>
+    /// <summary>Gets a value indicating whether any candidate is available.</summary>
+    public bool HasAvailableProcesses => AvailableProcesses.Count > 0;
+
+    /// <summary>
+    /// Gets or sets a value indicating whether the candidate list is showing. It floats over the whitelist
+    /// rather than pushing it down, so the page does not move while the user is searching.
+    /// </summary>
     public bool IsPickerOpen
     {
         get => _isPickerOpen;
         set => Set(ref _isPickerOpen, value);
     }
-
-    /// <summary>Gets a value indicating whether any candidate is available.</summary>
-    public bool HasAvailableProcesses => AvailableProcesses.Count > 0;
 
     /// <summary>Gets or sets the selected name in the picker.</summary>
     public string SelectedProcess
@@ -262,6 +266,10 @@ public sealed class MainViewModel : ObservableObject
             ExcludedProcesses.Add(name);
 
         Raise(nameof(HasExclusions));
+
+        // the first row cannot move up and the last cannot move down, so every row re-queries
+        (MoveUpCommand as RelayCommand<string>)?.RaiseCanExecuteChanged();
+        (MoveDownCommand as RelayCommand<string>)?.RaiseCanExecuteChanged();
     }
 
     private void AddExclusion(string? name)
@@ -274,17 +282,24 @@ public sealed class MainViewModel : ObservableObject
         Settings.Save();
         RefreshExcluded();
         RefreshAvailableProcesses();
-        ((RelayCommand)RemoveExclusionCommand).RaiseCanExecuteChanged();
+
+        // the picker closes itself once the name is in, so the whitelist is visible again
+        IsPickerOpen = false;
     }
 
-    private void Move(int delta)
+    private bool CanMove(string? name, int delta)
     {
-        var index = ExcludedProcesses.IndexOf(SelectedExclusion);
+        var index = ExcludedProcesses.IndexOf(name ?? string.Empty);
+
+        return index >= 0 && index + delta >= 0 && index + delta < ExcludedProcesses.Count;
+    }
+
+    private void Move(string? name, int delta)
+    {
+        var index = ExcludedProcesses.IndexOf(name ?? string.Empty);
 
         if (index < 0 || index + delta < 0 || index + delta >= ExcludedProcesses.Count)
             return;
-
-        var name = ExcludedProcesses[index];
 
         ExcludedProcesses.Move(index, index + delta);
 
@@ -292,7 +307,11 @@ public sealed class MainViewModel : ObservableObject
         Settings.ExcludedProcesses.AddRange(ExcludedProcesses);
 
         Settings.Save();
-        SelectedExclusion = name;
+        SelectedExclusion = name!;
+
+        // the first row cannot move up and the last cannot move down, so both rows re-query
+        (MoveUpCommand as RelayCommand<string>)?.RaiseCanExecuteChanged();
+        (MoveDownCommand as RelayCommand<string>)?.RaiseCanExecuteChanged();
     }
 
     private void RemoveExclusion(string? name)
@@ -464,30 +483,11 @@ public sealed class MainViewModel : ObservableObject
         }
     }
 
-    /// <summary>Gets or sets the excluded name selected for removal.</summary>
-    public bool HasSelectedExclusion => !string.IsNullOrEmpty(SelectedExclusion);
-
-    /// <summary>
-    /// Gets or sets a value indicating whether the exclusion card is expanded. Collapsed by default, so the
-    /// settings page fits without scrolling; the card is the only one tall enough to push the reset button away.
-    /// </summary>
-    public bool IsExclusionExpanded
-    {
-        get => _isExclusionExpanded;
-        set => Set(ref _isExclusionExpanded, value);
-    }
-
+    /// <summary>Gets or sets the row the whitelist has highlighted. The row buttons act on their own row, not on this.</summary>
     public string SelectedExclusion
     {
         get => _selectedExclusion;
-        set
-        {
-            if (Set(ref _selectedExclusion, value))
-            {
-                Raise(nameof(HasSelectedExclusion));
-                (RemoveExclusionCommand as RelayCommand)?.RaiseCanExecuteChanged();
-            }
-        }
+        set => Set(ref _selectedExclusion, value);
     }
 
     /// <summary>Gets or sets a value indicating whether closing hides the window instead of quitting.</summary>

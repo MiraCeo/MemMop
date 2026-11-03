@@ -1,5 +1,7 @@
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Input;
+using System.Windows.Media;
 using System.Windows.Threading;
 using MemMop.Core;
 using MemMop.ViewModel;
@@ -49,25 +51,55 @@ public partial class MainWindow : Window
         {
             if (args.PropertyName == nameof(MainViewModel.CompactMode))
                 ApplyWindowSize();
-
-            // The picker sits at the bottom of a page that is taller than the window, so opening it would
-            // otherwise show a list the user cannot see. Scroll it into view once the layout has caught up.
-            if (args.PropertyName == nameof(MainViewModel.IsPickerOpen) && _viewModel.IsPickerOpen)
-            {
-                Dispatcher.BeginInvoke(
-                    new Action(() =>
-                    {
-                        SettingsScroll.UpdateLayout();
-                        SettingsScroll.ScrollToEnd();
-                    }),
-                    System.Windows.Threading.DispatcherPriority.Background);
-            }
         };
 
         Loaded += (_, _) => ApplyWindowSize();
 
         Loaded += OnLoaded;
         Closed += (_, _) => _timer.Stop();
+
+        // the candidate list floats over the page, so a click anywhere else has to dismiss it
+        PreviewMouseDown += OnWindowPreviewMouseDown;
+    }
+
+    private void OnSearchBoxGotFocus(object sender, RoutedEventArgs e)
+    {
+        _viewModel.IsPickerOpen = true;
+    }
+
+    private void OnPickerRowClicked(object sender, MouseButtonEventArgs e)
+    {
+        // a row click fills the box rather than adding: the plus is the only thing that adds
+        if (PickerList.SelectedItem is string name)
+            _viewModel.ProcessSearchText = name;
+    }
+
+    private void OnWindowPreviewMouseDown(object sender, MouseButtonEventArgs e)
+    {
+        if (!_viewModel.IsPickerOpen)
+            return;
+
+        if (IsWithin(e.OriginalSource, SearchBox) || IsWithin(e.OriginalSource, PickerList))
+            return;
+
+        _viewModel.IsPickerOpen = false;
+    }
+
+    private static bool IsWithin(object? source, DependencyObject ancestor)
+    {
+        var current = source as DependencyObject;
+
+        while (current != null)
+        {
+            if (ReferenceEquals(current, ancestor))
+                return true;
+
+            current = current is Visual || current is System.Windows.Media.Media3D.Visual3D
+                ? VisualTreeHelper.GetParent(current)
+                : LogicalTreeHelper.GetParent(current);
+        }
+
+        return false;
     }
 
     private static string Size(long bytes)

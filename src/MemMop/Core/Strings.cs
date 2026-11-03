@@ -28,6 +28,12 @@ public sealed class Strings : INotifyPropertyChanged
     /// <summary>Gets the tab header for the settings view.</summary>
     public string Settings => _english ? "Settings" : "设置";
 
+    /// <summary>
+    /// Gets the tab header for the whitelist view. English says "Exemptions" rather than "Whitelist":
+    /// the list means "never cleaned", and whitelist/blacklist wording is being retired across software.
+    /// </summary>
+    public string Whitelist => _english ? "Exemptions" : "白名单";
+
     /// <summary>Gets the tab header for the about view.</summary>
     public string About => _english ? "About" : "关于";
 
