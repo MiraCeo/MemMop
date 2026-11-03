@@ -159,13 +159,15 @@ public partial class MainWindow : Window
         var snapshot = MemorySnapshot.Capture();
         var text = Strings.Current;
 
-        // the process table is always on screen now, so it has to keep up - but enumerating every process
-        // costs more than reading the counters, so it runs every fifth tick rather than every tick
-        if (++_ticks % 5 == 0)
-        {
-            _viewModel.RefreshProcessUsage();
+        // the chart reads the counters every two seconds; the process table costs far more to build, so it
+        // runs on a slower beat
+        _ticks++;
+
+        if (_ticks % 2 == 0)
             _viewModel.SampleMemory(snapshot);
-        }
+
+        if (_ticks % 5 == 0)
+            _viewModel.RefreshProcessUsage();
 
         _viewModel.PhysicalText = text.Physical(snapshot.Total - snapshot.Available, snapshot.Total);
 

@@ -105,15 +105,25 @@ public sealed class MainViewModel : ObservableObject
     /// <summary>The interval stops, in minutes. 0 is off.</summary>
     private static readonly int[] IntervalStops = { 0, 15, 30, 60, 120 };
 
-    /// <summary>How many readings each chart window covers, at one reading every five seconds.</summary>
-    private static readonly int[] ChartWindowSamples = { 60, 180, 720 };
+    /// <summary>How often a reading is taken, in seconds. The chart buckets these; it does not draw them.</summary>
+    private const int SampleSeconds = 2;
 
-    private readonly MemoryHistory _memory = new(720);
+    /// <summary>The four windows, in seconds: one minute, five, fifteen, an hour.</summary>
+    private static readonly int[] WindowSeconds = { 60, 300, 900, 3600 };
+
+    /// <summary>
+    /// How much time each point on the chart stands for. The windows are chosen so every one of them is drawn
+    /// from thirty or sixty points: a minute at two seconds, the rest at five, fifteen and sixty.
+    /// </summary>
+    private static readonly int[] BucketSeconds = { 2, 5, 15, 60 };
+
+    private readonly MemoryHistory _memory = new(1800);
     private readonly CleanHistory _cleans = new(100);
-    private int _chartWindowIndex = 1;
+    private int _chartWindowIndex = 1;   // five minutes
     private string _chartValues = string.Empty;
     private string _chartMarkers = string.Empty;
     private double _chartMaximum;
+    private double _chartSpanSeconds;
     private string _lastCleanSummary = "还没有清理过";
 
     /// <summary>
@@ -163,13 +173,18 @@ public sealed class MainViewModel : ObservableObject
         private set => Set(ref _chartMaximum, value);
     }
 
-    /// <summary>Gets how far back the chart reaches, in minutes, for the horizontal axis labels.</summary>
-    public double ChartWindowMinutes => _chartWindowIndex switch
+    /// <summary>Gets how far back the chart reaches, in seconds, for the horizontal axis labels.</summary>
+    public double ChartWindowSeconds => ChartWindowSecondsFor(_chartWindowIndex);
+
+    /// <summary>Gets how much time the readings actually cover, in seconds; less than the window at first.</summary>
+    public double ChartSpanSeconds
     {
-        0 => 5,
-        1 => 15,
-        _ => 60,
-    };
+        get => _chartSpanSeconds;
+        private set => Set(ref _chartSpanSeconds, value);
+    }
+
+    private static double ChartWindowSecondsFor(int index)
+        => WindowSeconds[Math.Max(0, Math.Min(index, WindowSeconds.Length - 1))];
 
     /// <summary>Gets the usage percentage at which automatic cleaning fires; 0 when it is off.</summary>
     public double ChartThreshold => Settings.LowMemoryPercent;
@@ -202,7 +217,7 @@ public sealed class MainViewModel : ObservableObject
         {
             if (Set(ref _chartWindowIndex, value))
             {
-                Raise(nameof(ChartWindowMinutes));
+                Raise(nameof(ChartWindowSeconds));
                 RefreshChart();
             }
         }
@@ -408,46 +423,100 @@ public sealed class MainViewModel : ObservableObject
     /// </summary>
     public void RefreshChart()
     {
-        var take = ChartWindowSamples[Math.Max(0, Math.Min(_chartWindowIndex, ChartWindowSamples.Length - 1))];
-        var samples = _memory.Tail(take);
+        var window = WindowSeconds[Math.Max(0, Math.Min(_chartWindowIndex, WindowSeconds.Length - 1))];
+        var bucket = BucketSeconds[Math.Max(0, Math.Min(_chartWindowIndex, BucketSeconds.Length - 1))];
+        var buckets = window / bucket;
 
-        if (samples.Count < 2)
+        var now = DateTime.Now;
+        var windowStart = now.AddSeconds(-window);
+
+        // Each bucket is the time-weighted mean of the readings that fall inside it. A five-second bucket
+        // holds two whole two-second readings and half of a third, so the halves are weighted rather than
+        // rounded away - otherwise the line would step at every bucket boundary.
+        var sums = new double[buckets];
+        var weights = new double[buckets];
+
+        for (var i = 0; i < _memory.Count; i++)
+        {
+            var sample = _memory[i];
+            var start = sample.At;
+            var end = start.AddSeconds(SampleSeconds);
+
+            if (end <= windowStart || start >= now)
+                continue;
+
+            var first = Math.Max(0, (int)Math.Floor((start - windowStart).TotalSeconds / bucket));
+            var last = Math.Min(buckets - 1, (int)Math.Floor((end.AddTicks(-1) - windowStart).TotalSeconds / bucket));
+
+            for (var b = first; b <= last; b++)
+            {
+                var bucketStart = windowStart.AddSeconds(b * bucket);
+                var bucketEnd = bucketStart.AddSeconds(bucket);
+                var overlap = (Earlier(end, bucketEnd) - Later(start, bucketStart)).TotalSeconds;
+
+                if (overlap <= 0)
+                    continue;
+
+                sums[b] += sample.Used * overlap;
+                weights[b] += overlap;
+            }
+        }
+
+        var firstUsed = -1;
+
+        for (var b = 0; b < buckets; b++)
+        {
+            if (weights[b] <= 0)
+                continue;
+
+            firstUsed = b;
+
+            break;
+        }
+
+        if (firstUsed < 0 || buckets - firstUsed < 2)
         {
             ChartValues = string.Empty;
             ChartMarkers = string.Empty;
             ChartMaximum = 0;
+            ChartSpanSeconds = 0;
 
             Raise(nameof(ChartValues));
             Raise(nameof(ChartMarkers));
             Raise(nameof(ChartMaximum));
+            Raise(nameof(ChartSpanSeconds));
             Raise(nameof(HasChartData));
-        Raise(nameof(ChartCurrentLabel));
+            Raise(nameof(ChartCurrentLabel));
 
             return;
         }
 
-        var last = samples[samples.Count - 1];
+        var values = new List<double>(buckets - firstUsed);
 
-        ChartMaximum = last.Used + last.Standby + last.Free;
-        ChartValues = string.Join(",", samples.Select(s => s.Used));
+        for (var b = firstUsed; b < buckets; b++)
+        {
+            // a bucket with no readings keeps the previous value rather than punching a hole in the line
+            values.Add(weights[b] > 0
+                ? sums[b] / weights[b]
+                : values.Count > 0 ? values[values.Count - 1] : 0);
+        }
+
+        var newest = _memory[_memory.Count - 1];
+
+        ChartMaximum = newest.Used + newest.Standby + newest.Free;
+        ChartValues = string.Join(",", values.Select(v => (long)v));
+        ChartSpanSeconds = (buckets - firstUsed) * bucket;
 
         var markers = new List<int>();
 
         foreach (var record in _cleans.Records)
         {
-            var index = samples.Count - 1;
+            var b = (int)Math.Floor((record.At - windowStart).TotalSeconds / bucket);
 
-            for (var i = 0; i < samples.Count; i++)
-            {
-                if (samples[i].At < record.At)
-                    continue;
+            if (b < firstUsed || b >= buckets)
+                continue;
 
-                index = i;
-
-                break;
-            }
-
-            markers.Add(index);
+            markers.Add(b - firstUsed);
         }
 
         ChartMarkers = string.Join(",", markers);
@@ -455,9 +524,14 @@ public sealed class MainViewModel : ObservableObject
         Raise(nameof(ChartValues));
         Raise(nameof(ChartMarkers));
         Raise(nameof(ChartMaximum));
+        Raise(nameof(ChartSpanSeconds));
         Raise(nameof(HasChartData));
         Raise(nameof(ChartCurrentLabel));
     }
+
+    private static DateTime Later(DateTime a, DateTime b) => a > b ? a : b;
+
+    private static DateTime Earlier(DateTime a, DateTime b) => a < b ? a : b;
 
     /// <summary>
     /// Rebuilds the two lists the statistics page shows: the last run's areas, and the runs themselves.

@@ -40,10 +40,15 @@ public sealed class LineChart : FrameworkElement
         nameof(Markers), typeof(string), typeof(LineChart),
         new FrameworkPropertyMetadata(string.Empty, FrameworkPropertyMetadataOptions.AffectsRender));
 
-    /// <summary>Identifies the <see cref="WindowMinutes"/> property.</summary>
-    public static readonly DependencyProperty WindowMinutesProperty = DependencyProperty.Register(
-        nameof(WindowMinutes), typeof(double), typeof(LineChart),
-        new FrameworkPropertyMetadata(15d, FrameworkPropertyMetadataOptions.AffectsRender));
+    /// <summary>Identifies the <see cref="WindowSeconds"/> property.</summary>
+    public static readonly DependencyProperty WindowSecondsProperty = DependencyProperty.Register(
+        nameof(WindowSeconds), typeof(double), typeof(LineChart),
+        new FrameworkPropertyMetadata(300d, FrameworkPropertyMetadataOptions.AffectsRender));
+
+    /// <summary>Identifies the <see cref="SpanSeconds"/> property.</summary>
+    public static readonly DependencyProperty SpanSecondsProperty = DependencyProperty.Register(
+        nameof(SpanSeconds), typeof(double), typeof(LineChart),
+        new FrameworkPropertyMetadata(0d, FrameworkPropertyMetadataOptions.AffectsRender));
 
     /// <summary>Identifies the <see cref="LineBrush"/> property.</summary>
     public static readonly DependencyProperty LineBrushProperty = DependencyProperty.Register(
@@ -106,11 +111,22 @@ public sealed class LineChart : FrameworkElement
         set => SetValue(MarkersProperty, value);
     }
 
-    /// <summary>Gets or sets how far back the chart reaches, in minutes, for the horizontal axis labels.</summary>
-    public double WindowMinutes
+    /// <summary>Gets or sets how far back the chart reaches, in seconds.</summary>
+    public double WindowSeconds
     {
-        get => (double)GetValue(WindowMinutesProperty);
-        set => SetValue(WindowMinutesProperty, value);
+        get => (double)GetValue(WindowSecondsProperty);
+        set => SetValue(WindowSecondsProperty, value);
+    }
+
+    /// <summary>
+    /// Gets or sets how much time the readings actually cover, in seconds. When it is shorter than the window
+    /// the line is drawn against the right edge and grows leftwards, rather than being stretched to fill a
+    /// window it does not have.
+    /// </summary>
+    public double SpanSeconds
+    {
+        get => (double)GetValue(SpanSecondsProperty);
+        set => SetValue(SpanSecondsProperty, value);
     }
 
     /// <summary>Gets or sets the colour of the line.</summary>
@@ -249,11 +265,15 @@ public sealed class LineChart : FrameworkElement
             if (LabelBrush == null)
                 continue;
 
-            var minutes = WindowMinutes * (1 - ratio);
+            var divisionAgo = WindowSeconds * (1 - ratio);
+
+            // one unit per axis: a one-minute window labelled in seconds throughout, the rest in minutes
             var text = Label(
                 i == Divisions
                     ? "现在"
-                    : minutes.ToString("0", CultureInfo.InvariantCulture) + " 分钟前",
+                    : WindowSeconds <= 120
+                        ? ((int)Math.Round(divisionAgo)).ToString(CultureInfo.InvariantCulture) + " 秒前"
+                        : FormatAgo(divisionAgo),
                 typeface,
                 dpi);
 
@@ -282,9 +302,14 @@ public sealed class LineChart : FrameworkElement
 
         var points = new Point[values.Length];
 
+        // the newest reading sits on the right edge; the oldest is as far left as the readings actually reach,
+        // which is short of the window until the buffer has filled
+        var span = SpanSeconds > 0 ? Math.Min(SpanSeconds, WindowSeconds) : WindowSeconds;
+
         for (var i = 0; i < values.Length; i++)
         {
-            var x = LabelWidth + plotWidth * i / (values.Length - 1);
+            var pointAgo = span * (1 - (double)i / (values.Length - 1));
+            var x = LabelWidth + plotWidth * (1 - pointAgo / WindowSeconds);
             var ratio = Math.Max(0, Math.Min(1, values[i] / maximum));
 
             points[i] = new Point(x, plotHeight - ratio * plotHeight);
@@ -292,12 +317,14 @@ public sealed class LineChart : FrameworkElement
 
         if (FillBrush != null)
         {
-            var area = new PathFigure { StartPoint = new Point(LabelWidth, plotHeight), IsClosed = true };
+            // the area starts where the readings start, not at the left edge: an empty stretch of window is
+            // empty, and filling it would claim data that is not there
+            var area = new PathFigure { StartPoint = new Point(points[0].X, plotHeight), IsClosed = true };
 
             foreach (var point in points)
                 area.Segments.Add(new LineSegment(point, true));
 
-            area.Segments.Add(new LineSegment(new Point(ActualWidth, plotHeight), true));
+            area.Segments.Add(new LineSegment(new Point(points[points.Length - 1].X, plotHeight), true));
 
             var geometry = new PathGeometry();
 
@@ -371,10 +398,8 @@ public sealed class LineChart : FrameworkElement
         if (LabelBrush == null)
             return;
 
-        var ago = WindowMinutes * (1 - (double)hover / (points.Length - 1));
-        var when = ago < 0.5
-            ? "现在"
-            : ago.ToString("0", CultureInfo.InvariantCulture) + " 分钟前";
+        var ago = span * (1 - (double)hover / (points.Length - 1));
+        var when = ago < 1 ? "现在" : FormatAgo(ago);
 
         var reading = Label(
             when + " · " + (values[hover] / maximum * 100).ToString("0", CultureInfo.InvariantCulture) + "%",
@@ -415,6 +440,25 @@ public sealed class LineChart : FrameworkElement
             10,
             LabelBrush,
             dpi);
+
+    /// <summary>
+    /// Formats a distance in the past. Seconds are shown below two minutes, because a one-minute window
+    /// labelled in whole minutes would read "1 分钟前" at every division.
+    /// </summary>
+    private static string FormatAgo(double seconds)
+    {
+        var whole = (int)Math.Round(seconds);
+
+        if (whole < 60)
+            return whole.ToString(CultureInfo.InvariantCulture) + " 秒前";
+
+        var minutes = whole / 60;
+        var rest = whole % 60;
+
+        return rest == 0
+            ? minutes.ToString(CultureInfo.InvariantCulture) + " 分钟前"
+            : minutes.ToString(CultureInfo.InvariantCulture) + " 分 " + rest.ToString(CultureInfo.InvariantCulture) + " 秒前";
+    }
 
     private static string FormatPercent(double ratio)
         => (ratio * 100).ToString("0", CultureInfo.InvariantCulture) + "%";

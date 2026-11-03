@@ -345,7 +345,8 @@
                                                 Values="{Binding ChartValues}"
                                                 Maximum="{Binding ChartMaximum}"
                                                 Markers="{Binding ChartMarkers}"
-                                                WindowMinutes="{Binding ChartWindowMinutes}"
+                                                WindowSeconds="{Binding ChartWindowSeconds}"
+                                                SpanSeconds="{Binding ChartSpanSeconds}"
                                                 Threshold="{Binding ChartThreshold}"
                                                 LineBrush="{DynamicResource Accent}"
                                                 FillBrush="{DynamicResource Accent}"
@@ -369,6 +370,7 @@
                                       Margin="0, 12, 0, 0"
                                       HorizontalAlignment="Left"
                                       SelectedIndex="{Binding ChartWindowIndex}">
+                                <ComboBoxItem Content="最近 1 分钟" />
                                 <ComboBoxItem Content="最近 5 分钟" />
                                 <ComboBoxItem Content="最近 15 分钟" />
                                 <ComboBoxItem Content="最近 1 小时" />

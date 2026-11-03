@@ -56,7 +56,7 @@ internal static class Program
         Render(Path.Combine(output, "statistics-bottom.png"), 540, 640, false, 1, SeedStatistics, scrollToEnd: true);
 
         // 1a3. the pointer resting on the chart, so the hover reading can be checked
-        Render(Path.Combine(output, "statistics-hover.png"), 540, 640, false, 1, SeedStatistics, hoverIndex: 96);
+        Render(Path.Combine(output, "statistics-hover.png"), 540, 640, false, 1, SeedStatistics, hoverIndex: 30);
 
         MemMop.Core.Settings.LowMemoryPercent = threshold;
 
@@ -176,16 +176,16 @@ internal static class Program
         var random = new Random(7);
         var used = total * 0.78;
 
-        // the readings are stamped backwards from now, so the markers land where the drops are instead of
-        // piling up at the right edge
+        // the readings are stamped backwards from now, two seconds apart like the real sampler, so the
+        // markers land where the drops are instead of piling up at the right edge
         var now = DateTime.Now;
-        // TimeSpan * int is not available on net472, so the offset is built in seconds
+        const int count = 300;   // ten minutes, which fills the five-minute window
 
-        for (var i = 0; i < 180; i++)
+        for (var i = 0; i < count; i++)
         {
-            used += random.Next(-40, 90) * 1024L * 1024;
+            used += random.Next(-16, 36) * 1024L * 1024;
 
-            if (i == 60 || i == 120)
+            if (i == 100 || i == 200)
                 used -= total * 0.06;
 
             used = Math.Max(total * 0.55, Math.Min(total * 0.95, used));
@@ -193,7 +193,7 @@ internal static class Program
             // the three parts have to add up to the total, or the chart's vertical axis is wrong
             var standby = (long)(total * 0.08);
 
-            vm.SampleMemory((long)used, standby, total - (long)used - standby, now.AddSeconds(-5 * (179 - i)));
+            vm.SampleMemory((long)used, standby, total - (long)used - standby, now.AddSeconds(-2 * (count - 1 - i)));
         }
 
         // The automatic run comes first so the newest record - the one the "last clean" card shows - is the
@@ -205,7 +205,7 @@ internal static class Program
             ("写回已修改内存", 0L),
             ("合并重复内存页", 0L),
             ("注册表缓存整理", 0L),
-        }, now.AddSeconds(-5 * (179 - 60)));
+        }, now.AddSeconds(-2 * (count - 1 - 100)));
 
         vm.RecordClean(false, TimeSpan.FromSeconds(17), new[]
         {
@@ -216,7 +216,7 @@ internal static class Program
             ("收缩系统缓存", 0L),
             ("注册表缓存整理", 12582912L),
             ("收缩程序驻留内存", 2254857830L),
-        }, now.AddSeconds(-5 * (179 - 120)));
+        }, now.AddSeconds(-2 * (count - 1 - 200)));
     }
 
     private static void SeedExclusions()
