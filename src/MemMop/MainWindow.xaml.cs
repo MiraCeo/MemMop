@@ -154,6 +154,19 @@ public partial class MainWindow : Window
         }
     }
 
+    private void OnOpenSettingsClick(object sender, RoutedEventArgs e)
+    {
+        try
+        {
+            // regedit opens on the key without needing elevation, because the key is under the current user
+            System.Diagnostics.Process.Start("regedit.exe", "/n,HKEY_CURRENT_USER\\SOFTWARE\\MemMop");
+        }
+        catch (Exception exception)
+        {
+            System.Windows.MessageBox.Show(this, "打不开注册表编辑器：" + exception.Message, "MemMop", MessageBoxButton.OK, MessageBoxImage.Warning);
+        }
+    }
+
     private void Refresh()
     {
         var snapshot = MemorySnapshot.Capture();

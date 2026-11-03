@@ -40,6 +40,7 @@ internal static class Program
         Render(Path.Combine(output, "statistics.png"), 540, 640, false, 1);
         Render(Path.Combine(output, "settings.png"), 540, 640, false, 2);
         Render(Path.Combine(output, "compact.png"), 320, 212, true, 0);
+        Render(Path.Combine(output, "about.png"), 540, 640, false, 4);
 
         // 1a. the statistics page with a line worth looking at: a sawtooth, which is what a machine that is
         // being cleaned actually looks like. The readings go through the view model, so the chart is drawn

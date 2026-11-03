@@ -882,17 +882,156 @@
         </TabItem>
 
         <TabItem Tag="last" Header="{Binding Source={x:Static core:Strings.Current}, Path=About}">
-            <StackPanel Margin="12">
-                <TextBlock FontSize="18" Text="{Binding TitleText}" />
-                <TextBlock Margin="0, 2, 0, 0" Foreground="#999999" Text="{Binding VersionText}" />
-                <TextBlock Margin="0, 14, 0, 0"
-                           TextWrapping="Wrap"
-                           Text="一个 Windows 内存管理工具，绿色免安装，设置保存在当前用户下。清理不会让电脑变快——待机内存本来就计入可用。" />
-                <TextBlock Margin="0, 14, 0, 0"
-                           Foreground="#999999"
-                           TextWrapping="Wrap"
-                           Text="从零开始的新实现。前身是 MemMop-Archived（基于 WinMemoryCleaner 修改，GPL v3），两者的代码不共享。" />
-            </StackPanel>
+            <ScrollViewer HorizontalScrollBarVisibility="Disabled" VerticalScrollBarVisibility="Auto">
+                <StackPanel Margin="22, 12, 22, 16">
+
+                    <Border Background="{DynamicResource Nav}" CornerRadius="8" Padding="16">
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="Auto" />
+                                <ColumnDefinition Width="*" />
+                            </Grid.ColumnDefinitions>
+
+                            <Image Width="64"
+                                   Height="64"
+                                   VerticalAlignment="Top"
+                                   RenderOptions.BitmapScalingMode="HighQuality"
+                                   Source="pack://application:,,,/MemMop;component/Assets/MemMop.ico" />
+
+                            <StackPanel Grid.Column="1" Margin="16, 2, 0, 0">
+                                <TextBlock FontSize="18"
+                                           FontWeight="SemiBold"
+                                           Foreground="{DynamicResource TextPrimary}"
+                                           Text="{Binding NameText}" />
+
+                                <StackPanel Margin="0, 4, 0, 0" Orientation="Horizontal">
+                                    <TextBlock FontSize="12"
+                                               Foreground="{DynamicResource Accent}"
+                                               Text="{Binding VersionText}" />
+
+                                    <TextBlock Margin="10, 0, 0, 0"
+                                               FontSize="12"
+                                               Foreground="{DynamicResource TextMuted}"
+                                               Text="{Binding BuildText}" />
+                                </StackPanel>
+
+                                <TextBlock Margin="0, 10, 0, 0"
+                                           FontSize="12"
+                                           Foreground="{DynamicResource TextMuted}"
+                                           TextWrapping="Wrap"
+                                           Text="看清内存被什么占着，并在需要时精确释放。" />
+                            </StackPanel>
+                        </Grid>
+                    </Border>
+
+                    <Border Margin="0, 12, 0, 0"
+                            Background="{DynamicResource Nav}"
+                            CornerRadius="8"
+                            Padding="16">
+                        <StackPanel>
+                            <TextBlock FontSize="16"
+                                       FontWeight="SemiBold"
+                                       Foreground="{DynamicResource TextPrimary}"
+                                       Text="关于清理" />
+
+                            <TextBlock Margin="0, 10, 0, 0"
+                                       FontSize="12"
+                                       Foreground="{DynamicResource TextMuted}"
+                                       TextWrapping="Wrap"
+                                       Text="清理不会让电脑变快。待机内存本来就计入可用，清理它只是把缓存让出来，让下一次分配快一点。" />
+
+                            <TextBlock Margin="0, 8, 0, 0"
+                                       FontSize="12"
+                                       Foreground="{DynamicResource TextMuted}"
+                                       TextWrapping="Wrap"
+                                       Text="释放量是清理前后实测的差值，不是估算。测不出来就写「无变化」。" />
+                        </StackPanel>
+                    </Border>
+
+                    <Border Margin="0, 12, 0, 0"
+                            Background="{DynamicResource Nav}"
+                            CornerRadius="8"
+                            Padding="16">
+                        <StackPanel>
+                            <TextBlock FontSize="16"
+                                       FontWeight="SemiBold"
+                                       Foreground="{DynamicResource TextPrimary}"
+                                       Text="技术信息" />
+
+                            <Grid Margin="0, 12, 0, 0">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="Auto" />
+                                    <ColumnDefinition Width="*" />
+                                </Grid.ColumnDefinitions>
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="Auto" />
+                                    <RowDefinition Height="Auto" />
+                                    <RowDefinition Height="Auto" />
+                                </Grid.RowDefinitions>
+
+                                <TextBlock Grid.Row="0"
+                                           Grid.Column="0"
+                                           FontSize="12"
+                                           Foreground="{DynamicResource TextMuted}"
+                                           Text="运行时" />
+                                <TextBlock Grid.Row="0"
+                                           Grid.Column="1"
+                                           Margin="16, 0, 0, 0"
+                                           FontSize="12"
+                                           Text=".NET Framework 4.7.2" />
+
+                                <TextBlock Grid.Row="1"
+                                           Grid.Column="0"
+                                           Margin="0, 6, 0, 0"
+                                           FontSize="12"
+                                           Foreground="{DynamicResource TextMuted}"
+                                           Text="形态" />
+                                <TextBlock Grid.Row="1"
+                                           Grid.Column="1"
+                                           Margin="16, 6, 0, 0"
+                                           FontSize="12"
+                                           Text="单文件，无外部依赖" />
+
+                                <TextBlock Grid.Row="2"
+                                           Grid.Column="0"
+                                           Margin="0, 6, 0, 0"
+                                           FontSize="12"
+                                           Foreground="{DynamicResource TextMuted}"
+                                           Text="设置" />
+                                <TextBlock Grid.Row="2"
+                                           Grid.Column="1"
+                                           Margin="16, 6, 0, 0"
+                                           FontSize="12"
+                                           Text="HKCU\SOFTWARE\MemMop" />
+                            </Grid>
+
+                            <Button Margin="0, 14, 0, 0"
+                                    Padding="12, 5"
+                                    HorizontalAlignment="Left"
+                                    Click="OnOpenSettingsClick"
+                                    Content="打开设置位置" />
+                        </StackPanel>
+                    </Border>
+
+                    <Border Margin="0, 12, 0, 0"
+                            Background="{DynamicResource Nav}"
+                            CornerRadius="8"
+                            Padding="16">
+                        <StackPanel>
+                            <TextBlock FontSize="16"
+                                       FontWeight="SemiBold"
+                                       Foreground="{DynamicResource TextPrimary}"
+                                       Text="前身" />
+
+                            <TextBlock Margin="0, 10, 0, 0"
+                                       FontSize="12"
+                                       Foreground="{DynamicResource TextMuted}"
+                                       TextWrapping="Wrap"
+                                       Text="从零开始的新实现。前身是 MemMop-Archived（基于 WinMemoryCleaner 修改，GPL v3），两者的代码不共享。" />
+                        </StackPanel>
+                    </Border>
+                </StackPanel>
+            </ScrollViewer>
         </TabItem>
     </TabControl>
                 </Grid>

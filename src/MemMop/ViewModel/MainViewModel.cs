@@ -63,9 +63,45 @@ public sealed class MainViewModel : ObservableObject
     public string TitleText =>
         "忆干二净 MemMop " + (System.Reflection.Assembly.GetExecutingAssembly().GetName().Version?.ToString(3) ?? "0.0.0");
 
+    /// <summary>Gets the program's name on its own, for the about card.</summary>
+    public string NameText => "忆干二净 MemMop";
+
     /// <summary>Gets the application version, read from the assembly rather than typed twice.</summary>
     public string VersionText =>
-        (System.Reflection.Assembly.GetExecutingAssembly().GetName().Version?.ToString(3) ?? "0.0.0") + " · Windows";
+        System.Reflection.Assembly.GetExecutingAssembly().GetName().Version?.ToString(3) ?? "0.0.0";
+
+    /// <summary>
+    /// Gets the build the executable came from. The build script stamps the commit into the product version,
+    /// so a screenshot of the about page says exactly which source produced it.
+    /// </summary>
+    public string BuildText
+    {
+        get
+        {
+            try
+            {
+                var product = System.Diagnostics.FileVersionInfo
+                    .GetVersionInfo(System.Reflection.Assembly.GetExecutingAssembly().Location)
+                    .ProductVersion;
+
+                if (string.IsNullOrWhiteSpace(product))
+                    return string.Empty;
+
+                var plus = product!.IndexOf('+');
+
+                if (plus < 0 || plus + 1 >= product.Length)
+                    return string.Empty;
+
+                var hash = product.Substring(plus + 1);
+
+                return "构建 " + (hash.Length > 7 ? hash.Substring(0, 7) : hash);
+            }
+            catch (Exception)
+            {
+                return string.Empty;
+            }
+        }
+    }
 
     /// <summary>Gets or sets the physical memory headline.</summary>
     public string PhysicalText
