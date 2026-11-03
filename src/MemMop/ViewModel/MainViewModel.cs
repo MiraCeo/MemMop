@@ -53,6 +53,7 @@ public sealed class MainViewModel : ObservableObject
         MoveUpCommand = new RelayCommand<string>(name => Move(name, -1), name => CanMove(name, -1));
         MoveDownCommand = new RelayCommand<string>(name => Move(name, 1), name => CanMove(name, 1));
         RemoveExclusionCommand = new RelayCommand<string>(name => RemoveExclusion(name), name => !string.IsNullOrEmpty(name));
+        OptimizeProcessCommand = new RelayCommand<string>(OptimizeProcess, name => !string.IsNullOrEmpty(name));
 
         RefreshExcluded();
         RefreshAvailableProcesses();
@@ -174,6 +175,9 @@ public sealed class MainViewModel : ObservableObject
     /// <summary>Gets the command that adds the selected name to the exclusion list.</summary>
     public ICommand AddExclusionCommand { get; }
 
+    /// <summary>Gets the command that trims one process; the row passes its own name in.</summary>
+    public ICommand OptimizeProcessCommand { get; }
+
     /// <summary>Gets the command that moves the selected name one place up.</summary>
     public ICommand MoveUpCommand { get; private set; } = null!;
 
@@ -228,13 +232,14 @@ public sealed class MainViewModel : ObservableObject
     }
 
     /// <summary>
-    /// Rebuilds the process table.
+    /// Rebuilds the process table. Eight rows is what the home page shows without scrolling; the list is
+    /// the one thing on that page that would otherwise push the clean button off the bottom.
     /// </summary>
     public void RefreshProcessUsage()
     {
         ProcessUsageItems.Clear();
 
-        foreach (var row in ProcessUsageReader.Read(10))
+        foreach (var row in ProcessUsageReader.Read(8))
             ProcessUsageItems.Add(row);
 
         var total = ProcessUsageItems.Sum(r => r.PrivateWorkingSet);
@@ -245,6 +250,30 @@ public sealed class MainViewModel : ObservableObject
             total / (1024d * 1024 * 1024));
 
         Raise(nameof(ProcessUsageTotal));
+    }
+
+    /// <summary>
+    /// Trims one process and refreshes the table, so the row's size reflects what is left.
+    /// </summary>
+    /// <param name="name">The process name the row carries.</param>
+    public void OptimizeProcess(string? name)
+    {
+        if (string.IsNullOrWhiteSpace(name))
+            return;
+
+        var result = ProcessOptimizer.Trim(name!);
+
+        RefreshProcessUsage();
+
+        Summary = result.Succeeded
+            ? string.Format(
+                System.Globalization.CultureInfo.InvariantCulture,
+                "已优化 {0}，释放 {1:0.#} GB",
+                name,
+                Math.Max(0, result.FreedBytes) / (1024d * 1024 * 1024))
+            : "优化 " + name + " 失败：" + (result.Message ?? "未知原因");
+
+        Raise(nameof(Summary));
     }
 
     private void RefreshAvailableProcesses()

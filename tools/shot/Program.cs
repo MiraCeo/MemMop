@@ -37,18 +37,29 @@ internal static class Program
 
         // 1. the default states, with whatever the user actually has configured
         Render(Path.Combine(output, "home.png"), 540, 640, false, 0);
-        Render(Path.Combine(output, "settings.png"), 540, 640, false, 1);
+        Render(Path.Combine(output, "statistics.png"), 540, 640, false, 1);
+        Render(Path.Combine(output, "settings.png"), 540, 640, false, 2);
         Render(Path.Combine(output, "compact.png"), 320, 212, true, 0);
+
+        // 1b. the home page as it looks after a run: each row reports what it released. The values go
+        // through AreaItem.Apply, so the screenshot shows the real formatting rather than a mock-up.
+        Render(Path.Combine(output, "home-results.png"), 540, 640, false, 0, vm =>
+        {
+            long[] released = { 1288490189, 0, 429496730, 92274688, 0, 12582912, 2254857830 };
+
+            for (var i = 0; i < vm.Areas.Count && i < released.Length; i++)
+                vm.Areas[i].Apply(new MemMop.Core.ReclaimResult(true, released[i], null));
+        });
 
         // 2. the whitelist, with a list worth looking at
         SeedExclusions();
-        Render(Path.Combine(output, "whitelist.png"), 540, 640, false, 2, vm => vm.SelectedExclusion = "ChatGPT");
+        Render(Path.Combine(output, "whitelist.png"), 540, 640, false, 3, vm => vm.SelectedExclusion = "ChatGPT");
         Render(
             Path.Combine(output, "whitelist-open.png"),
             540,
             640,
             false,
-            2,
+            3,
             vm =>
             {
                 vm.SelectedExclusion = "ChatGPT";
@@ -59,7 +70,7 @@ internal static class Program
         // 3. automatic cleaning switched on, which the home page reports
         MemMop.Core.Settings.AutoCleanMinutes = 30;
         MemMop.Core.Settings.LowMemoryPercent = 80;
-        Render(Path.Combine(output, "settings-autoclean.png"), 540, 640, false, 1);
+        Render(Path.Combine(output, "settings-autoclean.png"), 540, 640, false, 2);
         Render(Path.Combine(output, "home-autoclean.png"), 540, 640, false, 0);
 
         Console.WriteLine(output);

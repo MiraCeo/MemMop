@@ -349,9 +349,9 @@
                         </Track>
                     </Grid>
                     <ControlTemplate.Triggers>
-                        <!-- opacity, not visibility: the strip must still catch the pointer while hidden -->
+                        <!-- dimmed, not hidden: a page that scrolls has to say so before the pointer finds it -->
                         <Trigger Property="IsMouseOver" Value="False">
-                            <Setter TargetName="Strip" Property="Opacity" Value="0" />
+                            <Setter TargetName="Strip" Property="Opacity" Value="0.4" />
                         </Trigger>
                     </ControlTemplate.Triggers>
                 </ControlTemplate>

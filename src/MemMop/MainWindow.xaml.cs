@@ -15,6 +15,7 @@ public partial class MainWindow : Window
 {
     private readonly DispatcherTimer _timer = new() { Interval = TimeSpan.FromSeconds(1) };
     private readonly MainViewModel _viewModel = new();
+    private int _ticks;
 
     /// <summary>Sets the compact state before the window is shown (used by the screenshot harness).</summary>
     public bool CompactMode
@@ -124,6 +125,7 @@ public partial class MainWindow : Window
         CloseToTrayBox.IsChecked = Settings.CloseToTray;
 
         Refresh();
+        _viewModel.RefreshProcessUsage();
 
         _timer.Tick += (_, _) => Refresh();
         _timer.Start();
@@ -133,6 +135,11 @@ public partial class MainWindow : Window
     {
         var snapshot = MemorySnapshot.Capture();
         var text = Strings.Current;
+
+        // the process table is always on screen now, so it has to keep up - but enumerating every process
+        // costs more than reading the counters, so it runs every fifth tick rather than every tick
+        if (++_ticks % 5 == 0)
+            _viewModel.RefreshProcessUsage();
 
         _viewModel.PhysicalText = text.Physical(snapshot.Total - snapshot.Available, snapshot.Total);
 
