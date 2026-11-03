@@ -392,15 +392,19 @@ public sealed class MainViewModel : ObservableObject
 
         foreach (var record in _cleans.Records)
         {
+            var index = samples.Count - 1;
+
             for (var i = 0; i < samples.Count; i++)
             {
                 if (samples[i].At < record.At)
                     continue;
 
-                markers.Add(i);
+                index = i;
 
                 break;
             }
+
+            markers.Add(index);
         }
 
         ChartMarkers = string.Join(",", markers);
@@ -445,17 +449,28 @@ public sealed class MainViewModel : ObservableObject
         Raise(nameof(HasCleanRecords));
     }
 
-    private void RecordClean(bool automatic, TimeSpan duration, IReadOnlyList<(string Name, ReclaimResult Result)> results)
+    /// <summary>
+    /// Records a run that has already happened. The window calls this after a clean; the screenshot tool calls
+    /// it to render the page with something in it.
+    /// </summary>
+    /// <param name="automatic">Whether the policy started the run.</param>
+    /// <param name="duration">How long it took.</param>
+    /// <param name="areas">What each area released, in bytes.</param>
+    public void RecordClean(bool automatic, TimeSpan duration, IReadOnlyList<(string Area, long Freed)> areas)
     {
-        var areas = results
-            .Select(r => (Area: Areas.FirstOrDefault(a => a.Reclaimer.Name == r.Name)?.Title ?? r.Name, Freed: r.Result.FreedBytes))
-            .ToList();
-
         _cleans.Add(new CleanRecord(DateTime.Now, automatic, duration, areas));
 
         RefreshStatistics();
         RefreshChart();
     }
+
+    private void RecordResults(bool automatic, TimeSpan duration, IReadOnlyList<(string Name, ReclaimResult Result)> results)
+        => RecordClean(
+            automatic,
+            duration,
+            results
+                .Select(r => (Area: Areas.FirstOrDefault(a => a.Reclaimer.Name == r.Name)?.Title ?? r.Name, Freed: r.Result.FreedBytes))
+                .ToList());
 
     /// <summary>
     /// Builds the history as CSV, one row per area per run. Splitting by area is the point: what the user
@@ -990,7 +1005,7 @@ public sealed class MainViewModel : ObservableObject
         foreach (var (name, result) in results)
             Areas.FirstOrDefault(a => a.Reclaimer.Name == name)?.Apply(result);
 
-        RecordClean(automatic: true, DateTime.Now - started, results);
+        RecordResults(automatic: true, DateTime.Now - started, results);
 
         LastCleanAt = DateTime.Now;
         Raise(nameof(LastCleanText));
@@ -1025,7 +1040,7 @@ public sealed class MainViewModel : ObservableObject
                 row?.Apply(result);
             }
 
-            RecordClean(automatic: false, DateTime.Now - started, results);
+            RecordResults(automatic: false, DateTime.Now - started, results);
 
             var released = results.Where(r => r.Result.Succeeded).Sum(r => Math.Max(0, r.Result.FreedBytes));
             var failed = results.Count(r => !r.Result.Succeeded);

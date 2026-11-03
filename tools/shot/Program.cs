@@ -61,6 +61,27 @@ internal static class Program
 
                 vm.SampleMemory((long)used, (long)(total * 0.08), (long)(total * 0.02));
             }
+
+            // two runs, so the "last clean" and "history" cards have something in them and the chart gets
+            // its markers. The values go through the same path a real run takes.
+            vm.RecordClean(false, TimeSpan.FromSeconds(17), new[]
+            {
+                ("清理待机缓存", 1288490189L),
+                ("仅清理低优先级待机缓存", 0L),
+                ("写回已修改内存", 429496730L),
+                ("合并重复内存页", 92274688L),
+                ("收缩系统缓存", 0L),
+                ("注册表缓存整理", 12582912L),
+                ("收缩程序驻留内存", 2254857830L),
+            });
+
+            vm.RecordClean(true, TimeSpan.FromSeconds(9), new[]
+            {
+                ("清理待机缓存", 644245094L),
+                ("写回已修改内存", 0L),
+                ("合并重复内存页", 0L),
+                ("注册表缓存整理", 0L),
+            });
         });
 
         // 1b. the home page as it looks after a run: each row reports what it released. The values go
