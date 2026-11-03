@@ -1,6 +1,7 @@
 <Window x:Class="MemMop.MainWindow"
         xmlns:controls="clr-namespace:MemMop.Controls"
         xmlns:converters="clr-namespace:MemMop.Converters"
+        xmlns:c="clr-namespace:MemMop.Converters"
         Topmost="{Binding AlwaysOnTop}"
         xmlns:core="clr-namespace:MemMop.Core"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
@@ -64,7 +65,7 @@
                                   Background="Transparent"
                                   BorderThickness="0"
                                   IsChecked="{Binding AlwaysOnTop}"
-                                  ToolTip="窗口置顶">
+                                  ToolTip="{c:Text AlwaysOnTop}">
                         <Path Data="M 2.2 1.6 L 9.8 1.6 L 9.8 4.2 L 6.9 6.2 L 6.9 10.8 L 5.1 10.8 L 5.1 6.2 L 2.2 4.2 Z"
                               Fill="Transparent"
                               Stroke="{DynamicResource TextPrimary}"
@@ -80,7 +81,7 @@
                                   Background="Transparent"
                                   BorderThickness="0"
                                   IsChecked="{Binding CompactMode}"
-                                  ToolTip="紧凑视图">
+                                  ToolTip="{c:Text CompactView}">
                         <Path Data="M 2 8 L 6 3.5 L 10 8"
                               Width="12"
                               Height="12"
@@ -89,7 +90,7 @@
                               StrokeThickness="1.5" />
                     </ToggleButton>
 
-                    <Button Style="{StaticResource TitleButton}" Click="OnMinimizeClick" ToolTip="最小化">
+                    <Button Style="{StaticResource TitleButton}" Click="OnMinimizeClick" ToolTip="{c:Text Minimize}">
                         <Path Data="M 2 6 L 10 6"
                               Width="12"
                               Height="12"
@@ -98,7 +99,7 @@
                               StrokeThickness="1.5" />
                     </Button>
 
-                    <Button Style="{StaticResource TitleButton}" Click="OnCloseClick" ToolTip="关闭">
+                    <Button Style="{StaticResource TitleButton}" Click="OnCloseClick" ToolTip="{c:Text Close}">
                         <Path Data="M 2.5 2.5 L 9.5 9.5 M 9.5 2.5 L 2.5 9.5"
                               Width="12"
                               Height="12"
@@ -133,7 +134,7 @@
                         VerticalAlignment="Center"
                         FontSize="13"
                         Command="{Binding CleanCommand}"
-                        Content="清理" />
+                        Content="{c:Text Clean}" />
             </Grid>
 
             <StackPanel Grid.Column="1" Margin="14, 4, 0, 0" VerticalAlignment="Top">
@@ -225,7 +226,7 @@
                                        Margin="0, 0, 0, 8"
                                        FontSize="11"
                                        Foreground="{DynamicResource TextMuted}"
-                                       Text="进程占用" />
+                                       Text="{c:Text ProcessUsage}" />
 
                             <ScrollViewer Grid.Row="1"
                                           HorizontalScrollBarVisibility="Disabled"
@@ -263,7 +264,7 @@
                                                         Style="{StaticResource RowAction}"
                                                         Command="{Binding DataContext.OptimizeProcessCommand, RelativeSource={RelativeSource AncestorType=ItemsControl}}"
                                                         CommandParameter="{Binding Name}"
-                                                        ToolTip="优化这个进程">
+                                                        ToolTip="{c:Text OptimizeProcess}">
                                                     <Path Width="9"
                                                           Height="9"
                                                           Data="M 5 1 L 5 6 M 2 3.5 L 5 6.5 L 8 3.5 M 1 9 L 9 9"
@@ -316,7 +317,7 @@
             </Grid>
         </TabItem>
 
-        <TabItem Header="统计">
+        <TabItem Header="{c:Text Statistics}">
             <ScrollViewer HorizontalScrollBarVisibility="Disabled" VerticalScrollBarVisibility="Auto">
                 <StackPanel Margin="22, 12, 22, 16">
 
@@ -331,7 +332,7 @@
                                 <TextBlock FontSize="16"
                                            FontWeight="SemiBold"
                                            Foreground="{DynamicResource TextPrimary}"
-                                           Text="内存占用" />
+                                           Text="{c:Text MemoryUsage}" />
 
                                 <StackPanel Grid.Column="1"
                                             VerticalAlignment="Center"
@@ -372,17 +373,17 @@
                                            VerticalAlignment="Center"
                                            FontSize="11"
                                            Foreground="{DynamicResource TextMuted}"
-                                           Text="正在采样…" />
+                                           Text="{c:Text Sampling}" />
                             </Grid>
 
                             <ComboBox Width="150"
                                       Margin="0, 12, 0, 0"
                                       HorizontalAlignment="Left"
                                       SelectedIndex="{Binding ChartWindowIndex}">
-                                <ComboBoxItem Content="最近 1 分钟" />
-                                <ComboBoxItem Content="最近 5 分钟" />
-                                <ComboBoxItem Content="最近 15 分钟" />
-                                <ComboBoxItem Content="最近 1 小时" />
+                                <ComboBoxItem Content="{c:Text LastMinute}" />
+                                <ComboBoxItem Content="{c:Text Last5Minutes}" />
+                                <ComboBoxItem Content="{c:Text Last15Minutes}" />
+                                <ComboBoxItem Content="{c:Text LastHour}" />
                             </ComboBox>
                         </StackPanel>
                     </Border>
@@ -395,7 +396,7 @@
                             <TextBlock FontSize="16"
                                        FontWeight="SemiBold"
                                        Foreground="{DynamicResource TextPrimary}"
-                                       Text="上次清理" />
+                                       Text="{c:Text LastClean}" />
 
                             <TextBlock Margin="0, 4, 0, 12"
                                        FontSize="11"
@@ -437,12 +438,12 @@
                                 <TextBlock FontSize="16"
                                            FontWeight="SemiBold"
                                            Foreground="{DynamicResource TextPrimary}"
-                                           Text="清理记录" />
+                                           Text="{c:Text CleanHistory}" />
 
                                 <Button Grid.Column="1"
                                         Padding="12, 5"
                                         Click="OnExportHistoryClick"
-                                        Content="导出" />
+                                        Content="{c:Text Export}" />
                             </Grid>
 
                             <ItemsControl Margin="0, 12, 0, 0" ItemsSource="{Binding CleanRecords}">
@@ -472,7 +473,7 @@
                             <TextBlock Margin="0, 8, 0, 0"
                                        FontSize="11"
                                        Foreground="{DynamicResource TextMuted}"
-                                       Text="还没有记录"
+                                       Text="{c:Text NoRecords}"
                                        Visibility="{Binding HasCleanRecords, Converter={StaticResource InverseBoolToVisibility}}" />
                         </StackPanel>
                     </Border>
@@ -490,34 +491,34 @@
                                        FontSize="16"
                                        FontWeight="SemiBold"
                                        Foreground="{DynamicResource TextPrimary}"
-                                       Text="通用设置" />
+                                       Text="{c:Text GeneralSettings}" />
 
                             <Grid Margin="0, 0, 0, 12">
                                 <Grid.ColumnDefinitions>
-                                    <ColumnDefinition Width="56" />
+                                    <ColumnDefinition Width="Auto" MinWidth="56" />
                                     <ColumnDefinition Width="*" />
-                                    <ColumnDefinition Width="56" />
+                                    <ColumnDefinition Width="Auto" MinWidth="56" />
                                     <ColumnDefinition Width="Auto" />
                                 </Grid.ColumnDefinitions>
 
-                                <TextBlock VerticalAlignment="Center" Text="语言" />
+                                <TextBlock VerticalAlignment="Center" Text="{c:Text Language}" />
                                 <ComboBox x:Name="LanguageBox"
                                           Grid.Column="1"
                                           Margin="0, 0, 16, 0"
                                           HorizontalAlignment="Stretch"
                                           SelectionChanged="OnLanguageChanged">
-                                    <ComboBoxItem Content="简体中文" Tag="zh-Hans" />
+                                    <ComboBoxItem Content="{c:Text Chinese}" Tag="zh-Hans" />
                                     <ComboBoxItem Content="English" Tag="en" />
                                 </ComboBox>
 
-                                <TextBlock Grid.Column="2" VerticalAlignment="Center" Text="字号" />
+                                <TextBlock Grid.Column="2" Margin="0, 0, 8, 0" VerticalAlignment="Center" Text="{c:Text TextSize}" />
                                 <ComboBox Grid.Column="3"
                                           Width="100"
                                           HorizontalAlignment="Left"
                                           SelectedIndex="{Binding FontSizeIndex}">
-                                    <ComboBoxItem Content="小" />
-                                    <ComboBoxItem Content="标准" />
-                                    <ComboBoxItem Content="大" />
+                                    <ComboBoxItem Content="{c:Text SizeSmall}" />
+                                    <ComboBoxItem Content="{c:Text SizeNormal}" />
+                                    <ComboBoxItem Content="{c:Text SizeLarge}" />
                                 </ComboBox>
                             </Grid>
 
@@ -526,15 +527,15 @@
                                           Margin="0, 4, 16, 4"
                                           Content="{Binding Source={x:Static core:Strings.Current}, Path=CloseToTray}"
                                           IsChecked="{Binding CloseToTray}" />
-                                <CheckBox Margin="0, 4" Content="静默启动" IsChecked="{Binding StartMinimized}" />
-                                <CheckBox Margin="0, 4, 16, 4" Content="开机自启" IsChecked="{Binding RunOnStartup}" />
-                                <CheckBox Margin="0, 4" Content="显示清理通知" IsChecked="{Binding ShowNotifications}" />
-                                <CheckBox Margin="0, 4, 16, 4" Content="显示已提交" IsChecked="{Binding ShowCommitted}" />
-                                <CheckBox Margin="0, 4" Content="详细内存信息" IsChecked="{Binding DetailedMemory}" />
+                                <CheckBox Margin="0, 4" Content="{c:Text StartMinimized}" IsChecked="{Binding StartMinimized}" />
+                                <CheckBox Margin="0, 4, 16, 4" Content="{c:Text RunOnStartup}" IsChecked="{Binding RunOnStartup}" />
+                                <CheckBox Margin="0, 4" Content="{c:Text ShowNotifications}" IsChecked="{Binding ShowNotifications}" />
+                                <CheckBox Margin="0, 4, 16, 4" Content="{c:Text ShowCommitted}" IsChecked="{Binding ShowCommitted}" />
+                                <CheckBox Margin="0, 4" Content="{c:Text DetailedMemory}" IsChecked="{Binding DetailedMemory}" />
                             </UniformGrid>
 
                             <CheckBox Margin="0, 8, 0, 0"
-                                      Content="启用清理热键（Ctrl+Alt+M）"
+                                      Content="{c:Text EnableHotkey}"
                                       IsChecked="{Binding HotkeyEnabled}" />
                         </StackPanel>
                     </Border>
@@ -548,13 +549,13 @@
                                        FontSize="16"
                                        FontWeight="SemiBold"
                                        Foreground="{DynamicResource TextPrimary}"
-                                       Text="清理区域" />
+                                       Text="{c:Text CleanAreas}" />
 
                             <TextBlock Margin="0, 0, 0, 14"
                                        FontSize="11"
                                        Foreground="{DynamicResource TextMuted}"
                                        TextWrapping="Wrap"
-                                       Text="勾选要清理的项目。每项下面写的是它的代价。" />
+                                       Text="{c:Text CleanAreasHint}" />
 
                             <ItemsControl ItemsSource="{Binding Areas}">
                                 <ItemsControl.ItemTemplate>
@@ -594,7 +595,7 @@
                                        FontSize="16"
                                        FontWeight="SemiBold"
                                        Foreground="{DynamicResource TextPrimary}"
-                                       Text="自动清理" />
+                                       Text="{c:Text AutoClean}" />
 
                             <Grid>
                                 <Grid.ColumnDefinitions>
@@ -606,7 +607,7 @@
                                     <RowDefinition Height="Auto" />
                                 </Grid.RowDefinitions>
 
-                                <TextBlock Grid.Row="0" Grid.Column="0" VerticalAlignment="Center" Text="间隔" />
+                                <TextBlock Grid.Row="0" Grid.Column="0" VerticalAlignment="Center" Text="{c:Text Interval}" />
 
                                 <Grid Grid.Row="0" Grid.Column="1">
                                     <Grid.ColumnDefinitions>
@@ -633,19 +634,19 @@
                                         <ColumnDefinition Width="*" />
                                     </Grid.ColumnDefinitions>
 
-                                    <TextBlock Grid.Column="0" HorizontalAlignment="Center" FontSize="11" Text="关闭"
+                                    <TextBlock Grid.Column="0" HorizontalAlignment="Center" FontSize="11" Text="{c:Text Close}"
                                                FontWeight="{Binding AutoCleanIntervalIndex, Converter={StaticResource ActiveIndexWeight}, ConverterParameter=0}"
                                                Foreground="{Binding AutoCleanIntervalIndex, Converter={StaticResource ActiveIndexBrush}, ConverterParameter=0}" />
-                                    <TextBlock Grid.Column="1" HorizontalAlignment="Center" FontSize="11" Text="15 分"
+                                    <TextBlock Grid.Column="1" HorizontalAlignment="Center" FontSize="11" Text="{c:Text Minutes15}"
                                                FontWeight="{Binding AutoCleanIntervalIndex, Converter={StaticResource ActiveIndexWeight}, ConverterParameter=1}"
                                                Foreground="{Binding AutoCleanIntervalIndex, Converter={StaticResource ActiveIndexBrush}, ConverterParameter=1}" />
-                                    <TextBlock Grid.Column="2" HorizontalAlignment="Center" FontSize="11" Text="30 分"
+                                    <TextBlock Grid.Column="2" HorizontalAlignment="Center" FontSize="11" Text="{c:Text Minutes30}"
                                                FontWeight="{Binding AutoCleanIntervalIndex, Converter={StaticResource ActiveIndexWeight}, ConverterParameter=2}"
                                                Foreground="{Binding AutoCleanIntervalIndex, Converter={StaticResource ActiveIndexBrush}, ConverterParameter=2}" />
-                                    <TextBlock Grid.Column="3" HorizontalAlignment="Center" FontSize="11" Text="1 小时"
+                                    <TextBlock Grid.Column="3" HorizontalAlignment="Center" FontSize="11" Text="{c:Text Hour1}"
                                                FontWeight="{Binding AutoCleanIntervalIndex, Converter={StaticResource ActiveIndexWeight}, ConverterParameter=3}"
                                                Foreground="{Binding AutoCleanIntervalIndex, Converter={StaticResource ActiveIndexBrush}, ConverterParameter=3}" />
-                                    <TextBlock Grid.Column="4" HorizontalAlignment="Center" FontSize="11" Text="2 小时"
+                                    <TextBlock Grid.Column="4" HorizontalAlignment="Center" FontSize="11" Text="{c:Text Hour2}"
                                                FontWeight="{Binding AutoCleanIntervalIndex, Converter={StaticResource ActiveIndexWeight}, ConverterParameter=4}"
                                                Foreground="{Binding AutoCleanIntervalIndex, Converter={StaticResource ActiveIndexBrush}, ConverterParameter=4}" />
                                 </Grid>
@@ -661,7 +662,7 @@
                                     <RowDefinition Height="Auto" />
                                 </Grid.RowDefinitions>
 
-                                <TextBlock Grid.Row="0" Grid.Column="0" VerticalAlignment="Center" Text="占用超过" />
+                                <TextBlock Grid.Row="0" Grid.Column="0" VerticalAlignment="Center" Text="{c:Text Threshold}" />
 
                                 <Grid Grid.Row="0" Grid.Column="1">
                                     <Grid.ColumnDefinitions>
@@ -688,7 +689,7 @@
                                         <ColumnDefinition Width="*" />
                                     </Grid.ColumnDefinitions>
 
-                                    <TextBlock Grid.Column="0" HorizontalAlignment="Center" FontSize="11" Text="关闭"
+                                    <TextBlock Grid.Column="0" HorizontalAlignment="Center" FontSize="11" Text="{c:Text Close}"
                                                FontWeight="{Binding AutoCleanThresholdIndex, Converter={StaticResource ActiveIndexWeight}, ConverterParameter=0}"
                                                Foreground="{Binding AutoCleanThresholdIndex, Converter={StaticResource ActiveIndexBrush}, ConverterParameter=0}" />
                                     <TextBlock Grid.Column="1" HorizontalAlignment="Center" FontSize="11" Text="75%"
@@ -707,7 +708,7 @@
                             </Grid>
 
                             <CheckBox Margin="0, 16, 0, 0"
-                                      Content="只做保守操作（不收缩工作集、不压系统缓存）"
+                                      Content="{c:Text SafeOnly}"
                                       IsChecked="{Binding AutoCleanSafeOnly}" />
                         </StackPanel>
                     </Border>
@@ -720,13 +721,13 @@
                     <TextBlock Margin="0, 16, 0, 8"
                                FontSize="10"
                                Foreground="{DynamicResource TextMuted}"
-                               Text="重置会清除所有已保存的设置" />
+                               Text="{c:Text ResetHint}" />
 
                     <Button Margin="0, 0, 0, 0"
                             HorizontalAlignment="Left"
                             Padding="16, 7"
                             Command="{Binding ResetSettingsCommand}"
-                            Content="重置" />
+                            Content="{c:Text Reset}" />
                 </StackPanel>
             </ScrollViewer>
         </TabItem>
@@ -752,7 +753,7 @@
                                        Margin="0, 0, 0, 5"
                                        FontSize="10"
                                        Foreground="{DynamicResource TextMuted}"
-                                       Text="搜索并添加进程" />
+                                       Text="{c:Text SearchAndAdd}" />
 
                             <!-- search: the magnifier sits inside the box, the plus adds whatever is selected -->
                             <Grid Grid.Row="1" Grid.Column="0">
@@ -788,7 +789,7 @@
                                        Margin="0, 14, 0, 5"
                                        FontSize="10"
                                        Foreground="{DynamicResource TextMuted}"
-                                       Text="白名单（不参与清理）" />
+                                       Text="{c:Text WhitelistTitle}" />
 
                             <!-- every row carries its own move and delete buttons -->
                             <ListBox Grid.Row="3"
@@ -813,7 +814,7 @@
                                                 <Button Style="{StaticResource RowAction}"
                                                         Command="{Binding DataContext.MoveUpCommand, RelativeSource={RelativeSource AncestorType=ListBox}}"
                                                         CommandParameter="{Binding}"
-                                                        ToolTip="上移">
+                                                        ToolTip="{c:Text MoveUp}">
                                                     <Path Width="9"
                                                           Height="9"
                                                           Data="M 1 6 L 5 2 L 9 6"
@@ -824,7 +825,7 @@
                                                 <Button Style="{StaticResource RowAction}"
                                                         Command="{Binding DataContext.MoveDownCommand, RelativeSource={RelativeSource AncestorType=ListBox}}"
                                                         CommandParameter="{Binding}"
-                                                        ToolTip="下移">
+                                                        ToolTip="{c:Text MoveDown}">
                                                     <Path Width="9"
                                                           Height="9"
                                                           Data="M 1 2 L 5 6 L 9 2"
@@ -835,7 +836,7 @@
                                                 <Button Style="{StaticResource RowAction}"
                                                         Command="{Binding DataContext.RemoveExclusionCommand, RelativeSource={RelativeSource AncestorType=ListBox}}"
                                                         CommandParameter="{Binding}"
-                                                        ToolTip="删除">
+                                                        ToolTip="{c:Text Remove}">
                                                     <Path Width="9"
                                                           Height="9"
                                                           Data="M 2 2 L 8 8 M 8 2 L 2 8"
@@ -872,7 +873,7 @@
                                            FontSize="11"
                                            Foreground="{DynamicResource InputBorder}"
                                            IsHitTestVisible="False"
-                                           Text="无匹配的进程"
+                                           Text="{c:Text NoMatches}"
                                            Visibility="{Binding HasAvailableProcesses, Converter={StaticResource InverseBoolToVisibility}}" />
                             </Grid>
                         </Grid>
@@ -919,7 +920,7 @@
                                            FontSize="12"
                                            Foreground="{DynamicResource TextMuted}"
                                            TextWrapping="Wrap"
-                                           Text="看清内存被什么占着，并在需要时精确释放。" />
+                                           Text="{c:Text Tagline}" />
                             </StackPanel>
                         </Grid>
                     </Border>
@@ -932,19 +933,19 @@
                             <TextBlock FontSize="16"
                                        FontWeight="SemiBold"
                                        Foreground="{DynamicResource TextPrimary}"
-                                       Text="关于清理" />
+                                       Text="{c:Text AboutCleanTitle}" />
 
                             <TextBlock Margin="0, 10, 0, 0"
                                        FontSize="12"
                                        Foreground="{DynamicResource TextMuted}"
                                        TextWrapping="Wrap"
-                                       Text="清理不会让电脑变快。待机内存本来就计入可用，清理它只是把缓存让出来，让下一次分配快一点。" />
+                                       Text="{c:Text AboutClean1}" />
 
                             <TextBlock Margin="0, 8, 0, 0"
                                        FontSize="12"
                                        Foreground="{DynamicResource TextMuted}"
                                        TextWrapping="Wrap"
-                                       Text="释放量是清理前后实测的差值，不是估算。测不出来就写「无变化」。" />
+                                       Text="{c:Text AboutClean2}" />
                         </StackPanel>
                     </Border>
 
@@ -956,7 +957,7 @@
                             <TextBlock FontSize="16"
                                        FontWeight="SemiBold"
                                        Foreground="{DynamicResource TextPrimary}"
-                                       Text="技术信息" />
+                                       Text="{c:Text Technical}" />
 
                             <Grid Margin="0, 12, 0, 0">
                                 <Grid.ColumnDefinitions>
@@ -973,7 +974,7 @@
                                            Grid.Column="0"
                                            FontSize="12"
                                            Foreground="{DynamicResource TextMuted}"
-                                           Text="运行时" />
+                                           Text="{c:Text Runtime}" />
                                 <TextBlock Grid.Row="0"
                                            Grid.Column="1"
                                            Margin="16, 0, 0, 0"
@@ -985,19 +986,19 @@
                                            Margin="0, 6, 0, 0"
                                            FontSize="12"
                                            Foreground="{DynamicResource TextMuted}"
-                                           Text="形态" />
+                                           Text="{c:Text Shape}" />
                                 <TextBlock Grid.Row="1"
                                            Grid.Column="1"
                                            Margin="16, 6, 0, 0"
                                            FontSize="12"
-                                           Text="单文件，无外部依赖" />
+                                           Text="{c:Text SingleFile}" />
 
                                 <TextBlock Grid.Row="2"
                                            Grid.Column="0"
                                            Margin="0, 6, 0, 0"
                                            FontSize="12"
                                            Foreground="{DynamicResource TextMuted}"
-                                           Text="设置" />
+                                           Text="{c:Text SettingsLocation}" />
                                 <TextBlock Grid.Row="2"
                                            Grid.Column="1"
                                            Margin="16, 6, 0, 0"
@@ -1009,7 +1010,7 @@
                                     Padding="12, 5"
                                     HorizontalAlignment="Left"
                                     Click="OnOpenSettingsClick"
-                                    Content="打开设置位置" />
+                                    Content="{c:Text OpenSettings}" />
                         </StackPanel>
                     </Border>
 
@@ -1021,13 +1022,13 @@
                             <TextBlock FontSize="16"
                                        FontWeight="SemiBold"
                                        Foreground="{DynamicResource TextPrimary}"
-                                       Text="前身" />
+                                       Text="{c:Text Predecessor}" />
 
                             <TextBlock Margin="0, 10, 0, 0"
                                        FontSize="12"
                                        Foreground="{DynamicResource TextMuted}"
                                        TextWrapping="Wrap"
-                                       Text="从零开始的新实现。前身是 MemMop-Archived（基于 WinMemoryCleaner 修改，GPL v3），两者的代码不共享。" />
+                                       Text="{c:Text PredecessorText}" />
                         </StackPanel>
                     </Border>
                 </StackPanel>

@@ -56,13 +56,13 @@ public sealed class AreaItem : ObservableObject
     {
         if (!result.Succeeded)
         {
-            LastResult = "失败：" + (result.Message ?? "未知原因");
+            LastResult = Strings.Current.Failed + (result.Message ?? Strings.Current.UnknownReason);
 
             return;
         }
 
         LastResult = result.ReleasedAnything
-            ? string.Format(System.Globalization.CultureInfo.InvariantCulture, "上次释放 {0:0.#} GB", result.FreedBytes / (1024d * 1024 * 1024))
-            : "无变化";
+            ? Strings.Current.LastFreed(result.FreedBytes)
+            : Strings.Current.NoChange;
     }
 }

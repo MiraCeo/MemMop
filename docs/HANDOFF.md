@@ -176,19 +176,44 @@ origin/main 072e437  chore: project founding            2026-11-01 16:16
 
 「只做保守操作」从通用设置搬到了这张卡片里。
 
-### 3. 双语只做了三成
+### 3. 双语（2026-11-03 已完成，留作记录）
+
+**所有用户可见的字符串都在 `Core/Strings.cs` 里**，中英各一份。XAML 用 `{c:Text Key}` 这个
+标记扩展绑定（`Converters/TextExtension.cs`），C# 直接读 `Strings.Current.X`。
+
+**三个坑**：
+
+- 标记扩展必须 `return binding.ProvideValue(serviceProvider)`，不能直接 `return binding`——
+  否则解析器把 Binding 对象本身赋给 `Text`，属性拒绝
+- 不能加 `[MarkupExtensionReturnType(typeof(string))]`，那会让解析器试图把 Binding 转成字符串
+- **清理记录存的是稳定名**（`StandbyList` 之类），不是标题。标题是翻译，存标题的话
+  切语言之后历史记录还是旧语言
+
+**切语言时要重建的东西**：`RefreshStatistics()`（行是构造出来的字符串）、`RefreshChart()`
+（轴标签画在 `OnRender` 里）、`Refresh()`（图例行）。VM 订阅了 `Strings.PropertyChanged`
+重新 raise 自己的 `Summary` / `LastCleanSummary` / `AutoCleanStatus`。
+
+**顺带修的**：`Strings.Size()` 在 1 GB 以下用 MB。之前 12 MB 显示成「0 GB」，违反「不伪造数字」。
+
+### 4. 双语遗留
+
+- **清理记录里的区域名**：现在存稳定名、显示时翻译，所以切语言历史也跟着变。但**导出 CSV 里的
+  区域名是导出那一刻的语言**，不是记录时的
+- **`Strings.SearchProcess` 是死代码**：白名单搜索框的占位符在加放大镜图标时被去掉了
+- **英文比中文宽**：设置页「语言 / 字号」两列的固定宽度 56px 装不下，已改成 `Auto` + `MinWidth`。
+  以后加英文文案要留意这类固定宽度
 
 `MainWindow.xaml` 里 **30 行写着硬编码中文**，只有 **6 行**绑定了 `Strings.Current`。所以切到 English 之后，标签页标题会变、设置页那一片不会变。
 
 `Strings.cs` 是内联的两份文案（没有 JSON、没有 Localizer），加键的成本是"改一个属性 + 两个分支"。要真正双语，得把 XAML 里 30 处中文换成绑定。
 
-### 4. 主页密度
+### 5. 主页密度
 
 「清理区域」卡片在折叠线以上只露出 6 行（第 7 项 `收缩程序驻留内存` 要滚）；「进程占用」整段在折叠线以下。
 
 自动清理开启时 footer 多一行状态，还会再挤掉一行。
 
-### 5. 关于页（2026-11-03 已完成，留作记录）
+### 6. 关于页（2026-11-03 已完成，内容待重做）
 
 四张卡片：身份（图标 + 名字 + 版本 + 构建号 + 一句话）、关于清理（两条诚实声明）、
 技术信息（运行时 / 形态 / 设置位置 + 「打开设置位置」按钮）、前身。
@@ -198,7 +223,7 @@ origin/main 072e437  chore: project founding            2026-11-01 16:16
 
 仍是三个 TextBlock 堆着，没有按卡片规则排。文案与 `Strings.AboutText` 重复。
 
-### 6. 图标（2026-11-03 已完成，留作记录）
+### 7. 图标（2026-11-03 已完成，留作记录）
 
 `src/MemMop/Assets/MemMop.ico`，七个尺寸（16/20/24/32/48/64/256），从 `MemMop-256.png` 生成。
 
@@ -214,11 +239,11 @@ origin/main 072e437  chore: project founding            2026-11-01 16:16
 
 **代价**：exe 从 127.5 KB 涨到 239.5 KB——图标嵌了两份（Win32 资源 + WPF 资源）。
 
-### 7. 交付形态
+### 8. 交付形态
 
 图标仍是系统默认、没有安装包、没有签名、`app.manifest` 已要求 `requireAdministrator`。
 
-### 8. 仓库卫生（已完成）
+### 9. 仓库卫生（已完成）
 
 3 个被 git 跟踪的 WPF 临时工程已 `git rm`，`.gitignore` 加了 `*_wpftmp.csproj`。
 

@@ -172,7 +172,7 @@ public partial class App : Application
         Settings.ShownTrayHint = true;
         Settings.Save();
 
-        _tray?.Notify("已最小化到托盘");
+        _tray?.Notify(MemMop.Core.Strings.Current.MinimizedToTray);
     }
 
     private void ShowWindow()

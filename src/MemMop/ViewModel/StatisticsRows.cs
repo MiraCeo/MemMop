@@ -1,4 +1,5 @@
 using System.Globalization;
+using MemMop.Core;
 
 namespace MemMop.ViewModel;
 
@@ -15,15 +16,13 @@ public sealed class AreaResultRow
     public AreaResultRow(string area, long freed)
     {
         Area = area;
-        Freed = freed > 0
-            ? string.Format(CultureInfo.InvariantCulture, "{0:0.#} GB", freed / (1024d * 1024 * 1024))
-            : "无变化";
+        Freed = freed > 0 ? Strings.Size(freed) : Strings.Current.NoChange;
     }
 
     /// <summary>Gets the area's name.</summary>
     public string Area { get; }
 
-    /// <summary>Gets what it released, formatted; "无变化" when nothing was measured.</summary>
+    /// <summary>Gets what it released, formatted; the "no change" wording when nothing was measured.</summary>
     public string Freed { get; }
 }
 
@@ -41,10 +40,8 @@ public sealed class CleanRecordRow
     public CleanRecordRow(DateTime at, bool automatic, long freed)
     {
         When = at.ToString("MM-dd HH:mm", CultureInfo.InvariantCulture);
-        Trigger = automatic ? "自动" : "手动";
-        Freed = freed > 0
-            ? string.Format(CultureInfo.InvariantCulture, "{0:0.#} GB", freed / (1024d * 1024 * 1024))
-            : "无变化";
+        Trigger = automatic ? Strings.Current.Automatic : Strings.Current.Manual;
+        Freed = freed > 0 ? Strings.Size(freed) : Strings.Current.NoChange;
     }
 
     /// <summary>Gets when the run finished.</summary>

@@ -25,6 +25,27 @@ internal static class Program
             return;
         }
 
+        try
+        {
+            Run(args);
+        }
+        catch (Exception exception)
+        {
+            Console.Error.WriteLine("FAILED: " + exception.GetType().FullName);
+            Console.Error.WriteLine(exception.Message);
+            Console.Error.WriteLine(exception.StackTrace);
+
+            for (var inner = exception.InnerException; inner != null; inner = inner.InnerException)
+            {
+                Console.Error.WriteLine("INNER: " + inner.GetType().FullName);
+                Console.Error.WriteLine(inner.Message);
+            }
+            Environment.ExitCode = 1;
+        }
+    }
+
+    private static void Run(string[] args)
+    {
         var output = args.Length > 0 ? args[0] : Path.Combine(Path.GetTempPath(), "memmop-shots");
         Directory.CreateDirectory(output);
 
@@ -41,6 +62,25 @@ internal static class Program
         Render(Path.Combine(output, "settings.png"), 540, 640, false, 2);
         Render(Path.Combine(output, "compact.png"), 320, 212, true, 0);
         Render(Path.Combine(output, "about.png"), 540, 640, false, 4);
+
+        // 0. the same pages in English, so a translation gap shows up as a screenshot rather than a report.
+        // The language is switched inside the window, after it has loaded, so the registry is never written.
+        Render(Path.Combine(output, "home-en.png"), 540, 640, false, 0, _ => MemMop.Core.Strings.Current.SetLanguage(true));
+        Render(Path.Combine(output, "settings-en.png"), 540, 640, false, 2, _ => MemMop.Core.Strings.Current.SetLanguage(true));
+        Render(Path.Combine(output, "about-en.png"), 540, 640, false, 4, _ => MemMop.Core.Strings.Current.SetLanguage(true));
+        Render(Path.Combine(output, "statistics-en.png"), 540, 640, false, 1, vm =>
+        {
+            SeedStatistics(vm);
+            MemMop.Core.Strings.Current.SetLanguage(true);
+        });
+        Render(Path.Combine(output, "whitelist-en.png"), 540, 640, false, 3, vm =>
+        {
+            SeedExclusions();
+            vm.SelectedExclusion = "ChatGPT";
+            MemMop.Core.Strings.Current.SetLanguage(true);
+        });
+
+        MemMop.Core.Strings.Current.SetLanguage(false);
 
         // 1a. the statistics page with a line worth looking at: a sawtooth, which is what a machine that is
         // being cleaned actually looks like. The readings go through the view model, so the chart is drawn
@@ -202,21 +242,21 @@ internal static class Program
         // four, and that is what the card showed before this was reordered.
         vm.RecordClean(true, TimeSpan.FromSeconds(9), new[]
         {
-            ("清理待机缓存", 644245094L),
-            ("写回已修改内存", 0L),
-            ("合并重复内存页", 0L),
-            ("注册表缓存整理", 0L),
+            ("StandbyList", 644245094L),
+            ("ModifiedPageList", 0L),
+            ("CombinedPageList", 0L),
+            ("RegistryCache", 0L),
         }, now.AddSeconds(-2 * (count - 1 - 100)));
 
         vm.RecordClean(false, TimeSpan.FromSeconds(17), new[]
         {
-            ("清理待机缓存", 1288490189L),
-            ("仅清理低优先级待机缓存", 0L),
-            ("写回已修改内存", 429496730L),
-            ("合并重复内存页", 92274688L),
-            ("收缩系统缓存", 0L),
-            ("注册表缓存整理", 12582912L),
-            ("收缩程序驻留内存", 2254857830L),
+            ("StandbyList", 1288490189L),
+            ("StandbyListLowPriority", 0L),
+            ("ModifiedPageList", 429496730L),
+            ("CombinedPageList", 92274688L),
+            ("SystemFileCache", 0L),
+            ("RegistryCache", 12582912L),
+            ("WorkingSet", 2254857830L),
         }, now.AddSeconds(-2 * (count - 1 - 200)));
     }
 
@@ -278,6 +318,9 @@ internal static class Program
         if (prepare != null && window.DataContext is MainViewModel viewModel)
         {
             prepare(viewModel);
+
+            // the legend lines are built strings, so they only follow a language switch on the next refresh
+            window.RefreshNow();
             window.UpdateLayout();
         }
 

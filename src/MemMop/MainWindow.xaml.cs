@@ -136,8 +136,8 @@ public partial class MainWindow : Window
     {
         var dialog = new Microsoft.Win32.SaveFileDialog
         {
-            FileName = "MemMop-记录-" + DateTime.Now.ToString("yyyyMMdd", System.Globalization.CultureInfo.InvariantCulture) + ".csv",
-            Filter = "CSV (*.csv)|*.csv|所有文件 (*.*)|*.*",
+            FileName = MemMop.Core.Strings.Current.ExportFileName + DateTime.Now.ToString("yyyyMMdd", System.Globalization.CultureInfo.InvariantCulture) + ".csv",
+            Filter = MemMop.Core.Strings.Current.ExportFilter,
             DefaultExt = ".csv",
         };
 
@@ -150,7 +150,7 @@ public partial class MainWindow : Window
         }
         catch (Exception exception)
         {
-            System.Windows.MessageBox.Show(this, "导出失败：" + exception.Message, "MemMop", MessageBoxButton.OK, MessageBoxImage.Warning);
+            System.Windows.MessageBox.Show(this, MemMop.Core.Strings.Current.ExportFailed(exception.Message), "MemMop", MessageBoxButton.OK, MessageBoxImage.Warning);
         }
     }
 
@@ -163,8 +163,19 @@ public partial class MainWindow : Window
         }
         catch (Exception exception)
         {
-            System.Windows.MessageBox.Show(this, "打不开注册表编辑器：" + exception.Message, "MemMop", MessageBoxButton.OK, MessageBoxImage.Warning);
+            System.Windows.MessageBox.Show(this, MemMop.Core.Strings.Current.OpenSettingsFailed(exception.Message), "MemMop", MessageBoxButton.OK, MessageBoxImage.Warning);
         }
+    }
+
+    /// <summary>
+    /// Re-reads the counters now. The screenshot tool calls it after switching the language, because the
+    /// legend lines are built strings rather than bindings.
+    /// </summary>
+    public void RefreshNow()
+    {
+        Refresh();
+        _viewModel.RefreshProcessUsage();
+        _viewModel.RefreshStatistics();
     }
 
     private void Refresh()
@@ -206,11 +217,11 @@ public partial class MainWindow : Window
 
         _viewModel.UsedPercentText = usedPercent.ToString("0", System.Globalization.CultureInfo.InvariantCulture) + "%";
         _viewModel.UsedText = Size(snapshot.Total - snapshot.Available) + " / " + Size(snapshot.Total);
-        _viewModel.AvailableText = "可用 " + Size(snapshot.Available) + " / " + Size(snapshot.Total);
-        _viewModel.ActiveText = "活动 " + Size(snapshot.Active);
-        _viewModel.ModifiedText = "已修改 " + Size(snapshot.Modified);
-        _viewModel.StandbyText = "待机 " + Size(snapshot.Standby);
-        _viewModel.FreeText = "空闲 " + Size(snapshot.Free);
+        _viewModel.AvailableText = text.Available(snapshot.Available, snapshot.Total);
+        _viewModel.ActiveText = text.Active(snapshot.Active);
+        _viewModel.ModifiedText = text.Modified(snapshot.Modified);
+        _viewModel.StandbyText = text.Standby(snapshot.Standby);
+        _viewModel.FreeText = text.Free(snapshot.Free);
 
         _viewModel.CommitText = snapshot.CommitLimit > 0
             ? text.Commit(snapshot.CommitUsed, snapshot.CommitLimit)
@@ -263,7 +274,7 @@ public partial class MainWindow : Window
             return;
 
         if (!_hotkey.Register(this, (uint)_viewModel.HotkeyModifiers, (uint)_viewModel.HotkeyKey, out var error))
-            _viewModel.ReportHotkeyFailure("清理热键注册失败：" + error);
+            _viewModel.ReportHotkeyFailure(MemMop.Core.Strings.Current.HotkeyFailed(error ?? string.Empty));
     }
 
     private void OnLanguageChanged(object sender, SelectionChangedEventArgs e)
@@ -274,6 +285,11 @@ public partial class MainWindow : Window
             Settings.Save();
 
             Strings.Current.SetLanguage(tag == "en");
+
+            // the rows and the summary are built strings rather than bindings, so they have to be rebuilt
+            _viewModel.RefreshStatistics();
+            _viewModel.RefreshChart();
+            Refresh();
         }
     }
 

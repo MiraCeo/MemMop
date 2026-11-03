@@ -1,6 +1,7 @@
 using System.Globalization;
 using System.Windows;
 using System.Windows.Media;
+using MemMop.Core;
 using Brush = System.Windows.Media.Brush;
 using Brushes = System.Windows.Media.Brushes;
 using Pen = System.Windows.Media.Pen;
@@ -197,6 +198,16 @@ public sealed class LineChart : FrameworkElement
         set => SetValue(HoverIndexProperty, value);
     }
 
+    /// <summary>
+    /// Initializes a new instance of the <see cref="LineChart"/> class.
+    /// </summary>
+    public LineChart()
+    {
+        // the axis labels come from the catalog, so a language change has to repaint them
+        Loaded += (_, _) => Strings.Current.PropertyChanged += OnLanguageChanged;
+        Unloaded += (_, _) => Strings.Current.PropertyChanged -= OnLanguageChanged;
+    }
+
     /// <inheritdoc/>
     protected override void OnMouseMove(System.Windows.Input.MouseEventArgs e)
     {
@@ -270,10 +281,10 @@ public sealed class LineChart : FrameworkElement
             // one unit per axis: a one-minute window labelled in seconds throughout, the rest in minutes
             var text = Label(
                 i == Divisions
-                    ? "现在"
+                    ? Strings.Current.Now
                     : WindowSeconds <= 120
-                        ? ((int)Math.Round(divisionAgo)).ToString(CultureInfo.InvariantCulture) + " 秒前"
-                        : FormatAgo(divisionAgo),
+                        ? Strings.Current.SecondsAgo((int)Math.Round(divisionAgo))
+                        : Strings.Current.Ago(divisionAgo),
                 typeface,
                 dpi);
 
@@ -293,7 +304,7 @@ public sealed class LineChart : FrameworkElement
 
             if (LabelBrush != null)
             {
-                var text = Label("自动清理 " + Threshold.ToString("0", CultureInfo.InvariantCulture) + "%", typeface, dpi);
+                var text = Label(Strings.Current.AutoCleanThreshold((int)Threshold), typeface, dpi);
 
                 // the label goes on whichever side of the threshold the readings are not
                 var firstRatio = Math.Max(0, Math.Min(1, values[0] / maximum));
@@ -402,7 +413,7 @@ public sealed class LineChart : FrameworkElement
             return;
 
         var ago = span * (1 - (double)hover / (points.Length - 1));
-        var when = ago < 1 ? "现在" : FormatAgo(ago);
+        var when = ago < 1 ? Strings.Current.Now : Strings.Current.Ago(ago);
 
         var reading = Label(
             when + " · " + (values[hover] / maximum * 100).ToString("0", CultureInfo.InvariantCulture) + "%",
@@ -417,6 +428,9 @@ public sealed class LineChart : FrameworkElement
 
         context.DrawText(reading, new Point(boxLeft + 4, boxTop + 2));
     }
+
+    private void OnLanguageChanged(object? sender, System.ComponentModel.PropertyChangedEventArgs e)
+        => InvalidateVisual();
 
     private int IndexAt(double x)
     {
@@ -443,35 +457,6 @@ public sealed class LineChart : FrameworkElement
             10,
             LabelBrush,
             dpi);
-
-    /// <summary>
-    /// Formats a distance in the past. Seconds are shown below two minutes, because a one-minute window
-    /// labelled in whole minutes would read "1 分钟前" at every division.
-    /// </summary>
-    private static string FormatAgo(double seconds)
-    {
-        var whole = (int)Math.Round(seconds);
-
-        if (whole < 60)
-            return whole.ToString(CultureInfo.InvariantCulture) + " 秒前";
-
-        if (whole >= 3600)
-        {
-            var hours = whole / 3600;
-            var hourRest = whole % 3600 / 60;
-
-            return hourRest == 0
-                ? hours.ToString(CultureInfo.InvariantCulture) + " 小时前"
-                : hours.ToString(CultureInfo.InvariantCulture) + " 小时 " + hourRest.ToString(CultureInfo.InvariantCulture) + " 分前";
-        }
-
-        var minutes = whole / 60;
-        var rest = whole % 60;
-
-        return rest == 0
-            ? minutes.ToString(CultureInfo.InvariantCulture) + " 分钟前"
-            : minutes.ToString(CultureInfo.InvariantCulture) + " 分 " + rest.ToString(CultureInfo.InvariantCulture) + " 秒前";
-    }
 
     private static string FormatPercent(double ratio)
         => (ratio * 100).ToString("0", CultureInfo.InvariantCulture) + "%";

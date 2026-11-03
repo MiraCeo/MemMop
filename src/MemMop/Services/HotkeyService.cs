@@ -1,6 +1,7 @@
 using System.Runtime.InteropServices;
 using System.Windows;
 using System.Windows.Interop;
+using MemMop.Core;
 
 namespace MemMop.Services;
 
@@ -36,14 +37,14 @@ public sealed class HotkeyService : IDisposable
 
         if (handle == IntPtr.Zero)
         {
-            error = "窗口尚未创建";
+            error = Strings.Current.HotkeyNoWindow;
 
             return false;
         }
 
         if (!NativeMethods.RegisterHotKey(handle, Id, modifiers, key))
         {
-            error = "快捷键已被其他程序占用";
+            error = Strings.Current.HotkeyTaken;
 
             return false;
         }

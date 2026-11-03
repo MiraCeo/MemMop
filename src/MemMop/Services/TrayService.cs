@@ -1,5 +1,6 @@
 using System.Drawing;
 using System.Windows.Forms;
+using MemMop.Core;
 
 namespace MemMop.Services;
 
@@ -52,11 +53,11 @@ public sealed class TrayService : ITrayService
         menu.Items.Add(_statusLast);
         menu.Items.Add(new ToolStripSeparator());
 
-        var home = new ToolStripMenuItem("主页", null, (_, _) => ViewRequested?.Invoke(0));
-        var settings = new ToolStripMenuItem("设置…", null, (_, _) => ViewRequested?.Invoke(1));
+        var home = new ToolStripMenuItem(Strings.Current.Home, null, (_, _) => ViewRequested?.Invoke(0));
+        var settings = new ToolStripMenuItem(Strings.Current.TraySettings, null, (_, _) => ViewRequested?.Invoke(1));
 
-        _cleanItem = new ToolStripMenuItem("清理", null, (_, _) => CleanRequested?.Invoke());
-        var exit = new ToolStripMenuItem("退出", null, (_, _) => ExitRequested?.Invoke());
+        _cleanItem = new ToolStripMenuItem(Strings.Current.Clean, null, (_, _) => CleanRequested?.Invoke());
+        var exit = new ToolStripMenuItem(Strings.Current.TrayExit, null, (_, _) => ExitRequested?.Invoke());
 
         menu.Items.Add(home);
         menu.Items.Add(settings);

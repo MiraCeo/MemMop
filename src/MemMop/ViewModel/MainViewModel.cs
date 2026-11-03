@@ -14,7 +14,7 @@ public sealed class MainViewModel : ObservableObject
     private readonly AutoCleanPolicy _policy = new();
     private readonly IMemoryReclaimer[] AllReclaimers;
     private bool _isBusy;
-    private string _summary = "本次尚未清理";
+    private string? _summary;
     private string _physicalText = string.Empty;
     private string _segmentText = string.Empty;
     private string _commitText = string.Empty;
@@ -57,14 +57,26 @@ public sealed class MainViewModel : ObservableObject
 
         RefreshExcluded();
         RefreshAvailableProcesses();
+
+        // the summary lines are built strings rather than bindings, so a language change has to re-raise them
+        Strings.Current.PropertyChanged += (_, _) =>
+        {
+            Raise(nameof(Summary));
+            Raise(nameof(LastCleanSummary));
+            Raise(nameof(AutoCleanStatus));
+            Raise(nameof(TitleText));
+            Raise(nameof(NameText));
+            Raise(nameof(VersionText));
+            Raise(nameof(BuildText));
+        };
     }
 
     /// <summary>Gets the window title, with the version so a screenshot identifies its build.</summary>
     public string TitleText =>
-        "忆干二净 MemMop " + (System.Reflection.Assembly.GetExecutingAssembly().GetName().Version?.ToString(3) ?? "0.0.0");
+        Strings.Current.Name + " " + (System.Reflection.Assembly.GetExecutingAssembly().GetName().Version?.ToString(3) ?? "0.0.0");
 
     /// <summary>Gets the program's name on its own, for the about card.</summary>
-    public string NameText => "忆干二净 MemMop";
+    public string NameText => Strings.Current.Name;
 
     /// <summary>Gets the application version, read from the assembly rather than typed twice.</summary>
     public string VersionText =>
@@ -94,7 +106,7 @@ public sealed class MainViewModel : ObservableObject
 
                 var hash = product.Substring(plus + 1);
 
-                return "构建 " + (hash.Length > 7 ? hash.Substring(0, 7) : hash);
+                return Strings.Current.Build(hash.Length > 7 ? hash.Substring(0, 7) : hash);
             }
             catch (Exception)
             {
@@ -166,7 +178,7 @@ public sealed class MainViewModel : ObservableObject
     private string _chartMarkers = string.Empty;
     private double _chartMaximum;
     private double _chartSpanSeconds;
-    private string _lastCleanSummary = "还没有清理过";
+    private string? _lastCleanSummary;
 
     /// <summary>
     /// The usage stops, as a ceiling on memory in use. Usage is total minus available, so standby memory
@@ -190,7 +202,7 @@ public sealed class MainViewModel : ObservableObject
     /// <summary>Gets the one-line description of the last run.</summary>
     public string LastCleanSummary
     {
-        get => _lastCleanSummary;
+        get => _lastCleanSummary ?? Strings.Current.NoCleanYet;
         private set => Set(ref _lastCleanSummary, value);
     }
 
@@ -416,10 +428,7 @@ public sealed class MainViewModel : ObservableObject
 
         var total = ProcessUsageItems.Sum(r => r.PrivateWorkingSet);
 
-        ProcessUsageTotal = string.Format(
-            System.Globalization.CultureInfo.InvariantCulture,
-            "合计（专用工作集，不含共享页） {0:0.#} GB",
-            total / (1024d * 1024 * 1024));
+        ProcessUsageTotal = Strings.Current.ProcessTotal(total);
 
         Raise(nameof(ProcessUsageTotal));
     }
@@ -438,12 +447,8 @@ public sealed class MainViewModel : ObservableObject
         RefreshProcessUsage();
 
         Summary = result.Succeeded
-            ? string.Format(
-                System.Globalization.CultureInfo.InvariantCulture,
-                "已优化 {0}，释放 {1:0.#} GB",
-                name,
-                Math.Max(0, result.FreedBytes) / (1024d * 1024 * 1024))
-            : "优化 " + name + " 失败：" + (result.Message ?? "未知原因");
+            ? Strings.Current.Trimmed(name!, Math.Max(0, result.FreedBytes))
+            : Strings.Current.TrimFailed(name!, result.Message ?? Strings.Current.UnknownReason);
 
         Raise(nameof(Summary));
     }
@@ -647,6 +652,9 @@ public sealed class MainViewModel : ObservableObject
         Raise(nameof(ChartCurrentLabel));
     }
 
+    private string TitleOf(string name)
+        => Areas.FirstOrDefault(a => a.Reclaimer.Name == name)?.Title ?? name;
+
     private static DateTime Later(DateTime a, DateTime b) => a > b ? a : b;
 
     private static DateTime Earlier(DateTime a, DateTime b) => a < b ? a : b;
@@ -664,18 +672,13 @@ public sealed class MainViewModel : ObservableObject
         if (latest != null)
         {
             foreach (var (area, freed) in latest.Areas)
-                LastCleanAreas.Add(new AreaResultRow(area, freed));
+                LastCleanAreas.Add(new AreaResultRow(TitleOf(area), freed));
 
-            LastCleanSummary = string.Format(
-                System.Globalization.CultureInfo.InvariantCulture,
-                "{0} · {1} · 耗时 {2:0} 秒",
-                latest.At.ToString("MM-dd HH:mm", System.Globalization.CultureInfo.InvariantCulture),
-                latest.Automatic ? "自动" : "手动",
-                latest.Duration.TotalSeconds);
+            LastCleanSummary = Strings.Current.LastCleanSummary(latest.At, latest.Automatic, latest.Duration.TotalSeconds);
         }
         else
         {
-            LastCleanSummary = "还没有清理过";
+            LastCleanSummary = Strings.Current.NoCleanYet;
         }
 
         foreach (var record in _cleans.Records)
@@ -706,7 +709,9 @@ public sealed class MainViewModel : ObservableObject
             automatic,
             duration,
             results
-                .Select(r => (Area: Areas.FirstOrDefault(a => a.Reclaimer.Name == r.Name)?.Title ?? r.Name, Freed: r.Result.FreedBytes))
+                // the stable name is stored, not the title: a record made in one language has to read
+                // correctly in the other, and the title is a translation
+                .Select(r => (Area: r.Name, Freed: r.Result.FreedBytes))
                 .ToList());
 
     /// <summary>
@@ -718,7 +723,7 @@ public sealed class MainViewModel : ObservableObject
     {
         var builder = new System.Text.StringBuilder();
 
-        builder.AppendLine("时间,触发,区域,释放字节,释放GB");
+        builder.AppendLine(Strings.Current.CsvHeader);
 
         foreach (var record in _cleans.Records)
         {
@@ -728,8 +733,8 @@ public sealed class MainViewModel : ObservableObject
 
                 builder
                     .Append(record.At.ToString("yyyy-MM-dd HH:mm:ss", System.Globalization.CultureInfo.InvariantCulture)).Append(',')
-                    .Append(record.Automatic ? "自动" : "手动").Append(',')
-                    .Append('"').Append(area.Replace("\"", "\"\"")).Append('"').Append(',')
+                    .Append(record.Automatic ? Strings.Current.Automatic : Strings.Current.Manual).Append(',')
+                    .Append('"').Append(TitleOf(area).Replace("\"", "\"\"")).Append('"').Append(',')
                     .Append(bytes).Append(',')
                     .Append((bytes / (1024d * 1024 * 1024)).ToString("0.###", System.Globalization.CultureInfo.InvariantCulture))
                     .AppendLine();
@@ -786,9 +791,6 @@ public sealed class MainViewModel : ObservableObject
 
         return best;
     }
-
-    private static string DescribeMinutes(int minutes)
-        => minutes % 60 == 0 ? $"{minutes / 60} 小时" : $"{minutes} 分钟";
 
     private void AddExclusion(string? name)
     {
@@ -856,7 +858,7 @@ public sealed class MainViewModel : ObservableObject
         {
             if (!AutoStart.Set(value))
             {
-                CleanCompleted?.Invoke(value ? "开机自启设置失败" : "关闭开机自启失败");
+                CleanCompleted?.Invoke(value ? Strings.Current.StartupEnableFailed : Strings.Current.StartupDisableFailed);
                 Raise();
 
                 return;
@@ -1003,11 +1005,11 @@ public sealed class MainViewModel : ObservableObject
         get
         {
             if (LastCleanAt == null)
-                return "本次尚未清理";
+                return Strings.Current.NothingCleanedYet;
 
             var minutes = (int)(DateTime.Now - LastCleanAt.Value).TotalMinutes;
 
-            return minutes < 1 ? "刚刚清理" : $"上次清理 {minutes} 分钟前";
+            return minutes < 1 ? Strings.Current.CleanedJustNow : Strings.Current.CleanedMinutesAgo(minutes);
         }
     }
 
@@ -1093,20 +1095,7 @@ public sealed class MainViewModel : ObservableObject
     /// place the user learns why memory changed on its own, so it names both triggers.
     /// </summary>
     public string AutoCleanStatus
-    {
-        get
-        {
-            var parts = new List<string>();
-
-            if (Settings.AutoCleanMinutes > 0)
-                parts.Add("每 " + DescribeMinutes(Settings.AutoCleanMinutes));
-
-            if (Settings.LowMemoryPercent > 0)
-                parts.Add($"占用超过 {Settings.LowMemoryPercent}% 时");
-
-            return parts.Count == 0 ? string.Empty : "自动清理：" + string.Join(" · ", parts);
-        }
-    }
+        => Strings.Current.AutoCleanStatus(Settings.AutoCleanMinutes, Settings.LowMemoryPercent);
 
     /// <summary>Gets or sets a value indicating whether cleaning raises a tray notification.</summary>
     public bool ShowNotifications
@@ -1208,7 +1197,7 @@ public sealed class MainViewModel : ObservableObject
     /// <summary>Gets or sets the summary of the last run.</summary>
     public string Summary
     {
-        get => _summary;
+        get => _summary ?? Strings.Current.NothingCleanedYet;
         private set => Set(ref _summary, value);
     }
 
@@ -1251,8 +1240,8 @@ public sealed class MainViewModel : ObservableObject
         var released = results.Where(r => r.Result.Succeeded).Sum(r => Math.Max(0, r.Result.FreedBytes));
 
         return failed > 0
-            ? $"自动清理：{results.Count - failed} 项完成，{failed} 项失败"
-            : string.Format(System.Globalization.CultureInfo.InvariantCulture, "自动清理：释放 {0:0.#} GB", released / (1024d * 1024 * 1024));
+            ? Strings.Current.AutoCleanPartial(results.Count - failed, failed)
+            : Strings.Current.AutoCleanFreed(released);
     }
 
     private async void Clean()
@@ -1263,7 +1252,7 @@ public sealed class MainViewModel : ObservableObject
             return;
 
         IsBusy = true;
-        Summary = "清理中…";
+        Summary = Strings.Current.Cleaning;
 
         try
         {
@@ -1288,10 +1277,10 @@ public sealed class MainViewModel : ObservableObject
             CleanCompleted?.Invoke(Summary);
 
             Summary = failed > 0
-                ? $"{selected.Count - failed} 项完成，{failed} 项失败"
+                ? Strings.Current.PartialRun(selected.Count - failed, failed)
                 : released > 0
-                    ? string.Format(System.Globalization.CultureInfo.InvariantCulture, "本次释放 {0:0.#} GB", released / (1024d * 1024 * 1024))
-                    : "本次无可测量的释放";
+                    ? Strings.Current.FreedThisRun(released)
+                    : Strings.Current.NothingMeasured;
         }
         finally
         {
