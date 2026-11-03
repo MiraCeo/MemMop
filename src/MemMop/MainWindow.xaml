@@ -152,100 +152,118 @@
         <TabItem Header="{Binding Source={x:Static core:Strings.Current}, Path=Home}">
             <Grid>
                 <Grid.RowDefinitions>
-                    <RowDefinition Height="Auto" />
                     <RowDefinition Height="*" />
                     <RowDefinition Height="Auto" />
                 </Grid.RowDefinitions>
 
-                <!-- memory state: fixed, so it stays on screen whatever the list below does -->
-                <StackPanel Grid.Row="0" Margin="22, 18, 22, 0">
-                    <TextBlock FontSize="21" Text="{Binding PhysicalText}" />
+                <Grid Grid.Row="0" Margin="22, 18, 22, 0">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto" />
+                        <ColumnDefinition Width="*" />
+                    </Grid.ColumnDefinitions>
 
-                    <controls:ProportionBar Height="10"
-                                            Margin="0, 16, 0, 0"
-                                            Palette="{DynamicResource SegmentPalette}"
-                                            Values="{Binding PhysicalSegments}" />
-                    <TextBlock Margin="0, 9, 0, 0"
-                               FontSize="12"
-                               Foreground="{DynamicResource TextMuted}"
-                               Text="{Binding SegmentText}"
-                               Visibility="{Binding DetailedMemory, Converter={StaticResource BoolToVisibility}}" />
+                    <!-- left: the ring, then the four segments it is made of -->
+                    <StackPanel Grid.Column="0" Width="150">
+                        <Grid Width="132" Height="132" HorizontalAlignment="Left">
+                            <controls:RingChart Width="132"
+                                                Height="132"
+                                                Palette="{DynamicResource SegmentPalette}"
+                                                RingThickness="16"
+                                                Values="{Binding PhysicalSegments}" />
+                            <TextBlock HorizontalAlignment="Center"
+                                       VerticalAlignment="Center"
+                                       FontSize="26"
+                                       Text="{Binding UsedPercentText}" />
+                        </Grid>
 
-                    <controls:ProportionBar Height="6"
-                                            Margin="0, 14, 0, 0"
-                                            Palette="{DynamicResource CommitPalette}"
-                                            Values="{Binding CommitSegments}" />
-                    <TextBlock Margin="0, 9, 0, 0"
-                               FontSize="12"
-                               Foreground="{DynamicResource TextMuted}"
-                               Text="{Binding CommitText}"
-                               Visibility="{Binding ShowCommitted, Converter={StaticResource BoolToVisibility}}" />
-                </StackPanel>
-
-                <!-- who is holding the memory, and a way to act on one of them -->
-                <ScrollViewer Grid.Row="1"
-                              Margin="0, 18, 0, 0"
-                              HorizontalScrollBarVisibility="Disabled"
-                              VerticalScrollBarVisibility="Auto">
-                    <StackPanel Margin="22, 0, 22, 0">
-                        <TextBlock Margin="0, 0, 0, 8"
-                                   FontSize="11"
+                        <TextBlock Margin="0, 12, 0, 0"
+                                   FontSize="12"
                                    Foreground="{DynamicResource TextMuted}"
-                                   Text="进程占用" />
+                                   Text="{Binding UsedText}" />
 
-                        <ItemsControl ItemsSource="{Binding ProcessUsageItems}">
-                            <ItemsControl.ItemTemplate>
-                                <DataTemplate>
-                                    <Grid Margin="0, 2">
-                                        <Grid.ColumnDefinitions>
-                                            <ColumnDefinition Width="*" />
-                                            <ColumnDefinition Width="Auto" />
-                                            <ColumnDefinition Width="Auto" />
-                                            <ColumnDefinition Width="Auto" />
-                                        </Grid.ColumnDefinitions>
-
-                                        <TextBlock VerticalAlignment="Center"
-                                                   Text="{Binding Name}"
-                                                   TextTrimming="CharacterEllipsis" />
-
-                                        <TextBlock Grid.Column="1"
-                                                   Margin="12, 0"
-                                                   VerticalAlignment="Center"
-                                                   FontSize="11"
-                                                   Foreground="{DynamicResource TextMuted}"
-                                                   Text="{Binding Instances}" />
-
-                                        <TextBlock Grid.Column="2"
-                                                   VerticalAlignment="Center"
-                                                   Text="{Binding Size}" />
-
-                                        <Button Grid.Column="3"
-                                                Width="20"
-                                                Height="20"
-                                                Margin="8, 0, 0, 0"
-                                                Style="{StaticResource RowAction}"
-                                                Command="{Binding DataContext.OptimizeProcessCommand, RelativeSource={RelativeSource AncestorType=ItemsControl}}"
-                                                CommandParameter="{Binding Name}"
-                                                ToolTip="优化这个进程">
-                                            <Path Width="9"
-                                                  Height="9"
-                                                  Data="M 5 1 L 5 6 M 2 3.5 L 5 6.5 L 8 3.5 M 1 9 L 9 9"
-                                                  Stretch="Uniform"
-                                                  Stroke="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}"
-                                                  StrokeThickness="1.3" />
-                                        </Button>
-                                    </Grid>
-                                </DataTemplate>
-                            </ItemsControl.ItemTemplate>
-                        </ItemsControl>
-
-                        <TextBlock Margin="0, 8, 0, 0"
-                                   FontSize="11"
-                                   Foreground="{DynamicResource TextMuted}"
-                                   Text="{Binding ProcessUsageTotal}"
-                                   TextWrapping="Wrap" />
+                        <TextBlock Margin="0, 10, 0, 0"
+                                   FontSize="12"
+                                   Foreground="{DynamicResource SegActive}"
+                                   Text="{Binding ActiveText}" />
+                        <TextBlock Margin="0, 3, 0, 0"
+                                   FontSize="12"
+                                   Foreground="{DynamicResource SegModified}"
+                                   Text="{Binding ModifiedText}" />
+                        <TextBlock Margin="0, 3, 0, 0"
+                                   FontSize="12"
+                                   Foreground="{DynamicResource SegStandby}"
+                                   Text="{Binding StandbyText}" />
+                        <TextBlock Margin="0, 3, 0, 0"
+                                   FontSize="12"
+                                   Foreground="{DynamicResource SegFree}"
+                                   Text="{Binding FreeText}" />
                     </StackPanel>
-                </ScrollViewer>
+
+                    <!-- right: who is holding it, and a way to act on one of them -->
+                    <ScrollViewer Grid.Column="1"
+                                  Margin="18, 0, 0, 0"
+                                  HorizontalScrollBarVisibility="Disabled"
+                                  VerticalScrollBarVisibility="Auto">
+                        <StackPanel>
+                            <TextBlock Margin="0, 0, 0, 8"
+                                       FontSize="11"
+                                       Foreground="{DynamicResource TextMuted}"
+                                       Text="进程占用" />
+
+                            <ItemsControl ItemsSource="{Binding ProcessUsageItems}">
+                                <ItemsControl.ItemTemplate>
+                                    <DataTemplate>
+                                        <Grid Margin="0, 2">
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="*" />
+                                                <ColumnDefinition Width="Auto" />
+                                                <ColumnDefinition Width="Auto" />
+                                                <ColumnDefinition Width="Auto" />
+                                            </Grid.ColumnDefinitions>
+
+                                            <TextBlock VerticalAlignment="Center"
+                                                       Text="{Binding Name}"
+                                                       TextTrimming="CharacterEllipsis" />
+
+                                            <TextBlock Grid.Column="1"
+                                                       Margin="10, 0"
+                                                       VerticalAlignment="Center"
+                                                       FontSize="11"
+                                                       Foreground="{DynamicResource TextMuted}"
+                                                       Text="{Binding Instances}" />
+
+                                            <TextBlock Grid.Column="2"
+                                                       VerticalAlignment="Center"
+                                                       Text="{Binding Size}" />
+
+                                            <Button Grid.Column="3"
+                                                    Width="20"
+                                                    Height="20"
+                                                    Margin="8, 0, 0, 0"
+                                                    Style="{StaticResource RowAction}"
+                                                    Command="{Binding DataContext.OptimizeProcessCommand, RelativeSource={RelativeSource AncestorType=ItemsControl}}"
+                                                    CommandParameter="{Binding Name}"
+                                                    ToolTip="优化这个进程">
+                                                <Path Width="9"
+                                                      Height="9"
+                                                      Data="M 5 1 L 5 6 M 2 3.5 L 5 6.5 L 8 3.5 M 1 9 L 9 9"
+                                                      Stretch="Uniform"
+                                                      Stroke="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}"
+                                                      StrokeThickness="1.3" />
+                                            </Button>
+                                        </Grid>
+                                    </DataTemplate>
+                                </ItemsControl.ItemTemplate>
+                            </ItemsControl>
+
+                            <TextBlock Margin="0, 8, 0, 0"
+                                       FontSize="11"
+                                       Foreground="{DynamicResource TextMuted}"
+                                       Text="{Binding ProcessUsageTotal}"
+                                       TextWrapping="Wrap" />
+                        </StackPanel>
+                    </ScrollViewer>
+                </Grid>
 
                 <Border Grid.Row="2"
                         Padding="22, 12"

@@ -232,14 +232,14 @@ public sealed class MainViewModel : ObservableObject
     }
 
     /// <summary>
-    /// Rebuilds the process table. Eight rows is what the home page shows without scrolling; the list is
+    /// Rebuilds the process table. Twelve rows is what the two-column home page shows without scrolling; the list is
     /// the one thing on that page that would otherwise push the clean button off the bottom.
     /// </summary>
     public void RefreshProcessUsage()
     {
         ProcessUsageItems.Clear();
 
-        foreach (var row in ProcessUsageReader.Read(8))
+        foreach (var row in ProcessUsageReader.Read(12))
             ProcessUsageItems.Add(row);
 
         var total = ProcessUsageItems.Sum(r => r.PrivateWorkingSet);
