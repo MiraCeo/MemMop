@@ -3,16 +3,15 @@ using System.Windows;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using MemMop;
+using MemMop.ViewModel;
 
+/// <summary>
+/// Renders the pages to PNG, including the states that need a seeded list or a switched-on setting.
+/// Everything is seeded in memory: the tool never calls <c>Settings.Save</c>, so the user's registry is
+/// left alone. Rebuild this project after any XAML change - it compiles the app's markup into its own exe.
+/// </summary>
 internal static class Program
 {
-    private static readonly string[] Themes = { "Ceobe" };
-
-    private static readonly (string Name, double Accent, double Highlight, string Surface)[] Variants =
-    {
-        ("L3", 0.6, 0, "#281F16"),
-    };
-
     [STAThread]
     private static void Main(string[] args)
     {
@@ -22,32 +21,47 @@ internal static class Program
         MemMop.Core.Settings.Load();
 
         var app = new System.Windows.Application { ShutdownMode = ShutdownMode.OnExplicitShutdown };
+        ApplyTheme("Ceobe");
 
-        foreach (var theme in Themes)
-        {
-            ApplyTheme(theme);
+        // 1. the default states, with whatever the user actually has configured
+        Render(Path.Combine(output, "home.png"), 540, 640, false, 0);
+        Render(Path.Combine(output, "settings.png"), 540, 640, false, 1);
+        Render(Path.Combine(output, "compact.png"), 320, 212, true, 0);
 
-            foreach (var variant in Variants)
+        // 2. the whitelist, with a list worth looking at
+        SeedExclusions();
+        Render(Path.Combine(output, "whitelist.png"), 540, 640, false, 2, vm => vm.SelectedExclusion = "ChatGPT");
+        Render(
+            Path.Combine(output, "whitelist-open.png"),
+            540,
+            640,
+            false,
+            2,
+            vm =>
             {
-                System.Windows.Application.Current.Resources["TitleBarAccentOpacity"] = variant.Accent;
-                System.Windows.Application.Current.Resources["TitleBarSurface"] =
-                    new System.Windows.Media.SolidColorBrush(
-                        (System.Windows.Media.Color)System.Windows.Media.ColorConverter.ConvertFromString(variant.Surface));
-                System.Windows.Application.Current.Resources["TitleBarHighlightOpacity"] = variant.Highlight;
+                vm.SelectedExclusion = "ChatGPT";
+                vm.IsPickerOpen = true;
+                vm.ProcessSearchText = "c";
+            });
 
-                Render(Path.Combine(output, theme.ToLowerInvariant() + "-" + variant.Name + ".png"), 540, 640, false, 0);
-                var settings = Path.Combine(output, theme.ToLowerInvariant() + "-settings.png");
-                Render(Path.Combine(output, theme.ToLowerInvariant() + "-compact.png"), 320, 212, true, 0);
-                Render(settings, 540, 640, false, 1);
-            }
-
-
-            Render(Path.Combine(output, theme.ToLowerInvariant() + "-compact.png"), 320, 212, true, 0);
-        }
+        // 3. automatic cleaning switched on, which the home page reports
+        MemMop.Core.Settings.AutoCleanMinutes = 30;
+        MemMop.Core.Settings.LowMemoryPercent = 80;
+        Render(Path.Combine(output, "settings-autoclean.png"), 540, 640, false, 1);
+        Render(Path.Combine(output, "home-autoclean.png"), 540, 640, false, 0);
 
         Console.WriteLine(output);
 
         app.Shutdown();
+    }
+
+    private static void SeedExclusions()
+    {
+        MemMop.Core.Settings.ExcludedProcesses.Clear();
+        MemMop.Core.Settings.ExcludedProcesses.Add("chrome");
+        MemMop.Core.Settings.ExcludedProcesses.Add("ChatGPT");
+        MemMop.Core.Settings.ExcludedProcesses.Add("DSH Desktop");
+        MemMop.Core.Settings.ExcludedProcesses.Add("msedgewebview2");
     }
 
     private static void ApplyTheme(string name)
@@ -63,9 +77,21 @@ internal static class Program
         {
             Source = new Uri("pack://application:,,,/MemMop;component/Theme/Styles.xaml"),
         });
+
+        // the title bar variant the screenshots have always used
+        resources["TitleBarAccentOpacity"] = 0.6;
+        resources["TitleBarSurface"] = new SolidColorBrush(
+            (System.Windows.Media.Color)System.Windows.Media.ColorConverter.ConvertFromString("#281F16"));
+        resources["TitleBarHighlightOpacity"] = 0.0;
     }
 
-    private static void Render(string path, double width, double height, bool compact, int tab)
+    private static void Render(
+        string path,
+        double width,
+        double height,
+        bool compact,
+        int tab,
+        Action<MainViewModel> prepare = null)
     {
         var window = new MainWindow
         {
@@ -81,6 +107,12 @@ internal static class Program
         window.Show();
         window.ShowTab(tab);
         window.UpdateLayout();
+
+        if (prepare != null && window.DataContext is MainViewModel viewModel)
+        {
+            prepare(viewModel);
+            window.UpdateLayout();
+        }
 
         const double scale = 1.5;
         var bitmap = new RenderTargetBitmap(
