@@ -318,18 +318,136 @@
         <TabItem Header="统计">
             <ScrollViewer HorizontalScrollBarVisibility="Disabled" VerticalScrollBarVisibility="Auto">
                 <StackPanel Margin="22, 12, 22, 16">
+
                     <Border Background="{DynamicResource Nav}" CornerRadius="8" Padding="16">
                         <StackPanel>
                             <TextBlock FontSize="16"
                                        FontWeight="SemiBold"
                                        Foreground="{DynamicResource TextPrimary}"
-                                       Text="统计" />
+                                       Text="内存占用" />
+
+                            <TextBlock Margin="0, 4, 0, 12"
+                                       FontSize="11"
+                                       Foreground="{DynamicResource TextMuted}"
+                                       TextWrapping="Wrap"
+                                       Text="纵轴是整机内存，所以线的高度就是占用率。竖线是清理发生的位置。" />
+
+                            <controls:LineChart Height="120"
+                                                Values="{Binding ChartValues}"
+                                                Maximum="{Binding ChartMaximum}"
+                                                Markers="{Binding ChartMarkers}"
+                                                LineBrush="{DynamicResource Accent}"
+                                                FillBrush="{DynamicResource Accent}"
+                                                MarkerBrush="{DynamicResource TextMuted}"
+                                                Visibility="{Binding HasChartData, Converter={StaticResource BoolToVisibility}}" />
+
+                            <Grid Height="120"
+                                  Visibility="{Binding HasChartData, Converter={StaticResource InverseBoolToVisibility}}">
+                                <TextBlock HorizontalAlignment="Center"
+                                           VerticalAlignment="Center"
+                                           FontSize="11"
+                                           Foreground="{DynamicResource TextMuted}"
+                                           Text="正在采样…" />
+                            </Grid>
+
+                            <ComboBox Width="150"
+                                      Margin="0, 12, 0, 0"
+                                      HorizontalAlignment="Left"
+                                      SelectedIndex="{Binding ChartWindowIndex}">
+                                <ComboBoxItem Content="最近 5 分钟" />
+                                <ComboBoxItem Content="最近 15 分钟" />
+                                <ComboBoxItem Content="最近 1 小时" />
+                            </ComboBox>
+                        </StackPanel>
+                    </Border>
+
+                    <Border Margin="0, 12, 0, 0"
+                            Background="{DynamicResource Nav}"
+                            CornerRadius="8"
+                            Padding="16">
+                        <StackPanel>
+                            <TextBlock FontSize="16"
+                                       FontWeight="SemiBold"
+                                       Foreground="{DynamicResource TextPrimary}"
+                                       Text="上次清理" />
+
+                            <TextBlock Margin="0, 4, 0, 12"
+                                       FontSize="11"
+                                       Foreground="{DynamicResource TextMuted}"
+                                       Text="{Binding LastCleanSummary}" />
+
+                            <ItemsControl ItemsSource="{Binding LastCleanAreas}">
+                                <ItemsControl.ItemTemplate>
+                                    <DataTemplate>
+                                        <Grid Margin="0, 3">
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="*" />
+                                                <ColumnDefinition Width="Auto" />
+                                            </Grid.ColumnDefinitions>
+
+                                            <TextBlock Text="{Binding Area}" TextTrimming="CharacterEllipsis" />
+                                            <TextBlock Grid.Column="1"
+                                                       Margin="12, 0, 0, 0"
+                                                       Foreground="{DynamicResource TextMuted}"
+                                                       Text="{Binding Freed}" />
+                                        </Grid>
+                                    </DataTemplate>
+                                </ItemsControl.ItemTemplate>
+                            </ItemsControl>
+                        </StackPanel>
+                    </Border>
+
+                    <Border Margin="0, 12, 0, 0"
+                            Background="{DynamicResource Nav}"
+                            CornerRadius="8"
+                            Padding="16">
+                        <StackPanel>
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*" />
+                                    <ColumnDefinition Width="Auto" />
+                                </Grid.ColumnDefinitions>
+
+                                <TextBlock FontSize="16"
+                                           FontWeight="SemiBold"
+                                           Foreground="{DynamicResource TextPrimary}"
+                                           Text="清理记录" />
+
+                                <Button Grid.Column="1"
+                                        Padding="12, 5"
+                                        Click="OnExportHistoryClick"
+                                        Content="导出" />
+                            </Grid>
+
+                            <ItemsControl Margin="0, 12, 0, 0" ItemsSource="{Binding CleanRecords}">
+                                <ItemsControl.ItemTemplate>
+                                    <DataTemplate>
+                                        <Grid Margin="0, 3">
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="Auto" />
+                                                <ColumnDefinition Width="Auto" />
+                                                <ColumnDefinition Width="*" />
+                                                <ColumnDefinition Width="Auto" />
+                                            </Grid.ColumnDefinitions>
+
+                                            <TextBlock Width="92"
+                                                       Foreground="{DynamicResource TextMuted}"
+                                                       Text="{Binding When}" />
+                                            <TextBlock Grid.Column="1"
+                                                       Width="40"
+                                                       Foreground="{DynamicResource TextMuted}"
+                                                       Text="{Binding Trigger}" />
+                                            <TextBlock Grid.Column="3" Text="{Binding Freed}" />
+                                        </Grid>
+                                    </DataTemplate>
+                                </ItemsControl.ItemTemplate>
+                            </ItemsControl>
 
                             <TextBlock Margin="0, 8, 0, 0"
                                        FontSize="11"
                                        Foreground="{DynamicResource TextMuted}"
-                                       TextWrapping="Wrap"
-                                       Text="内存曲线、上次清理明细、清理记录与导出。这一页还没实现，先把位置留出来。" />
+                                       Text="还没有记录"
+                                       Visibility="{Binding HasCleanRecords, Converter={StaticResource InverseBoolToVisibility}}" />
                         </StackPanel>
                     </Border>
                 </StackPanel>

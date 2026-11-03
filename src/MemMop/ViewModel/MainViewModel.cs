@@ -105,6 +105,17 @@ public sealed class MainViewModel : ObservableObject
     /// <summary>The interval stops, in minutes. 0 is off.</summary>
     private static readonly int[] IntervalStops = { 0, 15, 30, 60, 120 };
 
+    /// <summary>How many readings each chart window covers, at one reading every five seconds.</summary>
+    private static readonly int[] ChartWindowSamples = { 60, 180, 720 };
+
+    private readonly MemoryHistory _memory = new(720);
+    private readonly CleanHistory _cleans = new(100);
+    private int _chartWindowIndex = 1;
+    private string _chartValues = string.Empty;
+    private string _chartMarkers = string.Empty;
+    private double _chartMaximum;
+    private string _lastCleanSummary = "还没有清理过";
+
     /// <summary>
     /// The usage stops, as a ceiling on memory in use. Usage is total minus available, so standby memory
     /// does not count against the user; the range is high because a healthy machine already sits well above
@@ -114,6 +125,57 @@ public sealed class MainViewModel : ObservableObject
 
     /// <summary>Gets the process rows, largest first.</summary>
     public ObservableCollection<ProcessUsage> ProcessUsageItems { get; } = new();
+
+    /// <summary>Gets what each area released on the last run.</summary>
+    public ObservableCollection<AreaResultRow> LastCleanAreas { get; } = new();
+
+    /// <summary>Gets the runs the statistics page lists, newest first.</summary>
+    public ObservableCollection<CleanRecordRow> CleanRecords { get; } = new();
+
+    /// <summary>Gets a value indicating whether any run has been recorded.</summary>
+    public bool HasCleanRecords => CleanRecords.Count > 0;
+
+    /// <summary>Gets the one-line description of the last run.</summary>
+    public string LastCleanSummary
+    {
+        get => _lastCleanSummary;
+        private set => Set(ref _lastCleanSummary, value);
+    }
+
+    /// <summary>Gets the readings the chart draws, comma-separated, oldest first.</summary>
+    public string ChartValues
+    {
+        get => _chartValues;
+        private set => Set(ref _chartValues, value);
+    }
+
+    /// <summary>Gets the indices to mark as cleans, comma-separated.</summary>
+    public string ChartMarkers
+    {
+        get => _chartMarkers;
+        private set => Set(ref _chartMarkers, value);
+    }
+
+    /// <summary>Gets the value the top of the chart represents: the machine's total memory.</summary>
+    public double ChartMaximum
+    {
+        get => _chartMaximum;
+        private set => Set(ref _chartMaximum, value);
+    }
+
+    /// <summary>Gets a value indicating whether there are enough readings to draw a line.</summary>
+    public bool HasChartData => _memory.Count >= 2;
+
+    /// <summary>Gets or sets which window the chart covers: 5 minutes, 15 minutes, or the whole hour.</summary>
+    public int ChartWindowIndex
+    {
+        get => _chartWindowIndex;
+        set
+        {
+            if (Set(ref _chartWindowIndex, value))
+                RefreshChart();
+        }
+    }
 
     /// <summary>Gets the names that can be excluded.</summary>
     public ObservableCollection<string> AvailableProcesses { get; } = new();
@@ -275,6 +337,154 @@ public sealed class MainViewModel : ObservableObject
             : "优化 " + name + " 失败：" + (result.Message ?? "未知原因");
 
         Raise(nameof(Summary));
+    }
+
+    /// <summary>
+    /// Records a reading for the chart. Called on a slower beat than the display refresh: one point every few
+    /// seconds is enough to draw a line, and the per-second readings would only thicken it.
+    /// </summary>
+    /// <param name="snapshot">The reading.</param>
+    public void SampleMemory(MemorySnapshot snapshot)
+        => SampleMemory(snapshot.Total - snapshot.Available, snapshot.Standby, snapshot.Free);
+
+    /// <summary>
+    /// Records a reading from raw numbers, so a caller that already has the counters does not have to build a
+    /// snapshot first.
+    /// </summary>
+    /// <param name="used">Memory in use, in bytes.</param>
+    /// <param name="standby">Standby memory, in bytes.</param>
+    /// <param name="free">Free memory, in bytes.</param>
+    public void SampleMemory(long used, long standby, long free)
+    {
+        _memory.Add(new MemorySample(DateTime.Now, used, standby, free));
+
+        RefreshChart();
+    }
+
+    /// <summary>
+    /// Rebuilds the chart's inputs from the readings held for the selected window.
+    /// </summary>
+    public void RefreshChart()
+    {
+        var take = ChartWindowSamples[Math.Max(0, Math.Min(_chartWindowIndex, ChartWindowSamples.Length - 1))];
+        var samples = _memory.Tail(take);
+
+        if (samples.Count < 2)
+        {
+            ChartValues = string.Empty;
+            ChartMarkers = string.Empty;
+            ChartMaximum = 0;
+
+            Raise(nameof(ChartValues));
+            Raise(nameof(ChartMarkers));
+            Raise(nameof(ChartMaximum));
+            Raise(nameof(HasChartData));
+
+            return;
+        }
+
+        var last = samples[samples.Count - 1];
+
+        ChartMaximum = last.Used + last.Standby + last.Free;
+        ChartValues = string.Join(",", samples.Select(s => s.Used));
+
+        var markers = new List<int>();
+
+        foreach (var record in _cleans.Records)
+        {
+            for (var i = 0; i < samples.Count; i++)
+            {
+                if (samples[i].At < record.At)
+                    continue;
+
+                markers.Add(i);
+
+                break;
+            }
+        }
+
+        ChartMarkers = string.Join(",", markers);
+
+        Raise(nameof(ChartValues));
+        Raise(nameof(ChartMarkers));
+        Raise(nameof(ChartMaximum));
+        Raise(nameof(HasChartData));
+    }
+
+    /// <summary>
+    /// Rebuilds the two lists the statistics page shows: the last run's areas, and the runs themselves.
+    /// </summary>
+    public void RefreshStatistics()
+    {
+        LastCleanAreas.Clear();
+        CleanRecords.Clear();
+
+        var latest = _cleans.Latest;
+
+        if (latest != null)
+        {
+            foreach (var (area, freed) in latest.Areas)
+                LastCleanAreas.Add(new AreaResultRow(area, freed));
+
+            LastCleanSummary = string.Format(
+                System.Globalization.CultureInfo.InvariantCulture,
+                "{0} · {1} · 耗时 {2:0} 秒",
+                latest.At.ToString("MM-dd HH:mm", System.Globalization.CultureInfo.InvariantCulture),
+                latest.Automatic ? "自动" : "手动",
+                latest.Duration.TotalSeconds);
+        }
+        else
+        {
+            LastCleanSummary = "还没有清理过";
+        }
+
+        foreach (var record in _cleans.Records)
+            CleanRecords.Add(new CleanRecordRow(record.At, record.Automatic, record.TotalFreed));
+
+        Raise(nameof(LastCleanSummary));
+        Raise(nameof(HasCleanRecords));
+    }
+
+    private void RecordClean(bool automatic, TimeSpan duration, IReadOnlyList<(string Name, ReclaimResult Result)> results)
+    {
+        var areas = results
+            .Select(r => (Area: Areas.FirstOrDefault(a => a.Reclaimer.Name == r.Name)?.Title ?? r.Name, Freed: r.Result.FreedBytes))
+            .ToList();
+
+        _cleans.Add(new CleanRecord(DateTime.Now, automatic, duration, areas));
+
+        RefreshStatistics();
+        RefreshChart();
+    }
+
+    /// <summary>
+    /// Builds the history as CSV, one row per area per run. Splitting by area is the point: what the user
+    /// wants to know after exporting is which areas actually release anything.
+    /// </summary>
+    /// <returns>The file's contents.</returns>
+    public string BuildHistoryCsv()
+    {
+        var builder = new System.Text.StringBuilder();
+
+        builder.AppendLine("时间,触发,区域,释放字节,释放GB");
+
+        foreach (var record in _cleans.Records)
+        {
+            foreach (var (area, freed) in record.Areas)
+            {
+                var bytes = Math.Max(0, freed);
+
+                builder
+                    .Append(record.At.ToString("yyyy-MM-dd HH:mm:ss", System.Globalization.CultureInfo.InvariantCulture)).Append(',')
+                    .Append(record.Automatic ? "自动" : "手动").Append(',')
+                    .Append('"').Append(area.Replace("\"", "\"\"")).Append('"').Append(',')
+                    .Append(bytes).Append(',')
+                    .Append((bytes / (1024d * 1024 * 1024)).ToString("0.###", System.Globalization.CultureInfo.InvariantCulture))
+                    .AppendLine();
+            }
+        }
+
+        return builder.ToString();
     }
 
     private void RefreshAvailableProcesses()
@@ -774,10 +984,13 @@ public sealed class MainViewModel : ObservableObject
 
         _policy.MarkIntervalRun(now);
 
+        var started = DateTime.Now;
         var results = await Task.Run(() => _engine.Run(areas));
 
         foreach (var (name, result) in results)
             Areas.FirstOrDefault(a => a.Reclaimer.Name == name)?.Apply(result);
+
+        RecordClean(automatic: true, DateTime.Now - started, results);
 
         LastCleanAt = DateTime.Now;
         Raise(nameof(LastCleanText));
@@ -802,6 +1015,7 @@ public sealed class MainViewModel : ObservableObject
 
         try
         {
+            var started = DateTime.Now;
             var results = await Task.Run(() => _engine.Run(selected.Select(a => a.Reclaimer.Name)));
 
             foreach (var (name, result) in results)
@@ -810,6 +1024,8 @@ public sealed class MainViewModel : ObservableObject
 
                 row?.Apply(result);
             }
+
+            RecordClean(automatic: false, DateTime.Now - started, results);
 
             var released = results.Where(r => r.Result.Succeeded).Sum(r => Math.Max(0, r.Result.FreedBytes));
             var failed = results.Count(r => !r.Result.Succeeded);

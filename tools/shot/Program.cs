@@ -41,6 +41,28 @@ internal static class Program
         Render(Path.Combine(output, "settings.png"), 540, 640, false, 2);
         Render(Path.Combine(output, "compact.png"), 320, 212, true, 0);
 
+        // 1a. the statistics page with a line worth looking at: a sawtooth, which is what a machine that is
+        // being cleaned actually looks like. The readings go through the view model, so the chart is drawn
+        // from real data rather than a mock-up.
+        Render(Path.Combine(output, "statistics-chart.png"), 540, 640, false, 1, vm =>
+        {
+            const long total = 33500744909;   // 31.2 GB
+            var random = new Random(7);
+            var used = total * 0.72;
+
+            for (var i = 0; i < 180; i++)
+            {
+                used += random.Next(-40, 90) * 1024L * 1024;
+
+                if (i == 60 || i == 120)
+                    used -= total * 0.06;
+
+                used = Math.Max(total * 0.55, Math.Min(total * 0.95, used));
+
+                vm.SampleMemory((long)used, (long)(total * 0.08), (long)(total * 0.02));
+            }
+        });
+
         // 1b. the home page as it looks after a run: each row reports what it released. The values go
         // through AreaItem.Apply, so the screenshot shows the real formatting rather than a mock-up.
         Render(Path.Combine(output, "home-results.png"), 540, 640, false, 0, vm =>

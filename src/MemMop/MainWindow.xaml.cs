@@ -126,9 +126,32 @@ public partial class MainWindow : Window
 
         Refresh();
         _viewModel.RefreshProcessUsage();
+        _viewModel.RefreshStatistics();
 
         _timer.Tick += (_, _) => Refresh();
         _timer.Start();
+    }
+
+    private void OnExportHistoryClick(object sender, RoutedEventArgs e)
+    {
+        var dialog = new Microsoft.Win32.SaveFileDialog
+        {
+            FileName = "MemMop-记录-" + DateTime.Now.ToString("yyyyMMdd", System.Globalization.CultureInfo.InvariantCulture) + ".csv",
+            Filter = "CSV (*.csv)|*.csv|所有文件 (*.*)|*.*",
+            DefaultExt = ".csv",
+        };
+
+        if (dialog.ShowDialog(this) != true)
+            return;
+
+        try
+        {
+            System.IO.File.WriteAllText(dialog.FileName, _viewModel.BuildHistoryCsv(), new System.Text.UTF8Encoding(true));
+        }
+        catch (Exception exception)
+        {
+            System.Windows.MessageBox.Show(this, "导出失败：" + exception.Message, "MemMop", MessageBoxButton.OK, MessageBoxImage.Warning);
+        }
     }
 
     private void Refresh()
@@ -139,7 +162,10 @@ public partial class MainWindow : Window
         // the process table is always on screen now, so it has to keep up - but enumerating every process
         // costs more than reading the counters, so it runs every fifth tick rather than every tick
         if (++_ticks % 5 == 0)
+        {
             _viewModel.RefreshProcessUsage();
+            _viewModel.SampleMemory(snapshot);
+        }
 
         _viewModel.PhysicalText = text.Physical(snapshot.Total - snapshot.Available, snapshot.Total);
 
