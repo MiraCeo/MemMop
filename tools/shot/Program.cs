@@ -175,7 +175,10 @@ internal static class Program
 
             used = Math.Max(total * 0.55, Math.Min(total * 0.95, used));
 
-            vm.SampleMemory((long)used, (long)(total * 0.08), (long)(total * 0.02));
+            // the three parts have to add up to the total, or the chart's vertical axis is wrong
+            var standby = (long)(total * 0.08);
+
+            vm.SampleMemory((long)used, standby, total - (long)used - standby);
         }
 
         // The automatic run comes first so the newest record - the one the "last clean" card shows - is the

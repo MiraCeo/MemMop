@@ -332,50 +332,19 @@
                                        TextWrapping="Wrap"
                                        Text="纵轴是整机内存，所以线的高度就是占用率。竖线是清理发生的位置。" />
 
-                            <Grid Visibility="{Binding HasChartData, Converter={StaticResource BoolToVisibility}}">
-                                <Grid.ColumnDefinitions>
-                                    <ColumnDefinition Width="Auto" />
-                                    <ColumnDefinition Width="*" />
-                                </Grid.ColumnDefinitions>
+                            <controls:LineChart Height="140"
+                                                Values="{Binding ChartValues}"
+                                                Maximum="{Binding ChartMaximum}"
+                                                Markers="{Binding ChartMarkers}"
+                                                WindowMinutes="{Binding ChartWindowMinutes}"
+                                                LineBrush="{DynamicResource Accent}"
+                                                FillBrush="{DynamicResource Accent}"
+                                                MarkerBrush="{DynamicResource TextMuted}"
+                                                GridBrush="{DynamicResource Border}"
+                                                LabelBrush="{DynamicResource TextMuted}"
+                                                Visibility="{Binding HasChartData, Converter={StaticResource BoolToVisibility}}" />
 
-                                <!-- the vertical axis, so the line's height can be read as a number -->
-                                <Grid Grid.Column="0" Height="120" Margin="0, 0, 8, 0">
-                                    <TextBlock HorizontalAlignment="Right"
-                                               VerticalAlignment="Top"
-                                               FontSize="10"
-                                               Foreground="{DynamicResource TextMuted}"
-                                               Text="{Binding ChartMaxLabel}" />
-                                    <TextBlock HorizontalAlignment="Right"
-                                               VerticalAlignment="Bottom"
-                                               FontSize="10"
-                                               Foreground="{DynamicResource TextMuted}"
-                                               Text="0" />
-                                </Grid>
-
-                                <StackPanel Grid.Column="1">
-                                    <controls:LineChart Height="120"
-                                                        Values="{Binding ChartValues}"
-                                                        Maximum="{Binding ChartMaximum}"
-                                                        Markers="{Binding ChartMarkers}"
-                                                        LineBrush="{DynamicResource Accent}"
-                                                        FillBrush="{DynamicResource Accent}"
-                                                        MarkerBrush="{DynamicResource TextMuted}" />
-
-                                    <!-- the horizontal axis: how far back the window reaches -->
-                                    <Grid Margin="0, 4, 0, 0">
-                                        <TextBlock HorizontalAlignment="Left"
-                                                   FontSize="10"
-                                                   Foreground="{DynamicResource TextMuted}"
-                                                   Text="{Binding ChartStartLabel}" />
-                                        <TextBlock HorizontalAlignment="Right"
-                                                   FontSize="10"
-                                                   Foreground="{DynamicResource TextMuted}"
-                                                   Text="现在" />
-                                    </Grid>
-                                </StackPanel>
-                            </Grid>
-
-                            <Grid Height="120"
+                            <Grid Height="140"
                                   Visibility="{Binding HasChartData, Converter={StaticResource InverseBoolToVisibility}}">
                                 <TextBlock HorizontalAlignment="Center"
                                            VerticalAlignment="Center"
