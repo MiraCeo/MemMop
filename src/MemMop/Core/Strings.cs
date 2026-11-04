@@ -419,6 +419,9 @@ public sealed class Strings : INotifyPropertyChanged
     /// <summary>Gets the manual trigger label.</summary>
     public string Manual => _english ? "manual" : "手动";
 
+    /// <summary>Gets the status line shown when automatic cleaning is off.</summary>
+    public string AutoCleanOff => _english ? "automatic: off" : "自动清理：关闭";
+
     /// <summary>Formats the automatic-cleaning status line.</summary>
     /// <param name="intervalMinutes">The interval, or 0.</param>
     /// <param name="percent">The threshold, or 0.</param>
@@ -434,7 +437,7 @@ public sealed class Strings : INotifyPropertyChanged
             parts.Add(_english ? $"above {percent}%" : $"占用超过 {percent}%");
 
         if (parts.Count == 0)
-            return string.Empty;
+            return AutoCleanOff;
 
         return (_english ? "automatic: " : "自动清理：") + string.Join(" · ", parts);
     }

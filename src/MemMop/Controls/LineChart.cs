@@ -314,7 +314,7 @@ public sealed class LineChart : FrameworkElement
         }
 
         // where automatic cleaning fires: the line crossing this is the whole point of the chart
-        if (Threshold > 0 && ThresholdBrush != null)
+        if (!Bare && Threshold > 0 && ThresholdBrush != null)
         {
             var y = plotHeight - Math.Min(1, Threshold / 100) * plotHeight;
             var pen = new Pen(ThresholdBrush, 1) { DashStyle = new DashStyle(new double[] { 3, 3 }, 0) };
@@ -334,6 +334,29 @@ public sealed class LineChart : FrameworkElement
             }
         }
 
+        // A sparkline has no grid to read against, so a fixed 0-100% axis would leave the line pinned to the
+        // top whenever memory is busy. It scales to the readings instead, with a floor on the span so a two
+        // percent wobble is not drawn as a mountain range.
+        var low = 0d;
+        var high = maximum;
+
+        if (Bare)
+        {
+            var lowest = values.Min();
+            var highest = values.Max();
+            var range = Math.Max(highest - lowest, maximum * 0.10);
+            var centre = (lowest + highest) / 2;
+
+            low = Math.Max(0, centre - range / 2);
+            high = low + range;
+
+            if (high > maximum)
+            {
+                high = maximum;
+                low = Math.Max(0, high - range);
+            }
+        }
+
         var points = new Point[values.Length];
 
         // the newest reading sits on the right edge; the oldest is as far left as the readings actually reach,
@@ -344,7 +367,7 @@ public sealed class LineChart : FrameworkElement
         {
             var pointAgo = span * (1 - (double)i / (values.Length - 1));
             var x = inset + plotWidth * (1 - pointAgo / WindowSeconds);
-            var ratio = Math.Max(0, Math.Min(1, values[i] / maximum));
+            var ratio = Math.Max(0, Math.Min(1, (values[i] - low) / (high - low)));
 
             points[i] = new Point(x, plotHeight - ratio * plotHeight);
         }

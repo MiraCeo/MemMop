@@ -160,14 +160,13 @@
 
                 <Border Grid.Row="0"
                         Margin="22, 18, 22, 0"
-                        VerticalAlignment="Top"
                         Background="{DynamicResource Nav}"
                         CornerRadius="8"
                         Padding="16">
                     <Grid>
                         <Grid.RowDefinitions>
                             <RowDefinition Height="Auto" />
-                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="*" />
                             <RowDefinition Height="Auto" />
                         </Grid.RowDefinitions>
                         <Grid.ColumnDefinitions>
@@ -288,33 +287,36 @@
                         </Grid>
 
                         <!-- the trend, at a glance: no axes, no labels, no markers - the statistics page has those -->
-                        <StackPanel Grid.Row="1" Grid.ColumnSpan="2" Margin="0, 14, 0, 0">
-                            <controls:LineChart Height="80"
+                        <Grid Grid.Row="1" Grid.ColumnSpan="2" Margin="0, 14, 0, 0">
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="*" />
+                                <RowDefinition Height="Auto" />
+                            </Grid.RowDefinitions>
+
+                            <controls:LineChart Grid.Row="0"
                                                 Bare="True"
                                                 Values="{Binding ChartValues}"
                                                 Maximum="{Binding ChartMaximum}"
                                                 SpanSeconds="{Binding ChartSpanSeconds}"
                                                 WindowSeconds="{Binding ChartWindowSeconds}"
-                                                Threshold="{Binding ChartThreshold}"
                                                 LineBrush="{DynamicResource Accent}"
                                                 FillBrush="{DynamicResource Accent}"
-                                                ThresholdBrush="{DynamicResource TextMuted}"
                                                 Visibility="{Binding HasChartData, Converter={StaticResource BoolToVisibility}}" />
 
-                            <Grid Height="80"
-                                  Visibility="{Binding HasChartData, Converter={StaticResource InverseBoolToVisibility}}">
-                                <TextBlock HorizontalAlignment="Center"
-                                           VerticalAlignment="Center"
-                                           FontSize="11"
-                                           Foreground="{DynamicResource TextMuted}"
-                                           Text="{c:Text Sampling}" />
-                            </Grid>
+                            <TextBlock Grid.Row="0"
+                                       HorizontalAlignment="Center"
+                                       VerticalAlignment="Center"
+                                       FontSize="11"
+                                       Foreground="{DynamicResource TextMuted}"
+                                       Text="{c:Text Sampling}"
+                                       Visibility="{Binding HasChartData, Converter={StaticResource InverseBoolToVisibility}}" />
 
-                            <TextBlock Margin="0, 4, 0, 0"
+                            <TextBlock Grid.Row="1"
+                                       Margin="0, 4, 0, 0"
                                        FontSize="10"
                                        Foreground="{DynamicResource TextMuted}"
                                        Text="{Binding ChartWindowLabel}" />
-                        </StackPanel>
+                        </Grid>
 
                         <Button Grid.Row="2"
                                 Grid.ColumnSpan="2"
@@ -331,13 +333,12 @@
                         BorderBrush="{DynamicResource Border}"
                         BorderThickness="0, 1, 0, 0">
                     <StackPanel>
-                        <!-- only while automatic cleaning is on: it is the only place the user learns
+                        <!-- always shown: "off" is information too, and it is the only place the user learns
                              why memory changed without them pressing anything -->
                         <TextBlock Margin="0, 0, 0, 6"
                                    FontSize="11"
                                    Foreground="{DynamicResource TextMuted}"
-                                   Text="{Binding AutoCleanStatus}"
-                                   Visibility="{Binding HasAutoClean, Converter={StaticResource BoolToVisibility}}" />
+                                   Text="{Binding AutoCleanStatus}" />
 
                         <TextBlock FontSize="11"
                                    Foreground="{DynamicResource TextMuted}"
