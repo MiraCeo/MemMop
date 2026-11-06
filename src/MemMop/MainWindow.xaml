@@ -964,19 +964,49 @@
                             <TextBlock FontSize="16"
                                        FontWeight="SemiBold"
                                        Foreground="{DynamicResource TextPrimary}"
-                                       Text="{c:Text AboutCleanTitle}" />
+                                       Text="{c:Text WhatItIsTitle}" />
 
                             <TextBlock Margin="0, 10, 0, 0"
                                        FontSize="12"
                                        Foreground="{DynamicResource TextMuted}"
                                        TextWrapping="Wrap"
-                                       Text="{c:Text AboutClean1}" />
+                                       Text="{c:Text WhatItIs1}" />
 
                             <TextBlock Margin="0, 8, 0, 0"
                                        FontSize="12"
                                        Foreground="{DynamicResource TextMuted}"
                                        TextWrapping="Wrap"
-                                       Text="{c:Text AboutClean2}" />
+                                       Text="{c:Text WhatItIs2}" />
+
+                            <TextBlock Margin="0, 8, 0, 0"
+                                       FontSize="12"
+                                       Foreground="{DynamicResource TextMuted}"
+                                       TextWrapping="Wrap"
+                                       Text="{c:Text WhatItIs3}" />
+                        </StackPanel>
+                    </Border>
+
+                    <Border Margin="0, 12, 0, 0"
+                            Background="{DynamicResource Nav}"
+                            CornerRadius="8"
+                            Padding="16">
+                        <StackPanel>
+                            <TextBlock FontSize="16"
+                                       FontWeight="SemiBold"
+                                       Foreground="{DynamicResource TextPrimary}"
+                                       Text="{c:Text HowToCheckTitle}" />
+
+                            <TextBlock Margin="0, 10, 0, 0"
+                                       FontSize="12"
+                                       Foreground="{DynamicResource TextMuted}"
+                                       TextWrapping="Wrap"
+                                       Text="{c:Text HowToCheck1}" />
+
+                            <TextBlock Margin="0, 8, 0, 0"
+                                       FontSize="12"
+                                       Foreground="{DynamicResource TextMuted}"
+                                       TextWrapping="Wrap"
+                                       Text="{c:Text HowToCheck2}" />
                         </StackPanel>
                     </Border>
 

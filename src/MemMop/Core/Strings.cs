@@ -269,18 +269,36 @@ public sealed class Strings : INotifyPropertyChanged
         ? "See what is holding memory, and release it when you mean to."
         : "看清内存被什么占着，并在需要时精确释放。";
 
-    /// <summary>Gets the about-cleaning card's title.</summary>
-    public string AboutCleanTitle => _english ? "About cleaning" : "关于清理";
+    /// <summary>Gets the "what it is" card's title.</summary>
+    public string WhatItIsTitle => _english ? "What it is" : "它是什么";
 
-    /// <summary>Gets the first honest claim.</summary>
-    public string AboutClean1 => _english
-        ? "Cleaning does not make a computer faster. Standby memory already counts as available; clearing it only hands the cache back, so the next allocation is quicker."
-        : "清理不会让电脑变快。待机内存本来就计入可用，清理它只是把缓存让出来，让下一次分配快一点。";
+    /// <summary>Gets the opening position: the category has a bad name, and this is the other road.</summary>
+    public string WhatItIs1 => _english
+        ? "Memory tools have a bad name. What a \"one-click booster\" promises and what it does are rarely the same thing."
+        : "内存工具这个品类名声不好。「一键加速」承诺的和实际做的，往往不是一回事。";
 
-    /// <summary>Gets the second honest claim.</summary>
-    public string AboutClean2 => _english
-        ? "What a run freed is measured before and after, not estimated. When nothing can be measured, it says so."
-        : "释放量是清理前后实测的差值，不是估算。测不出来就写「无变化」。";
+    /// <summary>Gets the description of what the program actually does.</summary>
+    public string WhatItIs2 => _english
+        ? "MemMop takes the other road: it lays the makeup of memory out in front of you - active, modified, standby, free - lists what is holding it, and lets you decide which part to touch."
+        : "MemMop 走另一条路：把内存的构成摊开给你看——活动、已修改、待机、空闲——列出谁在占，然后让你决定动哪一块。";
+
+    /// <summary>Gets the promise about costs and measurement.</summary>
+    public string WhatItIs3 => _english
+        ? "Every area says what it costs. What a run freed is measured before and after; when nothing can be measured, it says so."
+        : "每一项清理都写明代价。释放量是清理前后实测的差值，测不出来就写「无变化」。";
+
+    /// <summary>Gets the "how to check it" card's title.</summary>
+    public string HowToCheckTitle => _english ? "How to check it" : "怎么验证";
+
+    /// <summary>Gets the first verification step.</summary>
+    public string HowToCheck1 => _english
+        ? "You do not have to take my word for it. Open Resource Monitor (resmon.exe), Memory tab, and watch the blue Standby band - that is the cache left behind by programs you closed."
+        : "不用信我。打开资源监视器（resmon.exe）的「内存」标签页，看蓝色的「待机」——那是已关闭程序的缓存。";
+
+    /// <summary>Gets the second verification step.</summary>
+    public string HowToCheck2 => _english
+        ? "Open a few large programs, close them, and watch it grow. Then tick only \"Clear standby cache\" in MemMop and press Clean. However far the blue falls, the light green Available rises by the same amount."
+        : "打开几个大程序再关掉，看它涨；然后在 MemMop 里只勾「清理待机缓存」，点清理。蓝色掉多少，浅绿的「可用」就涨多少。";
 
     /// <summary>Gets the technical card's title.</summary>
     public string Technical => _english ? "Technical" : "技术信息";
