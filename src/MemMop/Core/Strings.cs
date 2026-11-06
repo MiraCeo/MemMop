@@ -238,9 +238,6 @@ public sealed class Strings : INotifyPropertyChanged
     /// <summary>Gets the exclusion section title.</summary>
     public string Exclusions => _english ? "Excluded processes" : "排除的进程（不参与收缩程序驻留内存）";
 
-    /// <summary>Gets the placeholder of the process search box.</summary>
-    public string SearchProcess => _english ? "search processes by name" : "按名称搜索进程";
-
     /// <summary>Gets the whitelist card's title.</summary>
     public string WhitelistTitle => _english ? "Exemptions (never cleaned)" : "白名单（不参与清理）";
 
@@ -310,11 +307,6 @@ public sealed class Strings : INotifyPropertyChanged
     public string PredecessorText => _english
         ? "A new implementation, written from scratch. Its predecessor is MemMop-Archived (a modified WinMemoryCleaner, GPL v3); the two share no code."
         : "从零开始的新实现。前身是 MemMop-Archived（基于 WinMemoryCleaner 修改，GPL v3），两者的代码不共享。";
-
-    /// <summary>Gets the about paragraph.</summary>
-    public string AboutText => _english
-        ? "A Windows memory management tool, portable, settings under the current user. Cleaning does not make a computer faster - standby memory already counts as available."
-        : "一个 Windows 内存管理工具，绿色免安装，设置保存在当前用户下。清理不会让电脑变快——待机内存本来就计入可用。";
 
     // ---- cleaning ------------------------------------------------------------------------------------
 
