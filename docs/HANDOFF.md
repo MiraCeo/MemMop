@@ -262,7 +262,23 @@ origin/main 072e437  chore: project founding            2026-11-01 16:16
 
 图标仍是系统默认、没有安装包、没有签名、`app.manifest` 已要求 `requireAdministrator`。
 
-### 9. 仓库卫生（已完成）
+### 9. 托盘菜单主题化（2026-11-04 已完成，留作记录）
+
+托盘右键菜单原本是 WinForms 的 `ContextMenuStrip`，**用系统样式渲染**——浅灰底、黑字，
+和窗口的暖暗色主题完全不是一套。
+
+改成自定义 `ToolStripRenderer`：背景 `Nav`、悬停 `Hover`、分隔线 `Border`、正文 `TextPrimary`、
+禁用行 `TextMuted`。颜色从 `Application.Current.TryFindResource` 读，所以**换主题时菜单跟着变**。
+
+**两个坑**：
+
+- `record struct` 在 net472 上编译不过——缺 `System.Runtime.CompilerServices.IsExternalInit`。
+  改成普通 `readonly struct` + 构造函数
+- 截图工具用 `menu.DrawToBitmap` 把菜单画出来验证，因为托盘菜单不是窗口的一部分，截不到
+
+**没做的**：气泡通知（`ShowBalloonTip`）是系统绘制的，主题化不了。
+
+### 10. 仓库卫生（已完成）
 
 3 个被 git 跟踪的 WPF 临时工程已 `git rm`，`.gitignore` 加了 `*_wpftmp.csproj`。
 

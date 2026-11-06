@@ -56,6 +56,13 @@ internal static class Program
         var app = new System.Windows.Application { ShutdownMode = ShutdownMode.OnExplicitShutdown };
         ApplyTheme("Ceobe");
 
+        // 0a. the tray menu, drawn to a bitmap: it is the one surface that is not part of the window
+        RenderTrayMenu(Path.Combine(output, "tray-menu.png"));
+
+        MemMop.Core.Strings.Current.SetLanguage(true);
+        RenderTrayMenu(Path.Combine(output, "tray-menu-en.png"));
+        MemMop.Core.Strings.Current.SetLanguage(false);
+
         // 1. the default states, with whatever the user actually has configured
         Render(Path.Combine(output, "home.png"), 540, 640, false, 0);
         Render(Path.Combine(output, "statistics.png"), 540, 640, false, 1);
@@ -267,6 +274,39 @@ internal static class Program
             ("RegistryCache", 12582912L),
             ("WorkingSet", 2254857830L),
         }, now.AddSeconds(-2 * (count - 1 - 200)));
+    }
+
+    /// <summary>
+    /// Draws the tray menu to a bitmap. The menu is a WinForms control, so it is laid out and painted by
+    /// hand rather than captured from a window.
+    /// </summary>
+    private static void RenderTrayMenu(string path)
+    {
+        var service = new MemMop.Services.TrayService();
+
+        service.Initialize();
+        service.SetStatus(
+            MemMop.Core.Strings.Current.Physical(25555051438, 33500744909),
+            MemMop.Core.Strings.Current.CleanedMinutesAgo(12));
+
+        var menu = service.Menu;
+
+        if (menu == null)
+            return;
+
+        menu.CreateControl();
+        menu.PerformLayout();
+
+        var size = menu.GetPreferredSize(System.Drawing.Size.Empty);
+
+        menu.Size = size;
+
+        using var bitmap = new System.Drawing.Bitmap(size.Width, size.Height);
+
+        menu.DrawToBitmap(bitmap, new System.Drawing.Rectangle(0, 0, size.Width, size.Height));
+        bitmap.Save(path, System.Drawing.Imaging.ImageFormat.Png);
+
+        service.Dispose();
     }
 
     private static void SeedExclusions()
