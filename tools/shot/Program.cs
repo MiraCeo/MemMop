@@ -285,9 +285,7 @@ internal static class Program
         var service = new MemMop.Services.TrayService();
 
         service.Initialize();
-        service.SetStatus(
-            MemMop.Core.Strings.Current.Physical(25555051438, 33500744909),
-            MemMop.Core.Strings.Current.CleanedMinutesAgo(12));
+
 
         var menu = service.Menu;
 
@@ -361,7 +359,7 @@ internal static class Program
         };
 
         window.Show();
-        window.ShowTab(tab);
+        window.ShowTab((MemMop.Core.AppPage)tab);
         window.UpdateLayout();
 
         if (prepare != null && window.DataContext is MainViewModel viewModel)

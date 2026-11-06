@@ -10,16 +10,17 @@ namespace MemMop.Services;
 /// </summary>
 public sealed class TrayService : ITrayService
 {
+    /// <summary>Marks the one entry that is the primary action, so the renderer can colour it.</summary>
+    private const string AccentTag = "accent";
+
     private NotifyIcon? _icon;
     private ToolStripMenuItem? _cleanItem;
-    private ToolStripMenuItem? _statusMain;
-    private ToolStripMenuItem? _statusLast;
 
     /// <inheritdoc/>
     public event Action? ShowRequested;
 
     /// <inheritdoc/>
-    public event Action<int>? ViewRequested;
+    public event Action<AppPage>? ViewRequested;
 
     /// <inheritdoc/>
     public event Action? CleanRequested;
@@ -57,39 +58,38 @@ public sealed class TrayService : ITrayService
             Renderer = new TrayMenuRenderer(colors),
         };
 
-        // two disabled rows: the figures live here so they are readable without opening the window
-        _statusMain = new ToolStripMenuItem(string.Empty) { Enabled = false };
-        _statusLast = new ToolStripMenuItem(string.Empty) { Enabled = false };
+        // an index of actions, not a status panel: the figures live in the tooltip, where a hover already
+        // looks for them, and mixing read-only rows into a menu makes the user sort clickable from not
+        var pages = new[]
+        {
+            (Page: AppPage.Home, Title: Strings.Current.Home),
+            (Page: AppPage.Statistics, Title: Strings.Current.Statistics),
+            (Page: AppPage.Settings, Title: Strings.Current.Settings),
+            (Page: AppPage.Whitelist, Title: Strings.Current.Whitelist),
+            (Page: AppPage.About, Title: Strings.Current.About),
+        };
 
-        menu.Items.Add(_statusMain);
-        menu.Items.Add(_statusLast);
+        foreach (var (page, title) in pages)
+        {
+            var item = new ToolStripMenuItem(title, null, (_, _) => ViewRequested?.Invoke(page));
+
+            menu.Items.Add(item);
+        }
+
         menu.Items.Add(new ToolStripSeparator());
 
-        var home = new ToolStripMenuItem(Strings.Current.Home, null, (_, _) => ViewRequested?.Invoke(0));
-        var settings = new ToolStripMenuItem(Strings.Current.TraySettings, null, (_, _) => ViewRequested?.Invoke(1));
+        _cleanItem = new ToolStripMenuItem(Strings.Current.Clean, null, (_, _) => CleanRequested?.Invoke())
+        {
+            Tag = AccentTag,
+        };
 
-        _cleanItem = new ToolStripMenuItem(Strings.Current.Clean, null, (_, _) => CleanRequested?.Invoke());
-        var exit = new ToolStripMenuItem(Strings.Current.TrayExit, null, (_, _) => ExitRequested?.Invoke());
-
-        menu.Items.Add(home);
-        menu.Items.Add(settings);
-        menu.Items.Add(new ToolStripSeparator());
         menu.Items.Add(_cleanItem);
         menu.Items.Add(new ToolStripSeparator());
-        menu.Items.Add(exit);
+        menu.Items.Add(new ToolStripMenuItem(Strings.Current.TrayExit, null, (_, _) => ExitRequested?.Invoke()));
 
         _icon.ContextMenuStrip = menu;
     }
 
-    /// <inheritdoc/>
-    public void SetStatus(string main, string last)
-    {
-        if (_statusMain != null)
-            _statusMain.Text = main;
-
-        if (_statusLast != null)
-            _statusLast.Text = last;
-    }
 
     /// <inheritdoc/>
     public void UpdateTooltip(string text)
@@ -159,13 +159,14 @@ public sealed class TrayService : ITrayService
     /// </summary>
     private readonly struct TrayColors
     {
-        public TrayColors(Color background, Color hover, Color border, Color text, Color muted)
+        public TrayColors(Color background, Color hover, Color border, Color text, Color muted, Color accent)
         {
             Background = background;
             Hover = hover;
             Border = border;
             Text = text;
             Muted = muted;
+            Accent = accent;
         }
 
         public Color Background { get; }
@@ -178,12 +179,15 @@ public sealed class TrayService : ITrayService
 
         public Color Muted { get; }
 
+        public Color Accent { get; }
+
         public static TrayColors FromTheme() => new(
             Read("Nav", Color.FromArgb(0x1F, 0x17, 0x10)),
             Read("Hover", Color.FromArgb(0x2B, 0x20, 0x18)),
             Read("Border", Color.FromArgb(0x3A, 0x2A, 0x1E)),
             Read("TextPrimary", Color.FromArgb(0xF3, 0xE7, 0xD8)),
-            Read("TextMuted", Color.FromArgb(0xA8, 0x84, 0x6A)));
+            Read("TextMuted", Color.FromArgb(0xA8, 0x84, 0x6A)),
+            Read("Accent", Color.FromArgb(0xF2, 0x87, 0x2F)));
 
         private static Color Read(string key, Color fallback)
         {
@@ -232,7 +236,9 @@ public sealed class TrayService : ITrayService
 
         protected override void OnRenderItemText(ToolStripItemTextRenderEventArgs e)
         {
-            e.TextColor = e.Item.Enabled ? _colors.Text : _colors.Muted;
+            e.TextColor = !e.Item.Enabled
+                ? _colors.Muted
+                : e.Item.Tag as string == AccentTag ? _colors.Accent : _colors.Text;
 
             base.OnRenderItemText(e);
         }

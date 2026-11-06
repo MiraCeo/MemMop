@@ -268,7 +268,15 @@ origin/main 072e437  chore: project founding            2026-11-01 16:16
 和窗口的暖暗色主题完全不是一套。
 
 改成自定义 `ToolStripRenderer`：背景 `Nav`、悬停 `Hover`、分隔线 `Border`、正文 `TextPrimary`、
-禁用行 `TextMuted`。颜色从 `Application.Current.TryFindResource` 读，所以**换主题时菜单跟着变**。
+主操作 `Accent`。颜色从 `Application.Current.TryFindResource` 读，所以**换主题时菜单跟着变**。
+
+**形态定成「索引类」**：菜单只列动作，不放状态。原来顶部有两行禁用的状态行，和动作行一样大、
+只是颜色淡一点——用户要先分辨哪些能点。状态挪进 tooltip（悬停就能看到），菜单只剩
+五个页面 + 清理 + 退出。
+
+**顺带修了一个静默 bug**：托盘菜单原来写死 `ViewRequested(1)` 表示「设置」。加了统计页之后，
+页签顺序变成 主页(0) / 统计(1) / 设置(2)，于是**「设置」打开的是统计页**——没有编译错误、没有崩溃，
+只是点错了地方。现在用 `Core/AppPage` 枚举，索引和页签顺序绑在一起。
 
 **两个坑**：
 

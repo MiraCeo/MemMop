@@ -1,3 +1,5 @@
+using MemMop.Core;
+
 namespace MemMop.Services;
 
 /// <summary>
@@ -8,8 +10,8 @@ public interface ITrayService : IDisposable
     /// <summary>Raised when the user asks for the window.</summary>
     event Action? ShowRequested;
 
-    /// <summary>Raised when the user asks to open a specific view: 0 home, 1 settings.</summary>
-    event Action<int>? ViewRequested;
+    /// <summary>Raised when the user asks to open a specific page.</summary>
+    event Action<AppPage>? ViewRequested;
 
     /// <summary>Raised when the user asks for a clean.</summary>
     event Action? CleanRequested;
@@ -27,13 +29,6 @@ public interface ITrayService : IDisposable
     /// </summary>
     /// <param name="text">The text to show on hover.</param>
     void UpdateTooltip(string text);
-
-    /// <summary>
-    /// Replaces the two status rows at the top of the menu.
-    /// </summary>
-    /// <param name="main">The memory line.</param>
-    /// <param name="last">The last-clean line.</param>
-    void SetStatus(string main, string last);
 
     /// <summary>
     /// Shows a balloon once.

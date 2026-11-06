@@ -143,12 +143,11 @@ public partial class App : Application
 
     private void OnMemoryRead(string tooltip)
     {
-        _tray?.UpdateTooltip(tooltip);
-
-        var first = tooltip.Split('\n')[0];
+        // the menu is an index of actions, so the figures live here: a hover is where the user already looks
+        // for them, and the shell caps the text well above what these two lines need
         var last = (_window?.DataContext as MainViewModel)?.LastCleanText ?? string.Empty;
 
-        _tray?.SetStatus(first, last);
+        _tray?.UpdateTooltip(string.IsNullOrEmpty(last) ? tooltip : tooltip + Environment.NewLine + last);
     }
 
     private void OnWindowClosing(object? sender, System.ComponentModel.CancelEventArgs e)
@@ -186,11 +185,11 @@ public partial class App : Application
         _tray?.SetCleanEnabled(true);
     }
 
-    private void ShowView(int index)
+    private void ShowView(AppPage page)
     {
         ShowWindow();
 
-        _window?.ShowTab(index);
+        _window?.ShowTab(page);
     }
 
     private void Quit()

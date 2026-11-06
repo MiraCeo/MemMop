@@ -232,11 +232,11 @@ public partial class MainWindow : Window
     /// Brings a tab to the front.
     /// </summary>
     /// <param name="index">0 home, 1 settings, 2 about.</param>
-    public void ShowTab(int index)
+    public void ShowTab(AppPage page)
     {
         // the generated field, not FindName: the name lives in the window namescope and a lookup there is a
         // silent no-op when it misses
-        Tabs.SelectedIndex = index;
+        Tabs.SelectedIndex = (int)page;
     }
 
     private void OnTitleBarMouseDown(object sender, System.Windows.Input.MouseButtonEventArgs e)
