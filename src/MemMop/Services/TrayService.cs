@@ -13,6 +13,12 @@ public sealed class TrayService : ITrayService
     /// <summary>Marks the one entry that is the primary action, so the renderer can colour it.</summary>
     private const string AccentTag = "accent";
 
+    /// <summary>Vertical breathing room inside a row; the default is tight enough to read as cramped.</summary>
+    private static readonly Padding RowPadding = new(0, 3, 0, 3);
+
+    /// <summary>How round the menu corners are, matching the cards in the window.</summary>
+    private const int CornerRadius = 8;
+
     private NotifyIcon? _icon;
     private ToolStripMenuItem? _cleanItem;
 
@@ -59,19 +65,21 @@ public sealed class TrayService : ITrayService
         };
 
         // an index of actions, not a status panel: the figures live in the tooltip, where a hover already
-        // looks for them, and mixing read-only rows into a menu makes the user sort clickable from not
+        // looks for them, and mixing read-only rows into a menu makes the user sort clickable from not.
+        // Two destinations, not five: the tab strip is one click away once the window is up, and listing
+        // every page gives the rarely used ones the same weight as the two that matter.
         var pages = new[]
         {
             (Page: AppPage.Home, Title: Strings.Current.Home),
-            (Page: AppPage.Statistics, Title: Strings.Current.Statistics),
             (Page: AppPage.Settings, Title: Strings.Current.Settings),
-            (Page: AppPage.Whitelist, Title: Strings.Current.Whitelist),
-            (Page: AppPage.About, Title: Strings.Current.About),
         };
 
         foreach (var (page, title) in pages)
         {
-            var item = new ToolStripMenuItem(title, null, (_, _) => ViewRequested?.Invoke(page));
+            var item = new ToolStripMenuItem(title, null, (_, _) => ViewRequested?.Invoke(page))
+            {
+                Padding = RowPadding,
+            };
 
             menu.Items.Add(item);
         }
@@ -81,11 +89,18 @@ public sealed class TrayService : ITrayService
         _cleanItem = new ToolStripMenuItem(Strings.Current.Clean, null, (_, _) => CleanRequested?.Invoke())
         {
             Tag = AccentTag,
+            Padding = RowPadding,
         };
 
         menu.Items.Add(_cleanItem);
         menu.Items.Add(new ToolStripSeparator());
-        menu.Items.Add(new ToolStripMenuItem(Strings.Current.TrayExit, null, (_, _) => ExitRequested?.Invoke()));
+        menu.Items.Add(new ToolStripMenuItem(Strings.Current.TrayExit, null, (_, _) => ExitRequested?.Invoke())
+        {
+            Padding = RowPadding,
+        });
+
+        // the cards in the window are rounded, so the menu is too; the region has to follow every resize
+        menu.SizeChanged += (_, _) => Round(menu);
 
         _icon.ContextMenuStrip = menu;
     }
@@ -127,6 +142,29 @@ public sealed class TrayService : ITrayService
         _icon.Visible = false;
         _icon.Dispose();
         _icon = null;
+    }
+
+    /// <summary>
+    /// Clips a control to a rounded rectangle. WinForms menus are square; the window is not.
+    /// </summary>
+    /// <param name="control">The control to round.</param>
+    private static void Round(Control control)
+    {
+        if (control.Width <= 0 || control.Height <= 0)
+            return;
+
+        using var path = new System.Drawing.Drawing2D.GraphicsPath();
+
+        var diameter = CornerRadius * 2;
+        var bounds = new Rectangle(0, 0, control.Width, control.Height);
+
+        path.AddArc(bounds.X, bounds.Y, diameter, diameter, 180, 90);
+        path.AddArc(bounds.Right - diameter, bounds.Y, diameter, diameter, 270, 90);
+        path.AddArc(bounds.Right - diameter, bounds.Bottom - diameter, diameter, diameter, 0, 90);
+        path.AddArc(bounds.X, bounds.Bottom - diameter, diameter, diameter, 90, 90);
+        path.CloseFigure();
+
+        control.Region = new Region(path);
     }
 
     /// <summary>
@@ -217,11 +255,22 @@ public sealed class TrayService : ITrayService
 
         protected override void OnRenderToolStripBorder(ToolStripRenderEventArgs e)
         {
+            // a rounded border, because the control is clipped to a rounded region and a square one would
+            // have its corners cut off
             using var pen = new Pen(_colors.Border);
+            using var path = new System.Drawing.Drawing2D.GraphicsPath();
 
-            e.Graphics.DrawRectangle(
-                pen,
-                new Rectangle(0, 0, e.ToolStrip.Width - 1, e.ToolStrip.Height - 1));
+            var diameter = CornerRadius * 2;
+            var bounds = new Rectangle(0, 0, e.ToolStrip.Width - 1, e.ToolStrip.Height - 1);
+
+            path.AddArc(bounds.X, bounds.Y, diameter, diameter, 180, 90);
+            path.AddArc(bounds.Right - diameter, bounds.Y, diameter, diameter, 270, 90);
+            path.AddArc(bounds.Right - diameter, bounds.Bottom - diameter, diameter, diameter, 0, 90);
+            path.AddArc(bounds.X, bounds.Bottom - diameter, diameter, diameter, 90, 90);
+            path.CloseFigure();
+
+            e.Graphics.SmoothingMode = System.Drawing.Drawing2D.SmoothingMode.AntiAlias;
+            e.Graphics.DrawPath(pen, path);
         }
 
         protected override void OnRenderMenuItemBackground(ToolStripItemRenderEventArgs e)
