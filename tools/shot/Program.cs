@@ -117,16 +117,6 @@ internal static class Program
 
         MemMop.Core.Settings.LowMemoryPercent = threshold;
 
-        // 1b. the home page as it looks after a run: each row reports what it released. The values go
-        // through AreaItem.Apply, so the screenshot shows the real formatting rather than a mock-up.
-        Render(Path.Combine(output, "home-results.png"), 540, 640, false, 0, vm =>
-        {
-            long[] released = { 1288490189, 0, 429496730, 92274688, 0, 12582912, 2254857830 };
-
-            for (var i = 0; i < vm.Areas.Count && i < released.Length; i++)
-                vm.Areas[i].Apply(new MemMop.Core.ReclaimResult(true, released[i], null));
-        });
-
         // 2. the whitelist, with a list worth looking at
         SeedExclusions();
         Render(Path.Combine(output, "whitelist.png"), 540, 640, false, 3, vm => vm.SelectedExclusion = "ChatGPT");
@@ -146,7 +136,8 @@ internal static class Program
         // 3. automatic cleaning switched on, which the home page reports
         MemMop.Core.Settings.AutoCleanMinutes = 30;
         MemMop.Core.Settings.LowMemoryPercent = 80;
-        Render(Path.Combine(output, "settings-autoclean.png"), 540, 640, false, 2);
+        // the automatic-cleaning card sits below the fold, so this one has to scroll to show what it changed
+        Render(Path.Combine(output, "settings-autoclean.png"), 540, 640, false, 2, null, scrollToEnd: true);
         Render(Path.Combine(output, "home-autoclean.png"), 540, 640, false, 0);
 
         Console.WriteLine(output);
