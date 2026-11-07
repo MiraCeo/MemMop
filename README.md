@@ -118,6 +118,20 @@ dotnet run --project tools/probe -c Release
 
 ---
 
+## Code signing policy
+
+Free code signing provided by [SignPath.io](https://about.signpath.io), certificate by [SignPath Foundation](https://signpath.org).
+
+- Committers and reviewers: [MiraCeo](https://github.com/MiraCeo)
+- Approvers: [MiraCeo](https://github.com/MiraCeo)
+
+This program will not transfer any information to other networked systems unless specifically requested by the user or the person installing or operating it.
+
+**当前状态：尚未签名。** 申请通过后，每个发布版本由 SignPath 在 CI 中签名，且每次签名需要人工批准。
+在那之前，首次运行会触发 SmartScreen 的「Windows 已保护你的电脑」——点「更多信息」→「仍要运行」即可。
+
+---
+
 ## 许可证
 
 [GNU General Public License v3.0](LICENSE)。
