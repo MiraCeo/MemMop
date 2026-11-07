@@ -70,6 +70,9 @@ internal static class Program
         Render(Path.Combine(output, "compact.png"), 320, 212, true, 0);
         Render(Path.Combine(output, "about.png"), 540, 640, false, 4);
 
+        // the technical card and the predecessor note sit below the fold
+        Render(Path.Combine(output, "about-bottom.png"), 540, 640, false, 4, null, scrollToEnd: true);
+
         // 0. the same pages in English, so a translation gap shows up as a screenshot rather than a report.
         // The language is switched inside the window, after it has loaded, so the registry is never written.
         Render(Path.Combine(output, "home-en.png"), 540, 640, false, 0, _ => MemMop.Core.Strings.Current.SetLanguage(true));

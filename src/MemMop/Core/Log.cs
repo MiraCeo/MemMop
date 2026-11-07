@@ -1,84 +1,82 @@
-using System.Diagnostics;
 using System.IO;
 using System.Text;
 
 namespace MemMop.Core;
 
 /// <summary>
-/// Writes what the program did. The event log is the primary sink; when it is unavailable - no rights to create
-/// the source, a locked log, anything - messages go to a file instead. Nothing here throws.
+/// Writes what the program did, to a file under the user's local application data. The event log was the
+/// first sink and it was the wrong one: creating a source needs rights the program does not always have, and
+/// reading it back means opening the event viewer. A file is something a user can find, read, and send.
 /// </summary>
+/// <remarks>
+/// Nothing here throws. A logger that takes the program down is worse than no logger.
+/// </remarks>
 public static class Log
 {
-    private const string Source = "MemMop";
-    private const string LogName = "Application";
+    /// <summary>How large the file may grow before it is rotated.</summary>
+    private const long MaxBytes = 1024 * 1024;
 
-    private static readonly object Gate = new object();
-    private static bool _eventLogAvailable;
-    private static bool _checked;
+    private static readonly object Gate = new();
+
+    /// <summary>Gets the file the program writes to.</summary>
+    public static string Path => System.IO.Path.Combine(Folder, "memmop.log");
+
+    /// <summary>Gets the folder the program writes to.</summary>
+    public static string Folder => System.IO.Path.Combine(
+        Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
+        "MemMop");
 
     /// <summary>
     /// Records an informational message.
     /// </summary>
     /// <param name="message">The message.</param>
-    public static void Info(string message) => Write(EventLogEntryType.Information, message, null);
+    public static void Info(string message) => Write("info ", message, null);
 
     /// <summary>
     /// Records a failure.
     /// </summary>
     /// <param name="message">The message.</param>
     /// <param name="exception">The exception, when there is one.</param>
-    public static void Error(string message, Exception? exception = null) => Write(EventLogEntryType.Error, message, exception);
+    public static void Error(string message, Exception? exception = null) => Write("error", message, exception);
 
-    private static void Write(EventLogEntryType type, string message, Exception? exception)
-    {
-        var text = exception == null ? message : message + Environment.NewLine + exception;
-
-        lock (Gate)
-        {
-            try
-            {
-                if (!_checked)
-                {
-                    _checked = true;
-                    _eventLogAvailable = TryPrepareEventLog();
-                }
-
-                if (_eventLogAvailable)
-                {
-                    EventLog.WriteEntry(Source, text, type);
-
-                    return;
-                }
-            }
-            catch (Exception)
-            {
-                _eventLogAvailable = false;
-            }
-
-            WriteFallback(type, text);
-        }
-    }
-
-    private static bool TryPrepareEventLog()
-    {
-        if (!EventLog.SourceExists(Source))
-            EventLog.CreateEventSource(Source, LogName);
-
-        return true;
-    }
-
-    private static void WriteFallback(EventLogEntryType type, string text)
+    private static void Write(string level, string message, Exception? exception)
     {
         try
         {
-            var path = Path.Combine(Path.GetTempPath(), "memmop.log");
+            lock (Gate)
+            {
+                Directory.CreateDirectory(Folder);
+                Rotate();
 
-            File.AppendAllText(path, DateTime.Now.ToString("s") + " [" + type + "] " + text + Environment.NewLine, Encoding.UTF8);
+                var line = DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss") + " [" + level + "] " + message;
+
+                if (exception != null)
+                    line += Environment.NewLine + exception;
+
+                File.AppendAllText(Path, line + Environment.NewLine, Encoding.UTF8);
+            }
         }
         catch (Exception)
         {
             // nowhere left to write; staying silent beats taking the program down
         }
+    }
+
+    /// <summary>
+    /// Keeps one previous file. A log that grows without bound is a log nobody keeps.
+    /// </summary>
+    private static void Rotate()
+    {
+        var file = new FileInfo(Path);
+
+        if (!file.Exists || file.Length < MaxBytes)
+            return;
+
+        var previous = Path + ".1";
+
+        if (File.Exists(previous))
+            File.Delete(previous);
+
+        File.Move(Path, previous);
     }
 }

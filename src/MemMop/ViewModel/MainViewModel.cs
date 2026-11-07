@@ -716,7 +716,25 @@ public sealed class MainViewModel : ObservableObject
     }
 
     private void RecordResults(bool automatic, TimeSpan duration, IReadOnlyList<(string Name, ReclaimResult Result)> results)
-        => RecordClean(
+    {
+        // the history lives in memory and dies with the process; the log is what survives, so a report of
+        // "cleaning did nothing" has something to look at
+        var released = results.Where(r => r.Result.Succeeded).Sum(r => Math.Max(0, r.Result.FreedBytes));
+        var failed = results.Count(r => !r.Result.Succeeded);
+
+        Log.Info(string.Format(
+            System.Globalization.CultureInfo.InvariantCulture,
+            "clean {0}: {1} areas, {2} bytes, {3} failed, {4:0.0}s",
+            automatic ? "automatic" : "manual",
+            results.Count,
+            released,
+            failed,
+            duration.TotalSeconds));
+
+        foreach (var (name, result) in results.Where(r => !r.Result.Succeeded))
+            Log.Error("clean area " + name + " failed: " + (result.Message ?? "unknown"));
+
+        RecordClean(
             automatic,
             duration,
             results
@@ -724,6 +742,7 @@ public sealed class MainViewModel : ObservableObject
                 // correctly in the other, and the title is a translation
                 .Select(r => (Area: r.Name, Freed: r.Result.FreedBytes))
                 .ToList());
+    }
 
     /// <summary>
     /// Builds the history as CSV, one row per area per run. Splitting by area is the point: what the user

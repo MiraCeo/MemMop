@@ -764,16 +764,15 @@
         </TabItem>
 
         <TabItem Header="{Binding Source={x:Static core:Strings.Current}, Path=Whitelist}">
-            <ScrollViewer HorizontalScrollBarVisibility="Disabled" VerticalScrollBarVisibility="Auto">
-                <StackPanel Margin="22, 12, 22, 16">
-                    <Border Background="{DynamicResource Nav}" CornerRadius="8" Padding="14">
-                        <Grid>
-                            <Grid.RowDefinitions>
-                                <RowDefinition Height="Auto" />
-                                <RowDefinition Height="Auto" />
-                                <RowDefinition Height="Auto" />
-                                <RowDefinition Height="Auto" />
-                            </Grid.RowDefinitions>
+            <Grid Margin="22, 12, 22, 16">
+                <Border Background="{DynamicResource Nav}" CornerRadius="8" Padding="14">
+                    <Grid>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="*" />
+                        </Grid.RowDefinitions>
                             <Grid.ColumnDefinitions>
                                 <ColumnDefinition Width="*" />
                                 <ColumnDefinition Width="Auto" />
@@ -825,8 +824,6 @@
                             <!-- every row carries its own move and delete buttons -->
                             <ListBox Grid.Row="3"
                                      Grid.ColumnSpan="2"
-                                     Height="190"
-                                     VerticalAlignment="Top"
                                      ItemsSource="{Binding ExcludedProcesses}"
                                      SelectedItem="{Binding SelectedExclusion}">
                                 <ListBox.ItemTemplate>
@@ -909,8 +906,7 @@
                             </Grid>
                         </Grid>
                     </Border>
-                </StackPanel>
-            </ScrollViewer>
+            </Grid>
         </TabItem>
 
         <TabItem Tag="last" Header="{Binding Source={x:Static core:Strings.Current}, Path=About}">
@@ -1029,6 +1025,7 @@
                                     <RowDefinition Height="Auto" />
                                     <RowDefinition Height="Auto" />
                                     <RowDefinition Height="Auto" />
+                                    <RowDefinition Height="Auto" />
                                 </Grid.RowDefinitions>
 
                                 <TextBlock Grid.Row="0"
@@ -1065,13 +1062,30 @@
                                            Margin="16, 6, 0, 0"
                                            FontSize="12"
                                            Text="HKCU\SOFTWARE\MemMop" />
+
+                                <TextBlock Grid.Row="3"
+                                           Grid.Column="0"
+                                           Margin="0, 6, 0, 0"
+                                           FontSize="12"
+                                           Foreground="{DynamicResource TextMuted}"
+                                           Text="{c:Text LogLocation}" />
+                                <TextBlock Grid.Row="3"
+                                           Grid.Column="1"
+                                           Margin="16, 6, 0, 0"
+                                           FontSize="12"
+                                           Text="%LOCALAPPDATA%\MemMop\memmop.log" />
                             </Grid>
 
-                            <Button Margin="0, 14, 0, 0"
-                                    Padding="12, 5"
-                                    HorizontalAlignment="Left"
-                                    Click="OnOpenSettingsClick"
-                                    Content="{c:Text OpenSettings}" />
+                            <StackPanel Margin="0, 14, 0, 0" Orientation="Horizontal">
+                                <Button Padding="12, 5"
+                                        Click="OnOpenSettingsClick"
+                                        Content="{c:Text OpenSettings}" />
+
+                                <Button Margin="8, 0, 0, 0"
+                                        Padding="12, 5"
+                                        Click="OnOpenLogClick"
+                                        Content="{c:Text OpenLog}" />
+                            </StackPanel>
                         </StackPanel>
                     </Border>
 

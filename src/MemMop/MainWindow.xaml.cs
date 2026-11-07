@@ -178,6 +178,20 @@ public partial class MainWindow : Window
         _viewModel.RefreshStatistics();
     }
 
+    private void OnOpenLogClick(object sender, RoutedEventArgs e)
+    {
+        try
+        {
+            // the folder may not exist yet on a machine that has never logged anything
+            System.IO.Directory.CreateDirectory(Log.Folder);
+            System.Diagnostics.Process.Start("explorer.exe", Log.Folder);
+        }
+        catch (Exception exception)
+        {
+            System.Windows.MessageBox.Show(this, Strings.Current.OpenSettingsFailed(exception.Message), "MemMop", MessageBoxButton.OK, MessageBoxImage.Warning);
+        }
+    }
+
     private void Refresh()
     {
         var snapshot = MemorySnapshot.Capture();

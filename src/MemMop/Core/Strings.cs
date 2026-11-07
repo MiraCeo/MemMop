@@ -312,6 +312,12 @@ public sealed class Strings : INotifyPropertyChanged
     /// <summary>Gets the settings caption.</summary>
     public string SettingsLocation => _english ? "Settings" : "设置";
 
+    /// <summary>Gets the log caption.</summary>
+    public string LogLocation => _english ? "Log" : "日志";
+
+    /// <summary>Gets the open-log button label.</summary>
+    public string OpenLog => _english ? "Open log location" : "打开日志位置";
+
     /// <summary>Gets the open-settings button label.</summary>
     public string OpenSettings => _english ? "Open settings location" : "打开设置位置";
 
