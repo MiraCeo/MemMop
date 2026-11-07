@@ -1080,7 +1080,6 @@ public sealed class MainViewModel : ObservableObject
             Settings.Save();
             Raise();
             Raise(nameof(AutoCleanStatus));
-            Raise(nameof(HasAutoClean));
         }
     }
 
@@ -1094,12 +1093,8 @@ public sealed class MainViewModel : ObservableObject
             Settings.Save();
             Raise();
             Raise(nameof(AutoCleanStatus));
-            Raise(nameof(HasAutoClean));
         }
     }
-
-    /// <summary>Gets a value indicating whether automatic cleaning is configured at all.</summary>
-    public bool HasAutoClean => Settings.AutoCleanMinutes > 0 || Settings.LowMemoryPercent > 0;
 
     /// <summary>
     /// Gets the one-line description the home page shows while automatic cleaning is on. It is the only
@@ -1292,6 +1287,14 @@ public sealed class MainViewModel : ObservableObject
                 : released > 0
                     ? Strings.Current.FreedThisRun(released)
                     : Strings.Current.NothingMeasured;
+        }
+        catch (Exception exception)
+        {
+            // an async void method that throws takes the whole process down, and a cleaner that crashes
+            // while cleaning is worse than one that reports it could not
+            Log.Error("clean failed", exception);
+
+            Summary = Strings.Current.CleanFailed(exception.Message);
         }
         finally
         {

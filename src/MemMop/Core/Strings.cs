@@ -235,9 +235,6 @@ public sealed class Strings : INotifyPropertyChanged
 
     // ---- whitelist -----------------------------------------------------------------------------------
 
-    /// <summary>Gets the exclusion section title.</summary>
-    public string Exclusions => _english ? "Excluded processes" : "排除的进程（不参与收缩程序驻留内存）";
-
     /// <summary>Gets the whitelist card's title.</summary>
     public string WhitelistTitle => _english ? "Exemptions (never cleaned)" : "白名单（不参与清理）";
 
@@ -388,6 +385,13 @@ public sealed class Strings : INotifyPropertyChanged
         ? $"{done} done, {failed} failed"
         : $"{done} 项完成，{failed} 项失败";
 
+    /// <summary>Formats a run that threw instead of finishing.</summary>
+    /// <param name="reason">What went wrong.</param>
+    /// <returns>The line.</returns>
+    public string CleanFailed(string reason) => _english
+        ? "cleaning failed: " + reason
+        : "清理失败：" + reason;
+
     /// <summary>Gets the line shown when a run released nothing measurable.</summary>
     public string NothingMeasured => _english ? "nothing measurable released" : "本次无可测量的释放";
 
@@ -488,9 +492,6 @@ public sealed class Strings : INotifyPropertyChanged
 
     /// <summary>Gets the failure reported when another program owns the hotkey.</summary>
     public string HotkeyTaken => _english ? "another program already owns this hotkey" : "快捷键已被其他程序占用";
-
-    /// <summary>Gets the tray menu's settings item.</summary>
-    public string TraySettings => _english ? "Settings…" : "设置…";
 
     /// <summary>Gets the tray menu's exit item.</summary>
     public string TrayExit => _english ? "Exit" : "退出";
@@ -607,12 +608,6 @@ public sealed class Strings : INotifyPropertyChanged
     public string HotkeyFailed(string reason) => _english
         ? "clean hotkey could not be registered: " + reason
         : "清理热键注册失败：" + reason;
-
-    /// <summary>Formats the used-over-total line beside the percentage.</summary>
-    /// <param name="used">Used bytes.</param>
-    /// <param name="total">Total bytes.</param>
-    /// <returns>The line.</returns>
-    public string UsedOverTotal(long used, long total) => $"{Gb(used)} / {Gb(total)}";
 
     /// <summary>Formats the build stamp on the about page.</summary>
     /// <param name="hash">The commit hash.</param>
