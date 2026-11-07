@@ -1,4 +1,4 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <OutputType>Exe</OutputType>
     <TargetFramework>net472</TargetFramework>
@@ -9,37 +9,13 @@
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="Program.cs" />
-    <Compile Include="..\..\src\MemMop\Core\MemorySnapshot.cs" Link="MemorySnapshot.cs" />
-    <Compile Include="..\..\src\MemMop\Core\NativeMethods.cs" Link="NativeMethods.cs" />
-    <Compile Include="..\..\src\MemMop\Core\Privileges.cs" Link="Privileges.cs" />
-    <Compile Include="..\..\src\MemMop\Core\CleaningEngine.cs" Link="CleaningEngine.cs" />
-    <Compile Include="..\..\src\MemMop\Core\IMemoryReclaimer.cs" Link="IMemoryReclaimer.cs" />
-    <Compile Include="..\..\src\MemMop\Core\ReclaimResult.cs" Link="ReclaimResult.cs" />
-    <Compile Include="..\..\src\MemMop\Core\Reclaimers\StandbyListReclaimer.cs" Link="StandbyListReclaimer.cs" />
-    <Compile Include="..\..\src\MemMop\Core\Reclaimers\ModifiedPageListReclaimer.cs" Link="ModifiedPageListReclaimer.cs" />
-    <Compile Include="..\..\src\MemMop\Core\Reclaimers\RegistryCacheReclaimer.cs" Link="RegistryCacheReclaimer.cs" />
-    <Compile Include="..\..\src\MemMop\Core\Reclaimers\WorkingSetReclaimer.cs" Link="WorkingSetReclaimer.cs" />
-    <Compile Include="..\..\src\MemMop\Core\Reclaimers\CombinedPageListReclaimer.cs" Link="CombinedPageListReclaimer.cs" />
-    <Compile Include="..\..\src\MemMop\Core\Reclaimers\SystemFileCacheReclaimer.cs" Link="SystemFileCacheReclaimer.cs" />
-    <Compile Include="..\..\src\MemMop\ViewModel\MainViewModel.cs" Link="MainViewModel.cs" />
-    <Compile Include="..\..\src\MemMop\ViewModel\AreaItem.cs" Link="AreaItem.cs" />
-    <Compile Include="..\..\src\MemMop\ViewModel\ObservableObject.cs" Link="ObservableObject.cs" />
-    <Compile Include="..\..\src\MemMop\ViewModel\RelayCommand.cs" Link="RelayCommand.cs" />
-    <Compile Include="..\..\src\MemMop\Core\AutoCleanPolicy.cs" Link="AutoCleanPolicy.cs" />
-    <Compile Include="..\..\src\MemMop\Core\Settings.cs" Link="Settings.cs" />
-    <Compile Include="..\..\src\MemMop\Core\ProcessUsage.cs" Link="ProcessUsage.cs" />
-  <Compile Include="..\..\src\MemMop\Core\ProcessUsageReader.cs" Link="ProcessUsageReader.cs" />
-      <Compile Include="..\..\src\MemMop\Core\Strings.cs" Link="Strings.cs" />
-    <Compile Include="..\..\src\MemMop\Core\Log.cs" Link="Log.cs" />
-  <Compile Include="..\..\src\MemMop\Core\AutoStart.cs" Link="AutoStart.cs" />
+
+    <!--
+      The whole of Core and ViewModel, by glob rather than by list. The list drifted: files were added to the
+      app and the probe stopped compiling, which is a worse failure than including one file too many. Neither
+      folder touches WPF, so the glob is safe.
+    -->
+    <Compile Include="..\..\src\MemMop\Core\**\*.cs" LinkBase="Core" />
+    <Compile Include="..\..\src\MemMop\ViewModel\**\*.cs" LinkBase="ViewModel" />
   </ItemGroup>
 </Project>
-
-
-
-
-
-
-
-
-
