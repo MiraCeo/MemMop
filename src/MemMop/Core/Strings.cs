@@ -504,8 +504,8 @@ public sealed class Strings : INotifyPropertyChanged
 
     /// <summary>Gets the CSV header.</summary>
     public string CsvHeader => _english
-        ? "time,trigger,area,bytes,gb"
-        : "时间,触发,区域,释放字节,释放GB";
+        ? "time,trigger,area,area id,bytes,gb"
+        : "时间,触发,区域,区域ID,释放字节,释放GB";
 
     /// <summary>
     /// Switches the language and notifies everything bound to the catalog.

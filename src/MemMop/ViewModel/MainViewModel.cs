@@ -765,6 +765,9 @@ public sealed class MainViewModel : ObservableObject
                     .Append(record.At.ToString("yyyy-MM-dd HH:mm:ss", System.Globalization.CultureInfo.InvariantCulture)).Append(',')
                     .Append(record.Automatic ? Strings.Current.Automatic : Strings.Current.Manual).Append(',')
                     .Append('"').Append(TitleOf(area).Replace("\"", "\"\"")).Append('"').Append(',')
+                    // the stable name travels with the title: the title is a translation, and a spreadsheet
+                    // that groups by it breaks the moment the user switches language
+                    .Append(area).Append(',')
                     .Append(bytes).Append(',')
                     .Append((bytes / (1024d * 1024 * 1024)).ToString("0.###", System.Globalization.CultureInfo.InvariantCulture))
                     .AppendLine();
